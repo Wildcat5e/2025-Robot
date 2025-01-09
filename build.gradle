@@ -72,6 +72,9 @@ dependencies {
 
     testImplementation 'org.junit.jupiter:junit-jupiter:5.10.1'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+    // https://mvnrepository.com/artifact/org.mockito/mockito-core
+    testImplementation group: 'org.mockito', name: 'mockito-core', version: '5.14.2'
 }
 
 test {
