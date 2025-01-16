@@ -20,7 +20,7 @@ public class TomsElevator extends SubsystemBase {
     }
 
     public TomsElevator() {
-        this(new PIDController(0.1, 0.0, 0.0), new TalonFX(0));
+        this(new PIDController(0.1, 0.0, 0.0), new TalonFX(0)); // https://en.wikipedia.org/wiki/Ziegler%E2%80%93Nichols_method
     }
 
     @Override
