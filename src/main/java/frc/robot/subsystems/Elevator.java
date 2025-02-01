@@ -1,70 +1,32 @@
 package frc.robot.subsystems;
 
-import com.ctre.phoenix6.hardware.TalonFX;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.Command;
 
-public class Elevator extends SubsystemBase {
-  private static final double TOLERANCE = 0.25;
-  TalonFX motorOne = new TalonFX(0);
-  TalonFX motorTwo = new TalonFX(1);
-  State currentState;
-  double desiredHeight;
+public interface Elevator {
+    double WHEEL_CIRCUMFERENCE = 2.7 * Math.PI;
+    double GEAR_RATIO = 48.0;
+    double ENCODER_TICS_PER_INCH = GEAR_RATIO / WHEEL_CIRCUMFERENCE;
+    double LEVEL_ZERO_POSITION = 0;
+    double LEVEL_ONE_POSITION = 3.0;
+    double LEVEL_TWO_POSITION = 6.0;
+    double LEVEL_THREE_POSITION = 9.0;
+    double LEVEL_FOUR_POSITION = 12.0;
 
-  public enum State {
-      NOT_MOVING,
-      MOVING_UP,
-      MOVING_DOWN;
-  }
+    Command jogUpCommand();
 
-  
-  public Elevator() {
-    currentState = State.NOT_MOVING;
-  }
+    Command jogDownCommand();
 
+    Command moveToPositionZeroCommand();
 
-  @Override
-  public void periodic() {
-    switch (currentState) {
-      case NOT_MOVING:
-        currentState = applyMovementLogic(desiredHeight);
-        break;
-      case MOVING_UP:
-        currentState = applyMovementLogic(desiredHeight);
-        break;
-      case MOVING_DOWN:
-        currentState = applyMovementLogic(desiredHeight);
-        break;
-    }
-  }
+    Command moveToLevelOneCommand();
 
-  public State applyMovementLogic(double desiredHeight) {
-    double currentHeight = motorOne.getPosition().getValueAsDouble();
-    double deltaHeight = desiredHeight - currentHeight;
+    Command moveToLevelTwoCommand();
 
-    if (deltaHeight > TOLERANCE) {
-      currentState = State.MOVING_UP;
-      motorOne.set(0.5);
-      motorTwo.set(0.5);
-    } else if (deltaHeight < TOLERANCE) {
-      currentState = State.MOVING_DOWN;
-      motorOne.set(-0.5);
-      motorTwo.set(-0.5);
-    } else {
-      currentState = State.NOT_MOVING;
-      motorOne.set(0.0);
-      motorTwo.set(0.0);
-    }
+    Command moveToLevelThreeCommand();
 
-    return currentState;
-  }
+    Command moveToLevelFourCommand();
 
-  public State setDesiredHeight(double desiredHeight) {
-    this.desiredHeight = desiredHeight;
-    return applyMovementLogic(desiredHeight);
-  }
+    Command setCurrentPositionAsHomeCommand();
 
-
-  public State getCurrentState() {
-    return currentState;
-  }
+    Command updateConfigCommand();
 }
