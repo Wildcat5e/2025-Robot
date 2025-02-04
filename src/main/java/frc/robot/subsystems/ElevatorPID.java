@@ -4,8 +4,10 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import com.ctre.phoenix6.hardware.TalonFX;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.networktables.DoublePublisher;
+import edu.wpi.first.networktables.DoubleSubscriber;
+import edu.wpi.first.networktables.DoubleTopic;
 import edu.wpi.first.networktables.NetworkTable;
-import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 // import com.ctre.phoenix6.controls.Follower;
 
@@ -20,10 +22,9 @@ public class ElevatorPID extends SubsystemBase implements Elevator {
   private double desiredHeight;
   private double speed;
   private double homeHeight;
-  private NetworkTable pidConstants = NetworkTableInstance.getDefault().getTable("PID Constants");
-  NetworkTableEntry KP = pidConstants.getEntry("KP");
-  NetworkTableEntry KI = pidConstants.getEntry("KI");
-  NetworkTableEntry KD = pidConstants.getEntry("KD");
+  final DoubleSubscriber pConstantSubscriber;
+  final DoubleSubscriber iConstantSubscriber;
+  final DoubleSubscriber dConstantSubscriber;
 
   public enum State {
     NOT_MOVING,
@@ -37,12 +38,31 @@ public class ElevatorPID extends SubsystemBase implements Elevator {
     currentState = State.NOT_MOVING;
     // motorTwo.setControl(follower);
     motorOne.setPosition(0.0);
-    KP.setDouble(0.0);
-    KI.setDouble(0.0);
-    KD.setDouble(0.0);
-    System.out.println("At Startup KP: " + pidController.getP() + " KI: " + pidController.getI() + " KD: " + pidController.getD());
+    NetworkTableInstance inst = NetworkTableInstance.getDefault();
+    NetworkTable pidConstants = inst.getTable("PID Constants");
+    pConstantSubscriber = subscribeToDoubleTopic(pidConstants, "KP", 0.0);
+    iConstantSubscriber = subscribeToDoubleTopic(pidConstants, "KI", 0.0);
+    dConstantSubscriber = subscribeToDoubleTopic(pidConstants, "KD", 0.0);
     pidController.setTolerance(TOLERANCE);
     setCurrentPositionAsHome();
+  }
+
+  /**
+   * Subscribe to a double topic. If the topic does not exist,
+   * then create the topic and mark it as persistant.
+   */
+  private DoubleSubscriber subscribeToDoubleTopic(NetworkTable pidConstants, String topicName, double defaultValue) {
+    DoubleTopic entry = pidConstants.getDoubleTopic(topicName);
+    if (!entry.exists()) {
+      System.out.println(String.format("Topic %s does not exist, creating it now.", topicName));
+      DoublePublisher publisher = pidConstants.getDoubleTopic(topicName).publish();
+      publisher.set(defaultValue);
+      entry.setPersistent(true);
+      publisher.close();
+    } else {
+      System.out.println(String.format("Topic %s EXISTS.", topicName));
+    }
+    return  entry.subscribe(defaultValue);
   }
 
   private void setCurrentPositionAsHome() {
@@ -140,11 +160,11 @@ public class ElevatorPID extends SubsystemBase implements Elevator {
   }
 
   private void updateConfig() {
-    pidController.setP(KP.getDouble(0.0));
-    pidController.setI(KI.getDouble(0.0));
-    pidController.setD(KD.getDouble(0.0));
-    System.out.println("At updateConfig KP: " + pidController.getP() + " KI: " + pidController.getI() + " KD: " + pidController.getD());
-    System.out.println("Network Table KP: " + KP.getDouble(0.0) + " KI: " + KI.getDouble(0.0) + " KD: " + KD.getDouble(0.0));
+    pidController.setP(pConstantSubscriber.get());
+    pidController.setI(iConstantSubscriber.get());
+    pidController.setD(dConstantSubscriber.get());
+
+    System.out.println("Kp = " + pConstantSubscriber.get() + " Ki = " + iConstantSubscriber.get() + " Kd = " + dConstantSubscriber.get());
   }
 
   public Command updateConfigCommand() {
