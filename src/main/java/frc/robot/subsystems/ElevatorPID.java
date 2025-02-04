@@ -4,12 +4,16 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import com.ctre.phoenix6.hardware.TalonFX;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.networktables.DoublePublisher;
-import edu.wpi.first.networktables.DoubleSubscriber;
-import edu.wpi.first.networktables.DoubleTopic;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.DoubleTopic;
+import edu.wpi.first.networktables.DoubleSubscriber;
+import edu.wpi.first.networktables.DoublePublisher;
 // import com.ctre.phoenix6.controls.Follower;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import com.ctre.phoenix6.SignalLogger;
+import com.ctre.phoenix6.controls.VoltageOut;
+import edu.wpi.first.units.Units;
 
 public class ElevatorPID extends SubsystemBase implements Elevator {
   public static final double TOLERANCE = 0.0;
@@ -22,16 +26,18 @@ public class ElevatorPID extends SubsystemBase implements Elevator {
   private double desiredHeight;
   private double speed;
   private double homeHeight;
-  final DoubleSubscriber pConstantSubscriber;
-  final DoubleSubscriber iConstantSubscriber;
-  final DoubleSubscriber dConstantSubscriber;
+  private final DoubleSubscriber pConstantSubscriber;
+  private final DoubleSubscriber iConstantSubscriber;
+  private final DoubleSubscriber dConstantSubscriber;
+  private final VoltageOut m_voltReq = new VoltageOut(0.0);
 
   public enum State {
     NOT_MOVING,
     MOVING_UP,
     MOVING_DOWN,
     JOGGING_UP,
-    JOGGING_DOWN;
+    JOGGING_DOWN,
+    SYSID;
   }
 
   public ElevatorPID() {
@@ -62,7 +68,7 @@ public class ElevatorPID extends SubsystemBase implements Elevator {
     } else {
       System.out.println(String.format("Topic %s EXISTS.", topicName));
     }
-    return  entry.subscribe(defaultValue);
+    return entry.subscribe(defaultValue);
   }
 
   private void setCurrentPositionAsHome() {
@@ -90,6 +96,7 @@ public class ElevatorPID extends SubsystemBase implements Elevator {
       case JOGGING_DOWN:
         speed = -1.0;
         break;
+      case SYSID:
     }
 
     double clampedSpeed = Math.max(-MAX_ELEVATOR_SPEED, Math.min(MAX_ELEVATOR_SPEED, speed));
@@ -164,10 +171,39 @@ public class ElevatorPID extends SubsystemBase implements Elevator {
     pidController.setI(iConstantSubscriber.get());
     pidController.setD(dConstantSubscriber.get());
 
-    System.out.println("Kp = " + pConstantSubscriber.get() + " Ki = " + iConstantSubscriber.get() + " Kd = " + dConstantSubscriber.get());
+    System.out.println("Kp = " + pConstantSubscriber.get() + " Ki = " + iConstantSubscriber.get() + " Kd = "
+        + dConstantSubscriber.get());
   }
 
   public Command updateConfigCommand() {
     return runOnce(() -> updateConfig());
+  }
+
+  private final SysIdRoutine m_sysIdRoutine =
+   new SysIdRoutine(
+      new SysIdRoutine.Config(
+         null,        // Use default ramp rate (1 V/s)
+         Units.Volts.of(4), // Reduce dynamic step voltage to 4 to prevent brownout
+         null,        // Use default timeout (10 s)
+                      // Log state with Phoenix SignalLogger class
+         (state) -> SignalLogger.writeString("state", state.toString())
+      ),
+      new SysIdRoutine.Mechanism(
+         (volts) -> motorOne.setControl(m_voltReq.withOutput(volts.in(Units.Volts))),
+         null,
+         this
+      )
+   );
+
+  @Override
+  public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
+    currentState = State.SYSID;
+    return m_sysIdRoutine.quasistatic(direction);
+  }
+
+  @Override
+  public Command sysIdDynamic(SysIdRoutine.Direction direction) {
+    currentState = State.SYSID;
+    return m_sysIdRoutine.dynamic(direction);
   }
 }

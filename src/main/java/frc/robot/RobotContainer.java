@@ -2,17 +2,20 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.subsystems.Elevator;
 // import frc.robot.subsystems.ElevatorBangBangControl;
 import frc.robot.subsystems.ElevatorPID;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import com.ctre.phoenix6.SignalLogger;
 
 public class RobotContainer {
   private final XboxController controller = new XboxController(0);
-  private final Trigger ButtonA = new Trigger(() -> controller.getAButton());
-  private final Trigger ButtonB = new Trigger(() -> controller.getBButton());
-  private final Trigger ButtonX = new Trigger(() -> controller.getXButton());
-  private final Trigger ButtonY = new Trigger(() -> controller.getYButton());
+  private final Trigger aButton = new Trigger(() -> controller.getAButton());
+  private final Trigger bButton = new Trigger(() -> controller.getBButton());
+  private final Trigger xButton = new Trigger(() -> controller.getXButton());
+  private final Trigger yButton = new Trigger(() -> controller.getYButton());
   private final Trigger leftBumper = new Trigger(() -> controller.getLeftBumperButton());
   private final Trigger rightBumper = new Trigger(() -> controller.getRightBumperButton());
   private final Trigger backButton = new Trigger(() -> controller.getBackButton());
@@ -21,20 +24,18 @@ public class RobotContainer {
 
   public RobotContainer() {
     configureBindings();
-    // candle.animate(rainbowAnim);
+    SignalLogger.setPath("/home/lvuser/logs");
   }
 
   private void configureBindings() {
-    ButtonY.onTrue(elevator.moveToLevelOneCommand());
-    ButtonB.onTrue(elevator.moveToLevelTwoCommand());
-    // ButtonA.onTrue(elevator.moveToLevelThreeCommand());
-    ButtonX.onTrue(elevator.moveToLevelFourCommand());
-    leftBumper.whileTrue(elevator.jogUpCommand());
-    rightBumper.whileTrue(elevator.jogDownCommand());
-    backButton.onTrue(elevator.setCurrentPositionAsHomeCommand());
-    startButton.onTrue(elevator.moveToPositionZeroCommand());
-
-    ButtonA.onTrue(elevator.updateConfigCommand());
+    aButton.whileTrue(elevator.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
+    bButton.whileTrue(elevator.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
+    xButton.whileTrue(elevator.sysIdDynamic(SysIdRoutine.Direction.kForward));
+    yButton.whileTrue(elevator.sysIdDynamic(SysIdRoutine.Direction.kReverse));
+    leftBumper.onTrue(Commands.runOnce(() -> SignalLogger.start()));
+    rightBumper.onTrue(Commands.runOnce(() -> SignalLogger.stop()));
+    backButton.whileTrue(elevator.jogUpCommand());
+    startButton.onTrue(elevator.setCurrentPositionAsHomeCommand());
   }
 
   public Command getAutonomousCommand() {
