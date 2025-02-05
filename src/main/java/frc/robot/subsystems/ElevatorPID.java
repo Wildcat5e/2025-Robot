@@ -21,7 +21,7 @@ public class ElevatorPID extends SubsystemBase implements Elevator {
   private final TalonFX motorOne = new TalonFX(0);
   // private final TalonFX motorTwo = new TalonFX(1);
   // private final Follower follower = new Follower(0, true);
-  private PIDController pidController = new PIDController(0.0, 0.0, 0.0);
+  private PIDController pidController = new PIDController(0.1, 0.0, 0.0);
   private State currentState;
   private double desiredHeight;
   private double speed;
@@ -140,8 +140,7 @@ public class ElevatorPID extends SubsystemBase implements Elevator {
 
   @Override
   public Command moveToPositionZeroCommand() {
-    return runOnce(
-        () -> determineNextState(Elevator.LEVEL_ZERO_POSITION * Elevator.ENCODER_TICS_PER_INCH + homeHeight));
+    return runOnce(() -> determineNextState(Elevator.LEVEL_ZERO_POSITION * Elevator.ENCODER_TICS_PER_INCH + homeHeight));
   }
 
   @Override
@@ -156,14 +155,12 @@ public class ElevatorPID extends SubsystemBase implements Elevator {
 
   @Override
   public Command moveToLevelThreeCommand() {
-    return runOnce(
-        () -> determineNextState(Elevator.LEVEL_THREE_POSITION * Elevator.ENCODER_TICS_PER_INCH + homeHeight));
+    return runOnce(() -> determineNextState(Elevator.LEVEL_THREE_POSITION * Elevator.ENCODER_TICS_PER_INCH + homeHeight));
   }
 
   @Override
   public Command moveToLevelFourCommand() {
-    return runOnce(
-        () -> determineNextState(Elevator.LEVEL_FOUR_POSITION * Elevator.ENCODER_TICS_PER_INCH + homeHeight));
+    return runOnce(() -> determineNextState(Elevator.LEVEL_FOUR_POSITION * Elevator.ENCODER_TICS_PER_INCH + homeHeight));
   }
 
   private void updateConfig() {
@@ -171,8 +168,7 @@ public class ElevatorPID extends SubsystemBase implements Elevator {
     pidController.setI(iConstantSubscriber.get());
     pidController.setD(dConstantSubscriber.get());
 
-    System.out.println("Kp = " + pConstantSubscriber.get() + " Ki = " + iConstantSubscriber.get() + " Kd = "
-        + dConstantSubscriber.get());
+    System.out.println("Kp = " + pConstantSubscriber.get() + " Ki = " + iConstantSubscriber.get() + " Kd = " + dConstantSubscriber.get());
   }
 
   public Command updateConfigCommand() {
