@@ -74,21 +74,27 @@ public class ElevatorPID extends SubsystemBase implements Elevator {
     return runOnce(() -> setCurrentPositionAsHome());
   }
 
-  int counter = 0;
-
+  private int stubUsageCounter = 0;
   @Override
   public void periodic() {
     switch (currentState) {
       case NOT_MOVING:
+        stubUsageCounter = 0;
       case MOVING_UP:
       case MOVING_DOWN:
         speed = pidController.calculate(getCurrentHeight(), desiredHeight);
         break;
       case JOGGING_UP:
         speed = 1.0;
+        if (stubUsageCounter++ == 0) {
+          System.out.println("Elevator: Jogging up");
+        }
         break;
       case JOGGING_DOWN:
         speed = -1.0;
+        if (stubUsageCounter++ == 0) {
+          System.out.println("Elevator: Jogging down");
+        }
         break;
     }
 
@@ -131,37 +137,38 @@ public class ElevatorPID extends SubsystemBase implements Elevator {
     return runEnd(() -> currentState = State.JOGGING_DOWN, () -> stop());
   }
 
+  private void moveTo(double height) {
+    determineNextState(height * Elevator.ENCODER_TICS_PER_INCH + homeHeight);
+  }
+
   @Override
   public Command moveToCoralStationHeightCommand() {
-    return runOnce(() -> determineNextState(Elevator.CORAL_STATION_HEIGHT * Elevator.ENCODER_TICS_PER_INCH + homeHeight));
+    return runOnce(() -> moveTo(Elevator.CORAL_STATION_HEIGHT));
   }
 
   @Override
   public Command moveToPositionZeroCommand() {
-    return runOnce(
-        () -> determineNextState(Elevator.LEVEL_ZERO_POSITION * Elevator.ENCODER_TICS_PER_INCH + homeHeight));
+    return runOnce(() -> moveTo(Elevator.LEVEL_ZERO_POSITION));
   }
 
   @Override
   public Command moveToLevelOneCommand() {
-    return runOnce(() -> determineNextState(Elevator.LEVEL_ONE_POSITION * Elevator.ENCODER_TICS_PER_INCH + homeHeight));
+    return runOnce(() -> moveTo(Elevator.LEVEL_ONE_POSITION));
   }
 
   @Override
   public Command moveToLevelTwoCommand() {
-    return runOnce(() -> determineNextState(Elevator.LEVEL_TWO_POSITION * Elevator.ENCODER_TICS_PER_INCH + homeHeight));
+    return runOnce(() -> moveTo(Elevator.LEVEL_TWO_POSITION));
   }
 
   @Override
   public Command moveToLevelThreeCommand() {
-    return runOnce(
-        () -> determineNextState(Elevator.LEVEL_THREE_POSITION * Elevator.ENCODER_TICS_PER_INCH + homeHeight));
+    return runOnce(() -> moveTo(Elevator.LEVEL_THREE_POSITION));
   }
 
   @Override
   public Command moveToLevelFourCommand() {
-    return runOnce(
-        () -> determineNextState(Elevator.LEVEL_FOUR_POSITION * Elevator.ENCODER_TICS_PER_INCH + homeHeight));
+    return runOnce(() -> moveTo(Elevator.LEVEL_FOUR_POSITION));
   }
 
   private void updateConfig() {

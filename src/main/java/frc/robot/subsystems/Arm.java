@@ -19,10 +19,10 @@ public class Arm extends SubsystemBase {
 
   public enum State {
     NOT_MOVING,
-    MOVING_FORWARD,
-    MOVING_BACKWARD,
-    JOGGING_FORWARD,
-    JOGGING_BACKWARD;
+    MOVING_TO_INTAKE,
+    MOVING_TO_OUTTAKE,
+    JOGGING_TO_OUTTAKE,
+    JOGGING_TO_INTAKE;
   }
 
   public Arm() {
@@ -36,16 +36,16 @@ public class Arm extends SubsystemBase {
       case NOT_MOVING:
         output = 0.0;
         break;
-      case MOVING_FORWARD:
+      case MOVING_TO_OUTTAKE:
         output = 3.0;
         break;
-      case MOVING_BACKWARD:
+      case MOVING_TO_INTAKE:
         output = -3.0;
         break;
-      case JOGGING_FORWARD:
+      case JOGGING_TO_OUTTAKE:
         output = 1.0;
         break;
-      case JOGGING_BACKWARD:
+      case JOGGING_TO_INTAKE:
         output = -1.0;
         break;
     }
@@ -59,9 +59,9 @@ public class Arm extends SubsystemBase {
     this.desiredAngle = desiredAngle;
 
     if (desiredAngle > currentAngle + TOLERANCE) {
-      currentState = State.MOVING_FORWARD;
+      currentState = State.MOVING_TO_OUTTAKE;
     } else if (desiredAngle < currentAngle - TOLERANCE) {
-      currentState = State.MOVING_BACKWARD;
+      currentState = State.MOVING_TO_INTAKE;
     } else {
       currentState = State.NOT_MOVING;
     }
@@ -71,19 +71,32 @@ public class Arm extends SubsystemBase {
     return motorOne.getPosition().getValueAsDouble();
   }
 
-  public void moveToIntakePosition() {
+  private void moveToOuttakePosition() {
     determineNextState(2.0);
   }
 
   public Command moveToIntakePositionCommand() {
-    return runOnce(() -> moveToIntakePosition());
+    return runOnce(() -> moveToOuttakePosition());
   }
 
-  public void moveToOuttakePosition() {
-    determineNextState(2.0);
+  private void moveToIntakePosition() {
+    determineNextState(-2.0);
   }
 
   public Command moveToOuttakePositionCommand() {
-    return runOnce(() ->  moveToOuttakePosition());
+    return runOnce(() ->  moveToIntakePosition());
+  }
+
+  private void stop() {
+    desiredAngle = getCurrentAngle();
+    currentState = State.NOT_MOVING;
+  }
+
+  public Command jogToIntakeCommand() {
+    return runEnd(() -> currentState = State.JOGGING_TO_INTAKE, () -> stop());
+  }
+
+  public Command jogToOuttakeCommand() {
+    return runEnd(() -> currentState = State.JOGGING_TO_OUTTAKE, () -> stop());
   }
 }
