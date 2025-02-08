@@ -4,7 +4,6 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import com.ctre.phoenix6.hardware.TalonFX;
 import edu.wpi.first.wpilibj2.command.Command;
 // import com.ctre.phoenix6.controls.Follower;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 
 public class ElevatorBangBangControl extends SubsystemBase implements Elevator {
   double positionZero = 0.0;
@@ -97,6 +96,11 @@ public class ElevatorBangBangControl extends SubsystemBase implements Elevator {
     return runEnd(() -> currentState = State.JOGGING_DOWN, () -> stop());
   }
 
+  @Override
+  public Command moveToCoralStationHeightCommand() {
+    return runOnce(() -> determineNextState(Elevator.CORAL_STATION_HEIGHT * Elevator.ENCODER_TICS_PER_INCH + homeHeight));
+  }
+
   public Command moveToPositionZeroCommand() {
     return runOnce(() -> determineNextState(Elevator.LEVEL_ZERO_POSITION * Elevator.ENCODER_TICS_PER_INCH + homeHeight));
   }
@@ -125,17 +129,5 @@ public class ElevatorBangBangControl extends SubsystemBase implements Elevator {
   public Command updateConfigCommand() {
     // TODO Auto-generated method stub
     throw new UnsupportedOperationException("Unimplemented method 'updatePidCommand'");
-  }
-
-  @Override
-  public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'sysIdQuasistatic'");
-  }
-
-  @Override
-  public Command sysIdDynamic(SysIdRoutine.Direction direction) {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'sysIdDynamic'");
   }
 }

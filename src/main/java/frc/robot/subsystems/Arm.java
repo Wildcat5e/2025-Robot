@@ -70,4 +70,20 @@ public class Arm extends SubsystemBase {
   private double getCurrentAngle() {
     return motorOne.getPosition().getValueAsDouble();
   }
+
+  public void moveToIntakePosition() {
+    determineNextState(2.0);
+  }
+
+  public Command moveToIntakePositionCommand() {
+    return runOnce(() -> moveToIntakePosition());
+  }
+
+  public void moveToOuttakePosition() {
+    determineNextState(2.0);
+  }
+
+  public Command moveToOuttakePositionCommand() {
+    return runOnce(() ->  moveToOuttakePosition());
+  }
 }

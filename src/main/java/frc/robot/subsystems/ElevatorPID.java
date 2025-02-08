@@ -10,10 +10,6 @@ import edu.wpi.first.networktables.DoubleTopic;
 import edu.wpi.first.networktables.DoubleSubscriber;
 import edu.wpi.first.networktables.DoublePublisher;
 // import com.ctre.phoenix6.controls.Follower;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import com.ctre.phoenix6.SignalLogger;
-import com.ctre.phoenix6.controls.VoltageOut;
-import edu.wpi.first.units.Units;
 
 public class ElevatorPID extends SubsystemBase implements Elevator {
   public static final double TOLERANCE = 0.0;
@@ -29,15 +25,13 @@ public class ElevatorPID extends SubsystemBase implements Elevator {
   private final DoubleSubscriber pConstantSubscriber;
   private final DoubleSubscriber iConstantSubscriber;
   private final DoubleSubscriber dConstantSubscriber;
-  private final VoltageOut m_voltReq = new VoltageOut(0.0);
 
   public enum State {
     NOT_MOVING,
     MOVING_UP,
     MOVING_DOWN,
     JOGGING_UP,
-    JOGGING_DOWN,
-    SYSID;
+    JOGGING_DOWN;
   }
 
   public ElevatorPID() {
@@ -96,7 +90,6 @@ public class ElevatorPID extends SubsystemBase implements Elevator {
       case JOGGING_DOWN:
         speed = -1.0;
         break;
-      case SYSID:
     }
 
     double clampedSpeed = Math.max(-MAX_ELEVATOR_SPEED, Math.min(MAX_ELEVATOR_SPEED, speed));
@@ -139,8 +132,14 @@ public class ElevatorPID extends SubsystemBase implements Elevator {
   }
 
   @Override
+  public Command moveToCoralStationHeightCommand() {
+    return runOnce(() -> determineNextState(Elevator.CORAL_STATION_HEIGHT * Elevator.ENCODER_TICS_PER_INCH + homeHeight));
+  }
+
+  @Override
   public Command moveToPositionZeroCommand() {
-    return runOnce(() -> determineNextState(Elevator.LEVEL_ZERO_POSITION * Elevator.ENCODER_TICS_PER_INCH + homeHeight));
+    return runOnce(
+        () -> determineNextState(Elevator.LEVEL_ZERO_POSITION * Elevator.ENCODER_TICS_PER_INCH + homeHeight));
   }
 
   @Override
@@ -155,12 +154,14 @@ public class ElevatorPID extends SubsystemBase implements Elevator {
 
   @Override
   public Command moveToLevelThreeCommand() {
-    return runOnce(() -> determineNextState(Elevator.LEVEL_THREE_POSITION * Elevator.ENCODER_TICS_PER_INCH + homeHeight));
+    return runOnce(
+        () -> determineNextState(Elevator.LEVEL_THREE_POSITION * Elevator.ENCODER_TICS_PER_INCH + homeHeight));
   }
 
   @Override
   public Command moveToLevelFourCommand() {
-    return runOnce(() -> determineNextState(Elevator.LEVEL_FOUR_POSITION * Elevator.ENCODER_TICS_PER_INCH + homeHeight));
+    return runOnce(
+        () -> determineNextState(Elevator.LEVEL_FOUR_POSITION * Elevator.ENCODER_TICS_PER_INCH + homeHeight));
   }
 
   private void updateConfig() {
@@ -168,38 +169,11 @@ public class ElevatorPID extends SubsystemBase implements Elevator {
     pidController.setI(iConstantSubscriber.get());
     pidController.setD(dConstantSubscriber.get());
 
-    System.out.println("Kp = " + pConstantSubscriber.get() + " Ki = " + iConstantSubscriber.get() + " Kd = " + dConstantSubscriber.get());
+    System.out.println("Kp = " + pConstantSubscriber.get() + " Ki = " + iConstantSubscriber.get() + " Kd = "
+        + dConstantSubscriber.get());
   }
 
   public Command updateConfigCommand() {
     return runOnce(() -> updateConfig());
-  }
-
-  private final SysIdRoutine m_sysIdRoutine =
-   new SysIdRoutine(
-      new SysIdRoutine.Config(
-         null,        // Use default ramp rate (1 V/s)
-         Units.Volts.of(4), // Reduce dynamic step voltage to 4 to prevent brownout
-         null,        // Use default timeout (10 s)
-                      // Log state with Phoenix SignalLogger class
-         (state) -> SignalLogger.writeString("state", state.toString())
-      ),
-      new SysIdRoutine.Mechanism(
-         (volts) -> motorOne.setControl(m_voltReq.withOutput(volts.in(Units.Volts))),
-         null,
-         this
-      )
-   );
-
-  @Override
-  public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
-    currentState = State.SYSID;
-    return m_sysIdRoutine.quasistatic(direction);
-  }
-
-  @Override
-  public Command sysIdDynamic(SysIdRoutine.Direction direction) {
-    currentState = State.SYSID;
-    return m_sysIdRoutine.dynamic(direction);
   }
 }

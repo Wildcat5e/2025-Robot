@@ -1,7 +1,6 @@
 package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 
 public interface Elevator {
     double WHEEL_CIRCUMFERENCE = 2.7 * Math.PI;
@@ -12,10 +11,13 @@ public interface Elevator {
     double LEVEL_TWO_POSITION = 6.0;
     double LEVEL_THREE_POSITION = 9.0;
     double LEVEL_FOUR_POSITION = 12.0;
+    double CORAL_STATION_HEIGHT = 5.0;
 
     Command jogUpCommand();
 
     Command jogDownCommand();
+
+    Command moveToCoralStationHeightCommand();
 
     Command moveToPositionZeroCommand();
 
@@ -30,8 +32,4 @@ public interface Elevator {
     Command setCurrentPositionAsHomeCommand();
 
     Command updateConfigCommand();
-
-    Command sysIdQuasistatic(SysIdRoutine.Direction direction);
-
-    Command sysIdDynamic(SysIdRoutine.Direction direction);
 }
