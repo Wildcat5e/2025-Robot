@@ -20,25 +20,21 @@ When the operator hits button 8 on the numberpad, the elevator will move to leve
 
 ### Button Mapping
 
-| Device                 | Button   | Subsystem        | Usage                                                                                 |
-|------------------------|----------|------------------|---------------------------------------------------------------------------------------|
-| Driver Xbox Controller | Left X   | Drivetrain       | Move left joystick horizontally to control the robot translation                      |
-| Driver Xbox Controller | Left Y   | Drivetrain       | Move left joystick vertically to control the robot translation                        |
-| Driver Xbox Controller | Right X  | Drivetrain       | Move right joystick horizonally to control the robot rotation                         |
-| Operator Numberpad     | 1        | Elevator         | jog down                                                                              |
-| Operator Numberpad     | 2        | Elevator         | jog up                                                                                |
-| Operator Numberpad     | 3        | Elevator and Arm | move to the height of the coral station and the arm will move to the intake position. |
-| Operator Numberpad     | 4        | Elevator and Arm | move to position 0 and the arm will move to the outtake position.                     |
-| Operator Numberpad     | 5        | Elevator         | move to level 1.                                                                      |
-| Operator Numberpad     | 6        | Elevator         | move to level 2.                                                                      |
-| Operator Numberpad     | 7        | Elevator         | move to level 3.                                                                      |
-| Operator Numberpad     | 8        | Elevator         | move to level 4.                                                                      |
-| Operator Numberpad     | 9        | Arm              | move to coral loading position.                                                       |
-| Operator Numberpad     | 10       | Arm              | move to coral droping position. (angle determined by curent level 1-4)                |
-| Operator Numberpad     | 11       | Arm              | jog down                                                                              |
-| Operator Numberpad     | 12       | Arm              | jog up                                                                                |
-|                        |          | Algae            | Extract from reef                                                                     |
-|                        |          | Algae            | Eject into processor                                                                  |
+| Device                 | Button   | Subsystem  | Usage                                                             |
+|------------------------|----------|------------|-------------------------------------------------------------------|
+| Driver Xbox Controller | Left X   | Drivetrain | Move left joystick horizontally to control the robot translation  |
+| Driver Xbox Controller | Left Y   | Drivetrain | Move left joystick vertically to control the robot translation    |
+| Driver Xbox Controller | Right X  | Drivetrain | Move right joystick horizonally to control the robot rotation     |
+| Operator Numberpad     | 1        | Elevator   | jog down                                                          |
+| Operator Numberpad     | 2        | Elevator   | jog up                                                            |
+| Operator Numberpad     | 3        | Elevator   | move to the height of the coral station.                          |
+| Operator Numberpad     | 4        | Elevator   | move to position 0 and the arm will move to the outtake position. |
+| Operator Numberpad     | 5        | Elevator   | move to level 1.                                                  |
+| Operator Numberpad     | 6        | Elevator   | move to level 2.                                                  |
+| Operator Numberpad     | 7        | Elevator   | move to level 3.                                                  |
+| Operator Numberpad     | 8        | Elevator   | move to level 4.                                                  |
+|                        |          | Algae      | Extract from reef                                                 |
+|                        |          | Algae      | Eject into processor                                              |
 
 ### Can Devices
 

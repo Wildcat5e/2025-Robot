@@ -128,6 +128,6 @@ public class ElevatorBangBangControl extends SubsystemBase implements Elevator {
   @Override
   public Command updateConfigCommand() {
     // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'updatePidCommand'");
+    throw new UnsupportedOperationException("Unimplemented method 'updateConfigCommand'");
   }
 }
