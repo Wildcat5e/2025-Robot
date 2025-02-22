@@ -1,0 +1,54 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 3.971097752988156,
+        "y": 5.244
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 3.280157767898409,
+        "y": 5.854736204687053
+      },
+      "isLocked": false,
+      "linkedName": "Coral Load to Reef Loop"
+    },
+    {
+      "anchor": {
+        "x": 1.687,
+        "y": 7.39
+      },
+      "prevControl": {
+        "x": 2.569812345662921,
+        "y": 6.6105801265304684
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "Start to Coral Load"
+    }
+  ],
+  "rotationTargets": [],
+  "constraintZones": [],
+  "pointTowardsZones": [],
+  "eventMarkers": [],
+  "globalConstraints": {
+    "maxVelocity": 3.0,
+    "maxAcceleration": 3.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": -53.832
+  },
+  "reversed": false,
+  "folder": null,
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": -59.701669756307915
+  },
+  "useDefaultConstraints": true
+}

@@ -2,19 +2,17 @@ package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.controls.Follower;
 import edu.wpi.first.wpilibj2.command.Command;
-// import com.ctre.phoenix6.controls.Follower;
 
 public class ElevatorBangBangControl extends SubsystemBase implements Elevator {
-  double positionZero = 0.0;
   public static final double TOLERANCE = 2.0;
-  private final TalonFX motorOne = new TalonFX(0);
-  // private final TalonFX motorTwo = new TalonFX(1);
-  // private final Follower follower = new Follower(0, true);
+  private final TalonFX motorOne = new TalonFX(13);
+  private final TalonFX motorTwo = new TalonFX(14);
+  private final Follower follower = new Follower(13, true);
   private State currentState;
   private double desiredHeight;
   private double output;
-  private double homeHeight;
 
   public enum State {
     NOT_MOVING,
@@ -26,18 +24,8 @@ public class ElevatorBangBangControl extends SubsystemBase implements Elevator {
 
   public ElevatorBangBangControl() {
     currentState = State.NOT_MOVING;
-    // motorTwo.setControl(follower);
+    motorTwo.setControl(follower);
     motorOne.setPosition(0.0);
-    setCurrentPositionAsHome();
-  }
-
-  private void setCurrentPositionAsHome() {
-    homeHeight = getCurrentHeight();
-    System.out.println("Home is currently at = " + homeHeight);
-  }
-
-  public Command setCurrentPositionAsHomeCommand() {
-    return runOnce(() -> setCurrentPositionAsHome());
   }
 
   @Override
@@ -96,38 +84,37 @@ public class ElevatorBangBangControl extends SubsystemBase implements Elevator {
     return runEnd(() -> currentState = State.JOGGING_DOWN, () -> stop());
   }
 
-  @Override
-  public Command moveToCoralStationHeightCommand() {
-    return runOnce(() -> determineNextState(Elevator.CORAL_STATION_HEIGHT * Elevator.ENCODER_TICS_PER_INCH + homeHeight));
-  }
-
-  public Command moveToPositionZeroCommand() {
-    return runOnce(() -> determineNextState(Elevator.LEVEL_ZERO_POSITION * Elevator.ENCODER_TICS_PER_INCH + homeHeight));
+  public Command moveToHomePositionCommand() {
+    return runOnce(() -> determineNextState(Elevator.LEVEL_ZERO_POSITION * Elevator.ENCODER_TICS_PER_INCH));
   }
 
   @Override
   public Command moveToLevelOneCommand() {
-    return runOnce(() -> determineNextState(Elevator.LEVEL_ONE_POSITION * Elevator.ENCODER_TICS_PER_INCH + homeHeight));
+    return runOnce(() -> determineNextState(Elevator.LEVEL_ONE_POSITION * Elevator.ENCODER_TICS_PER_INCH));
   }
 
   @Override
   public Command moveToLevelTwoCommand() {
-    return runOnce(() -> determineNextState(Elevator.LEVEL_TWO_POSITION * Elevator.ENCODER_TICS_PER_INCH + homeHeight));
+    return runOnce(() -> determineNextState(Elevator.LEVEL_TWO_POSITION * Elevator.ENCODER_TICS_PER_INCH));
   }
 
   @Override
   public Command moveToLevelThreeCommand() {
-    return runOnce(() -> determineNextState(Elevator.LEVEL_THREE_POSITION * Elevator.ENCODER_TICS_PER_INCH + homeHeight));
+    return runOnce(() -> determineNextState(Elevator.LEVEL_THREE_POSITION * Elevator.ENCODER_TICS_PER_INCH));
   }
 
   @Override
   public Command moveToLevelFourCommand() {
-    return runOnce(() -> determineNextState(Elevator.LEVEL_FOUR_POSITION * Elevator.ENCODER_TICS_PER_INCH + homeHeight));
+    return runOnce(() -> determineNextState(Elevator.LEVEL_FOUR_POSITION * Elevator.ENCODER_TICS_PER_INCH));
   }
 
   @Override
   public Command updateConfigCommand() {
     // TODO Auto-generated method stub
     throw new UnsupportedOperationException("Unimplemented method 'updateConfigCommand'");
+  }
+
+  public boolean isElevatorNotMoving() {
+    return currentState == State.NOT_MOVING;
   }
 }

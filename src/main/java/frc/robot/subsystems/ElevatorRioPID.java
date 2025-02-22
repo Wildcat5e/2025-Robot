@@ -2,26 +2,25 @@ package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import com.ctre.phoenix6.hardware.TalonFX;
-import edu.wpi.first.wpilibj2.command.Command;
+import com.ctre.phoenix6.controls.Follower;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.DoubleTopic;
 import edu.wpi.first.networktables.DoubleSubscriber;
 import edu.wpi.first.networktables.DoublePublisher;
-// import com.ctre.phoenix6.controls.Follower;
+import edu.wpi.first.wpilibj2.command.Command;
 
-public class ElevatorPID extends SubsystemBase implements Elevator {
+public class ElevatorRioPID extends SubsystemBase implements Elevator {
   public static final double TOLERANCE = 0.0;
   public static final double MAX_ELEVATOR_SPEED = 12.0;
-  private final TalonFX motorOne = new TalonFX(0);
-  // private final TalonFX motorTwo = new TalonFX(1);
-  // private final Follower follower = new Follower(0, true);
+  private final TalonFX motorOne = new TalonFX(13);
+  private final TalonFX motorTwo = new TalonFX(14);
+  private final Follower follower = new Follower(13, true);
   private PIDController pidController = new PIDController(0.1, 0.0, 0.0);
   private State currentState;
   private double desiredHeight;
   private double speed;
-  private double homeHeight;
   private final DoubleSubscriber pConstantSubscriber;
   private final DoubleSubscriber iConstantSubscriber;
   private final DoubleSubscriber dConstantSubscriber;
@@ -34,17 +33,15 @@ public class ElevatorPID extends SubsystemBase implements Elevator {
     JOGGING_DOWN;
   }
 
-  public ElevatorPID() {
+  public ElevatorRioPID() {
     currentState = State.NOT_MOVING;
-    // motorTwo.setControl(follower);
+    motorTwo.setControl(follower);
     motorOne.setPosition(0.0);
-    NetworkTableInstance inst = NetworkTableInstance.getDefault();
-    NetworkTable pidConstants = inst.getTable("PID Constants");
+    NetworkTable pidConstants = NetworkTableInstance.getDefault().getTable("PID Constants");
     pConstantSubscriber = subscribeToDoubleTopic(pidConstants, "KP", 0.0);
     iConstantSubscriber = subscribeToDoubleTopic(pidConstants, "KI", 0.0);
     dConstantSubscriber = subscribeToDoubleTopic(pidConstants, "KD", 0.0);
     pidController.setTolerance(TOLERANCE);
-    setCurrentPositionAsHome();
   }
 
   /**
@@ -65,36 +62,20 @@ public class ElevatorPID extends SubsystemBase implements Elevator {
     return entry.subscribe(defaultValue);
   }
 
-  private void setCurrentPositionAsHome() {
-    homeHeight = getCurrentHeight();
-    System.out.println("Home is currently at = " + homeHeight);
-  }
-
-  public Command setCurrentPositionAsHomeCommand() {
-    return runOnce(() -> setCurrentPositionAsHome());
-  }
-
-  private int stubUsageCounter = 0;
+  int counter = 0;
   @Override
   public void periodic() {
     switch (currentState) {
       case NOT_MOVING:
-        stubUsageCounter = 0;
       case MOVING_UP:
       case MOVING_DOWN:
         speed = pidController.calculate(getCurrentHeight(), desiredHeight);
         break;
       case JOGGING_UP:
         speed = 1.0;
-        if (stubUsageCounter++ == 0) {
-          System.out.println("Elevator: Jogging up");
-        }
         break;
       case JOGGING_DOWN:
         speed = -1.0;
-        if (stubUsageCounter++ == 0) {
-          System.out.println("Elevator: Jogging down");
-        }
         break;
     }
 
@@ -123,8 +104,8 @@ public class ElevatorPID extends SubsystemBase implements Elevator {
   }
 
   private void stop() {
-    desiredHeight = getCurrentHeight();
     currentState = State.NOT_MOVING;
+    desiredHeight = getCurrentHeight();
   }
 
   @Override
@@ -137,38 +118,29 @@ public class ElevatorPID extends SubsystemBase implements Elevator {
     return runEnd(() -> currentState = State.JOGGING_DOWN, () -> stop());
   }
 
-  private void moveTo(double height) {
-    determineNextState(height * Elevator.ENCODER_TICS_PER_INCH + homeHeight);
-  }
-
   @Override
-  public Command moveToCoralStationHeightCommand() {
-    return runOnce(() -> moveTo(Elevator.CORAL_STATION_HEIGHT));
-  }
-
-  @Override
-  public Command moveToPositionZeroCommand() {
-    return runOnce(() -> moveTo(Elevator.LEVEL_ZERO_POSITION));
+  public Command moveToHomePositionCommand() {
+    return runOnce(() -> determineNextState(Elevator.LEVEL_ZERO_POSITION * Elevator.ENCODER_TICS_PER_INCH));
   }
 
   @Override
   public Command moveToLevelOneCommand() {
-    return runOnce(() -> moveTo(Elevator.LEVEL_ONE_POSITION));
+    return runOnce(() -> determineNextState(Elevator.LEVEL_ONE_POSITION * Elevator.ENCODER_TICS_PER_INCH));
   }
 
   @Override
   public Command moveToLevelTwoCommand() {
-    return runOnce(() -> moveTo(Elevator.LEVEL_TWO_POSITION));
+    return runOnce(() -> determineNextState(Elevator.LEVEL_TWO_POSITION * Elevator.ENCODER_TICS_PER_INCH));
   }
 
   @Override
   public Command moveToLevelThreeCommand() {
-    return runOnce(() -> moveTo(Elevator.LEVEL_THREE_POSITION));
+    return runOnce(() -> determineNextState(Elevator.LEVEL_THREE_POSITION * Elevator.ENCODER_TICS_PER_INCH));
   }
 
   @Override
   public Command moveToLevelFourCommand() {
-    return runOnce(() -> moveTo(Elevator.LEVEL_FOUR_POSITION));
+    return runOnce(() -> determineNextState(Elevator.LEVEL_FOUR_POSITION * Elevator.ENCODER_TICS_PER_INCH));
   }
 
   private void updateConfig() {
@@ -176,11 +148,14 @@ public class ElevatorPID extends SubsystemBase implements Elevator {
     pidController.setI(iConstantSubscriber.get());
     pidController.setD(dConstantSubscriber.get());
 
-    System.out.println("Kp = " + pConstantSubscriber.get() + " Ki = " + iConstantSubscriber.get() + " Kd = "
-        + dConstantSubscriber.get());
+    System.out.println("Kp = " + pConstantSubscriber.get() + " Ki = " + iConstantSubscriber.get() + " Kd = " + dConstantSubscriber.get());
   }
 
   public Command updateConfigCommand() {
     return runOnce(() -> updateConfig());
+  }
+
+  public boolean isElevatorNotMoving() {
+    return currentState == State.NOT_MOVING;
   }
 }

@@ -1,0 +1,54 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 3.669204869286097,
+        "y": 2.9460261809400703
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 4.001064836633311,
+        "y": 2.9779257288067726
+      },
+      "isLocked": false,
+      "linkedName": "Reef Point C"
+    },
+    {
+      "anchor": {
+        "x": 3.95418296552019,
+        "y": 2.785097373654935
+      },
+      "prevControl": {
+        "x": 3.5877282970237645,
+        "y": 2.554670743386186
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "Reef Point D"
+    }
+  ],
+  "rotationTargets": [],
+  "constraintZones": [],
+  "pointTowardsZones": [],
+  "eventMarkers": [],
+  "globalConstraints": {
+    "maxVelocity": 3.0,
+    "maxAcceleration": 3.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": 59.99999999999999
+  },
+  "reversed": false,
+  "folder": null,
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": 59.99999999999999
+  },
+  "useDefaultConstraints": true
+}

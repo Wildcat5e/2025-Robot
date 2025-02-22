@@ -11,15 +11,12 @@ public interface Elevator {
     double LEVEL_TWO_POSITION = 6.0;
     double LEVEL_THREE_POSITION = 9.0;
     double LEVEL_FOUR_POSITION = 12.0;
-    double CORAL_STATION_HEIGHT = 5.0;
 
     Command jogUpCommand();
 
     Command jogDownCommand();
 
-    Command moveToCoralStationHeightCommand();
-
-    Command moveToPositionZeroCommand();
+    Command moveToHomePositionCommand();
 
     Command moveToLevelOneCommand();
 
@@ -29,7 +26,7 @@ public interface Elevator {
 
     Command moveToLevelFourCommand();
 
-    Command setCurrentPositionAsHomeCommand();
-
     Command updateConfigCommand();
+
+    boolean isElevatorNotMoving();
 }

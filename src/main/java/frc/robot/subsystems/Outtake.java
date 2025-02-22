@@ -3,12 +3,15 @@ package frc.robot.subsystems;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.controls.Follower;
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj2.command.Command;
 
 public class Outtake extends SubsystemBase {
-  private final TalonFX leftMotor = new TalonFX(2);
-  private final TalonFX rightMotor = new TalonFX(3);
-  private final Follower follower = new Follower(2, true);
+  public static final double TOLERANCE = 0.0;
+  private final TalonFX leftMotor = new TalonFX(15);
+  private final TalonFX rightMotor = new TalonFX(16);
+  private final Follower follower = new Follower(15, true);
+  private final DigitalInput proximitySensor = new DigitalInput(0);
   private State currentState;
 
   public enum State {
@@ -47,15 +50,21 @@ public class Outtake extends SubsystemBase {
     }
 
     leftMotor.setVoltage(output);
-    determineNextState();
-  }
-
-  private void determineNextState() {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'determineNextState'");
   }
 
   public Command outtakeCommand() {
-    return runEnd(() -> currentState = State.MOVING_FORWARD, () -> currentState = State.NOT_MOVING);
+    return runOnce(() -> currentState = State.MOVING_FORWARD);
+  }
+
+  public Command jogForwardCommand() {
+    return runEnd(() -> currentState = State.JOGGING_FORWARD, () -> currentState = State.NOT_MOVING);
+  }
+
+  public Command jogBackwardCommand() {
+    return runEnd(() -> currentState = State.JOGGING_FORWARD, () -> currentState = State.NOT_MOVING);
+  }
+
+  public boolean getProximitySensor() {
+    return proximitySensor.get();
   }
 }

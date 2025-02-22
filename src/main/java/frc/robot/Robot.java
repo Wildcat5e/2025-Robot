@@ -1,16 +1,18 @@
 package frc.robot;
 
-import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.subsystems.Elevator;
-import frc.robot.subsystems.ElevatorPID;
+import frc.robot.subsystems.ElevatorBangBangControl;
+import frc.robot.subsystems.ElevatorRioPID;
+import frc.robot.subsystems.Limelight;
+import frc.robot.subsystems.Outtake;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
 public class Robot extends TimedRobot {
-  private Command m_autonomousCommand;
   private final XboxController controller = new XboxController(0);
   private final Joystick joystick = new Joystick(1);
   private final JoystickButton button1 = new JoystickButton(joystick, 1);
@@ -25,21 +27,27 @@ public class Robot extends TimedRobot {
   private final JoystickButton button10 = new JoystickButton(joystick, 10);
   private final JoystickButton button11 = new JoystickButton(joystick, 11);
   private final JoystickButton button12 = new JoystickButton(joystick, 12);
-  private final Elevator elevator = new ElevatorPID();
+  private final Elevator elevator = new ElevatorRioPID();
+  private final Outtake outtake = new Outtake();
+  private final Limelight limelight = new Limelight();
+  private final Superstructure superstructure = new Superstructure(elevator, outtake, limelight);
+  private Command m_autonomousCommand;
 
   public Robot() {
     configureBindings();
   }
 
   private void configureBindings() {
-    button1.whileTrue(elevator.jogUpCommand());
-    button2.whileTrue(elevator.jogDownCommand());
-    button3.onTrue(elevator.moveToCoralStationHeightCommand());
-    button4.onTrue(elevator.moveToPositionZeroCommand());
-    button5.onTrue(elevator.moveToLevelOneCommand());
-    button6.onTrue(elevator.moveToLevelTwoCommand());
-    button7.onTrue(elevator.moveToLevelThreeCommand());
-    button8.onTrue(elevator.moveToLevelFourCommand());
+    button1.onTrue(limelight.alignLeft());
+    button3.onTrue(limelight.alignRight());
+    button11.onTrue(superstructure.moveElevatorToLevelOneAndOuttake());
+    button8.onTrue(superstructure.moveElevatorToLevelTwoAndOuttake());
+    button5.onTrue(superstructure.moveElevatorToLevelThreeAndOuttake());
+    button2.onTrue(superstructure.moveElevatorToLevelFourAndOuttake());
+    button4.whileTrue(elevator.jogUpCommand());
+    button6.whileTrue(elevator.jogDownCommand());
+    button7.whileTrue(outtake.jogForwardCommand());
+    button9.whileTrue(outtake.jogBackwardCommand());
   }
 
   @Override
@@ -48,22 +56,28 @@ public class Robot extends TimedRobot {
   }
 
   @Override
-  public void disabledInit() {}
+  public void disabledInit() {
+  }
 
   @Override
-  public void disabledPeriodic() {}
+  public void disabledPeriodic() {
+  }
 
   @Override
-  public void disabledExit() {}
+  public void disabledExit() {
+  }
 
   @Override
-  public void autonomousInit() {}
+  public void autonomousInit() {
+  }
 
   @Override
-  public void autonomousPeriodic() {}
+  public void autonomousPeriodic() {
+  }
 
   @Override
-  public void autonomousExit() {}
+  public void autonomousExit() {
+  }
 
   @Override
   public void teleopInit() {
@@ -73,10 +87,12 @@ public class Robot extends TimedRobot {
   }
 
   @Override
-  public void teleopPeriodic() {}
+  public void teleopPeriodic() {
+  }
 
   @Override
-  public void teleopExit() {}
+  public void teleopExit() {
+  }
 
   @Override
   public void testInit() {
@@ -84,8 +100,10 @@ public class Robot extends TimedRobot {
   }
 
   @Override
-  public void testPeriodic() {}
+  public void testPeriodic() {
+  }
 
   @Override
-  public void testExit() {}
+  public void testExit() {
+  }
 }
