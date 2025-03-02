@@ -2,7 +2,6 @@ package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import com.ctre.phoenix6.hardware.TalonFX;
-import com.ctre.phoenix6.controls.Follower;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
@@ -10,13 +9,12 @@ import edu.wpi.first.networktables.DoubleTopic;
 import edu.wpi.first.networktables.DoubleSubscriber;
 import edu.wpi.first.networktables.DoublePublisher;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 
 public class ElevatorRioPID extends SubsystemBase implements Elevator {
   public static final double TOLERANCE = 0.0;
   public static final double MAX_ELEVATOR_SPEED = 12.0;
-  private final TalonFX motorOne = new TalonFX(13);
-  private final TalonFX motorTwo = new TalonFX(14);
-  private final Follower follower = new Follower(13, true);
+  private final TalonFX motor = new TalonFX(9);
   private PIDController pidController = new PIDController(0.1, 0.0, 0.0);
   private State currentState;
   private double desiredHeight;
@@ -35,8 +33,7 @@ public class ElevatorRioPID extends SubsystemBase implements Elevator {
 
   public ElevatorRioPID() {
     currentState = State.NOT_MOVING;
-    motorTwo.setControl(follower);
-    motorOne.setPosition(0.0);
+    motor.setPosition(0.0);
     NetworkTable pidConstants = NetworkTableInstance.getDefault().getTable("PID Constants");
     pConstantSubscriber = subscribeToDoubleTopic(pidConstants, "KP", 0.0);
     iConstantSubscriber = subscribeToDoubleTopic(pidConstants, "KI", 0.0);
@@ -81,7 +78,7 @@ public class ElevatorRioPID extends SubsystemBase implements Elevator {
 
     double clampedSpeed = Math.max(-MAX_ELEVATOR_SPEED, Math.min(MAX_ELEVATOR_SPEED, speed));
 
-    motorOne.setVoltage(clampedSpeed);
+    motor.setVoltage(clampedSpeed);
     determineNextState(desiredHeight);
   }
 
@@ -100,7 +97,7 @@ public class ElevatorRioPID extends SubsystemBase implements Elevator {
   }
 
   private double getCurrentHeight() {
-    return motorOne.getPosition().getValueAsDouble();
+    return motor.getPosition().getValueAsDouble();
   }
 
   private void stop() {
@@ -138,11 +135,6 @@ public class ElevatorRioPID extends SubsystemBase implements Elevator {
     return runOnce(() -> determineNextState(Elevator.LEVEL_THREE_POSITION * Elevator.ENCODER_TICS_PER_INCH));
   }
 
-  @Override
-  public Command moveToLevelFourCommand() {
-    return runOnce(() -> determineNextState(Elevator.LEVEL_FOUR_POSITION * Elevator.ENCODER_TICS_PER_INCH));
-  }
-
   private void updateConfig() {
     pidController.setP(pConstantSubscriber.get());
     pidController.setI(iConstantSubscriber.get());
@@ -151,11 +143,25 @@ public class ElevatorRioPID extends SubsystemBase implements Elevator {
     System.out.println("Kp = " + pConstantSubscriber.get() + " Ki = " + iConstantSubscriber.get() + " Kd = " + dConstantSubscriber.get());
   }
 
+  @Override
   public Command updateConfigCommand() {
     return runOnce(() -> updateConfig());
   }
 
+  @Override
   public boolean isElevatorNotMoving() {
     return currentState == State.NOT_MOVING;
+  }
+
+  @Override
+  public Command sysIdQuasistaticCommand(SysIdRoutine.Direction direction) {
+    // TODO Auto-generated method stub
+    throw new UnsupportedOperationException("Unimplemented method 'sysIdQuasistaticCommand'");
+  }
+
+  @Override
+  public Command sysIdDynamicCommand(SysIdRoutine.Direction direction) {
+    // TODO Auto-generated method stub
+    throw new UnsupportedOperationException("Unimplemented method 'sysIdDynamicCommand'");
   }
 }

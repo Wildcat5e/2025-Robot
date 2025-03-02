@@ -58,9 +58,9 @@ public class Limelight extends SubsystemBase {
     if(tv == 1.0) {
       List<Waypoint> waypoints = PathPlannerPath.waypointsFromPoses(
         new Pose2d(tx, ty, Rotation2d.fromDegrees(yaw)),
-        new Pose2d(tx + xOffset, ty, Rotation2d.fromDegrees(yaw))
+        new Pose2d(xOffset - tx, ty, Rotation2d.fromDegrees(yaw))
       );
-
+      
       PathPlannerPath path = new PathPlannerPath(
         waypoints,
         constraints,
@@ -78,7 +78,7 @@ public class Limelight extends SubsystemBase {
     if(tv == 1.0) {
       List<Waypoint> waypoints = PathPlannerPath.waypointsFromPoses(
         new Pose2d(tx, ty, Rotation2d.fromDegrees(yaw)),
-        new Pose2d(tx - xOffset, ty, Rotation2d.fromDegrees(yaw))
+        new Pose2d(xOffset + tx, ty, Rotation2d.fromDegrees(yaw))
       );
       
       PathPlannerPath path = new PathPlannerPath(

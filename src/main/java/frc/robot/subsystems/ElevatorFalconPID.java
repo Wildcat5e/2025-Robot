@@ -2,7 +2,6 @@ package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import com.ctre.phoenix6.hardware.TalonFX;
-import com.ctre.phoenix6.controls.Follower;
 import edu.wpi.first.networktables.DoubleSubscriber;
 import edu.wpi.first.networktables.DoublePublisher;
 import com.ctre.phoenix6.controls.PositionVoltage;
@@ -11,17 +10,33 @@ import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.DoubleTopic;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import com.ctre.phoenix6.controls.VoltageOut;
+import com.ctre.phoenix6.SignalLogger;
+import static edu.wpi.first.units.Units.Volts;
 
 public class ElevatorFalconPID extends SubsystemBase implements Elevator {
   public static final double TOLERANCE = 0.0;
   public static final double MAX_ELEVATOR_SPEED = 12.0;
-  private final TalonFX motorOne = new TalonFX(13);
-  private final TalonFX motorTwo = new TalonFX(14);
-  private final Follower follower = new Follower(13, true);
+  private final TalonFX motor = new TalonFX(9);
   private final DoubleSubscriber pConstantSubscriber;
   private final DoubleSubscriber iConstantSubscriber;
   private final DoubleSubscriber dConstantSubscriber;
   private final PositionVoltage request = new PositionVoltage(0).withSlot(0);
+  private final VoltageOut m_voltReq = new VoltageOut(0.0);
+  private final SysIdRoutine m_sysIdRoutine = new SysIdRoutine(
+    new SysIdRoutine.Config(
+      null,
+      Volts.of(4),
+      null,
+      (state) -> SignalLogger.writeString("state", state.toString())
+    ),
+    new SysIdRoutine.Mechanism(
+      (volts) -> motor.setControl(m_voltReq.withOutput(volts.in(Volts))),
+      null,
+      this
+    )
+  );
   private Slot0Configs slot0Configs;
   private State currentState;
   private double desiredHeight;
@@ -32,18 +47,18 @@ public class ElevatorFalconPID extends SubsystemBase implements Elevator {
     MOVING_UP,
     MOVING_DOWN,
     JOGGING_UP,
-    JOGGING_DOWN;
+    JOGGING_DOWN,
+    SYSID;
   }
 
   public ElevatorFalconPID() {
     currentState = State.NOT_MOVING;
-    motorTwo.setControl(follower);
-    motorOne.setPosition(0.0);
+    motor.setPosition(0.0);
     slot0Configs = new Slot0Configs();
     slot0Configs.kP = 0.1;
     slot0Configs.kI = 0.0;
     slot0Configs.kD = 0.0;
-    motorOne.getConfigurator().apply(slot0Configs);
+    motor.getConfigurator().apply(slot0Configs);
     NetworkTable pidConstants = NetworkTableInstance.getDefault().getTable("PID Constants");
     pConstantSubscriber = subscribeToDoubleTopic(pidConstants, "KP", 0.0);
     iConstantSubscriber = subscribeToDoubleTopic(pidConstants, "KI", 0.0);
@@ -74,7 +89,7 @@ public class ElevatorFalconPID extends SubsystemBase implements Elevator {
       case NOT_MOVING:
       case MOVING_UP:
       case MOVING_DOWN:
-        motorOne.setControl(request.withPosition(desiredHeight));
+        motor.setControl(request.withPosition(desiredHeight));
         break;
       case JOGGING_UP:
         speed = 1.0;
@@ -82,18 +97,20 @@ public class ElevatorFalconPID extends SubsystemBase implements Elevator {
       case JOGGING_DOWN:
         speed = -1.0;
         break;
+      case SYSID:
+        break;
     }
 
     double clampedSpeed = Math.max(-MAX_ELEVATOR_SPEED, Math.min(MAX_ELEVATOR_SPEED, speed));
 
-    motorOne.setVoltage(clampedSpeed);
+    motor.setVoltage(clampedSpeed);
     determineNextState(desiredHeight);
   }
 
   private void determineNextState(double desiredHeight) {
     double currentHeight = getCurrentHeight();
     this.desiredHeight = desiredHeight;
-    motorOne.setControl(request.withPosition(desiredHeight));
+    motor.setControl(request.withPosition(desiredHeight));
 
     if (desiredHeight > currentHeight + TOLERANCE) {
       currentState = State.MOVING_UP;
@@ -105,7 +122,7 @@ public class ElevatorFalconPID extends SubsystemBase implements Elevator {
   }
 
   private double getCurrentHeight() {
-    return motorOne.getPosition().getValueAsDouble();
+    return motor.getPosition().getValueAsDouble();
   }
 
   private void stop() {
@@ -143,11 +160,6 @@ public class ElevatorFalconPID extends SubsystemBase implements Elevator {
     return runOnce(() -> determineNextState(Elevator.LEVEL_THREE_POSITION * Elevator.ENCODER_TICS_PER_INCH));
   }
 
-  @Override
-  public Command moveToLevelFourCommand() {
-    return runOnce(() -> determineNextState(Elevator.LEVEL_FOUR_POSITION * Elevator.ENCODER_TICS_PER_INCH));
-  }
-
   private void updateConfig() {
     slot0Configs.kP = pConstantSubscriber.get();
     slot0Configs.kI = iConstantSubscriber.get();
@@ -156,11 +168,23 @@ public class ElevatorFalconPID extends SubsystemBase implements Elevator {
     System.out.println("Kp = " + pConstantSubscriber.get() + " Ki = " + iConstantSubscriber.get() + " Kd = " + dConstantSubscriber.get());
   }
 
+  @Override
   public Command updateConfigCommand() {
     return runOnce(() -> updateConfig());
   }
 
+  @Override
   public boolean isElevatorNotMoving() {
     return currentState == State.NOT_MOVING;
+  }
+
+  @Override
+  public Command sysIdQuasistaticCommand(SysIdRoutine.Direction direction) {
+    return m_sysIdRoutine.quasistatic(direction);
+  }
+  
+  @Override
+  public Command sysIdDynamicCommand(SysIdRoutine.Direction direction) {
+    return m_sysIdRoutine.dynamic(direction);
   }
 }

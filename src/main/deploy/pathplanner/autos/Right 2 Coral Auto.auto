@@ -7,25 +7,25 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Low to Back Right"
+            "pathName": "Right Start to Front Right Reef"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "Back Right to Right Coral Station"
+            "pathName": "Front Right Reef to Right Coral Station"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "Right Coral Station to Front Right"
+            "pathName": "Right Coral Station to Back Center Reef"
           }
         }
       ]
     }
   },
   "resetOdom": true,
-  "folder": "Low",
+  "folder": "Right",
   "choreoAuto": false
 }

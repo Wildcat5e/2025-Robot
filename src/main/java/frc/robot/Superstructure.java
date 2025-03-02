@@ -29,8 +29,4 @@ public class Superstructure {
   public SequentialCommandGroup moveElevatorToLevelThreeAndOuttake() {
     return new SequentialCommandGroup(elevator.moveToLevelThreeCommand(), new WaitUntilCommand(() -> elevator.isElevatorNotMoving()), new ParallelDeadlineGroup(new WaitUntilCommand(() -> outtake.getProximitySensor()), outtake.outtakeCommand()), elevator.moveToHomePositionCommand(), new WaitUntilCommand(() -> elevator.isElevatorNotMoving()));
   }
-  
-  public SequentialCommandGroup moveElevatorToLevelFourAndOuttake() {
-    return new SequentialCommandGroup(elevator.moveToLevelFourCommand(), new WaitUntilCommand(() -> elevator.isElevatorNotMoving()), new ParallelDeadlineGroup(new WaitUntilCommand(() -> outtake.getProximitySensor()), outtake.outtakeCommand()), elevator.moveToHomePositionCommand(), new WaitUntilCommand(() -> elevator.isElevatorNotMoving()));
-  }
 }

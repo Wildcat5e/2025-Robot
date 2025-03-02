@@ -6,6 +6,7 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.ElevatorBangBangControl;
+import frc.robot.subsystems.ElevatorFalconPID;
 import frc.robot.subsystems.ElevatorRioPID;
 import frc.robot.subsystems.Limelight;
 import frc.robot.subsystems.Outtake;
@@ -27,7 +28,7 @@ public class Robot extends TimedRobot {
   private final JoystickButton button10 = new JoystickButton(joystick, 10);
   private final JoystickButton button11 = new JoystickButton(joystick, 11);
   private final JoystickButton button12 = new JoystickButton(joystick, 12);
-  private final Elevator elevator = new ElevatorRioPID();
+  private final Elevator elevator = new ElevatorFalconPID();
   private final Outtake outtake = new Outtake();
   private final Limelight limelight = new Limelight();
   private final Superstructure superstructure = new Superstructure(elevator, outtake, limelight);
@@ -43,7 +44,6 @@ public class Robot extends TimedRobot {
     button11.onTrue(superstructure.moveElevatorToLevelOneAndOuttake());
     button8.onTrue(superstructure.moveElevatorToLevelTwoAndOuttake());
     button5.onTrue(superstructure.moveElevatorToLevelThreeAndOuttake());
-    button2.onTrue(superstructure.moveElevatorToLevelFourAndOuttake());
     button4.whileTrue(elevator.jogUpCommand());
     button6.whileTrue(elevator.jogDownCommand());
     button7.whileTrue(outtake.jogForwardCommand());

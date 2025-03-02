@@ -2,14 +2,12 @@ package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import com.ctre.phoenix6.hardware.TalonFX;
-import com.ctre.phoenix6.controls.Follower;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 
 public class ElevatorBangBangControl extends SubsystemBase implements Elevator {
   public static final double TOLERANCE = 2.0;
-  private final TalonFX motorOne = new TalonFX(13);
-  private final TalonFX motorTwo = new TalonFX(14);
-  private final Follower follower = new Follower(13, true);
+  private final TalonFX motor = new TalonFX(9);
   private State currentState;
   private double desiredHeight;
   private double output;
@@ -24,8 +22,7 @@ public class ElevatorBangBangControl extends SubsystemBase implements Elevator {
 
   public ElevatorBangBangControl() {
     currentState = State.NOT_MOVING;
-    motorTwo.setControl(follower);
-    motorOne.setPosition(0.0);
+    motor.setPosition(0.0);
   }
 
   @Override
@@ -48,7 +45,7 @@ public class ElevatorBangBangControl extends SubsystemBase implements Elevator {
         break;
     }
 
-    motorOne.setVoltage(output);
+    motor.setVoltage(output);
     determineNextState(desiredHeight);
   }
 
@@ -66,7 +63,7 @@ public class ElevatorBangBangControl extends SubsystemBase implements Elevator {
   }
 
   private double getCurrentHeight() {
-    return motorOne.getPosition().getValueAsDouble();
+    return motor.getPosition().getValueAsDouble();
   }
 
   private void stop() {
@@ -103,9 +100,9 @@ public class ElevatorBangBangControl extends SubsystemBase implements Elevator {
     return runOnce(() -> determineNextState(Elevator.LEVEL_THREE_POSITION * Elevator.ENCODER_TICS_PER_INCH));
   }
 
-  @Override
-  public Command moveToLevelFourCommand() {
-    return runOnce(() -> determineNextState(Elevator.LEVEL_FOUR_POSITION * Elevator.ENCODER_TICS_PER_INCH));
+  public void updateConfig() {
+    // TODO Auto-generated method stub
+    throw new UnsupportedOperationException("Unimplemented method 'updateConfig'");
   }
 
   @Override
@@ -114,7 +111,20 @@ public class ElevatorBangBangControl extends SubsystemBase implements Elevator {
     throw new UnsupportedOperationException("Unimplemented method 'updateConfigCommand'");
   }
 
+  @Override
   public boolean isElevatorNotMoving() {
     return currentState == State.NOT_MOVING;
+  }
+
+  @Override
+  public Command sysIdQuasistaticCommand(SysIdRoutine.Direction direction) {
+    // TODO Auto-generated method stub
+    throw new UnsupportedOperationException("Unimplemented method 'sysIdQuasistaticCommand'");
+  }
+
+  @Override
+  public Command sysIdDynamicCommand(SysIdRoutine.Direction direction) {
+    // TODO Auto-generated method stub
+    throw new UnsupportedOperationException("Unimplemented method 'sysIdDynamicCommand'");
   }
 }
