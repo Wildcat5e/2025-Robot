@@ -8,9 +8,9 @@ import edu.wpi.first.wpilibj2.command.Command;
 
 public class Outtake extends SubsystemBase {
   public static final double TOLERANCE = 0.0;
-  private final TalonFX leftMotor = new TalonFX(10);
-  private final TalonFX rightMotor = new TalonFX(11);
-  private final Follower follower = new Follower(10, true);
+  private final TalonFX leftMotor = new TalonFX(15);
+  private final TalonFX rightMotor = new TalonFX(16);
+  private final Follower follower = new Follower(15, true);
   private final DigitalInput proximitySensor = new DigitalInput(0);
   private State currentState;
 

@@ -7,7 +7,7 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 
 public class ElevatorBangBangControl extends SubsystemBase implements Elevator {
   public static final double TOLERANCE = 2.0;
-  private final TalonFX motor = new TalonFX(9);
+  private final TalonFX motor = new TalonFX(14);
   private State currentState;
   private double desiredHeight;
   private double output;

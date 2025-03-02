@@ -14,7 +14,7 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 public class ElevatorRioPID extends SubsystemBase implements Elevator {
   public static final double TOLERANCE = 0.0;
   public static final double MAX_ELEVATOR_SPEED = 12.0;
-  private final TalonFX motor = new TalonFX(9);
+  private final TalonFX motor = new TalonFX(14);
   private PIDController pidController = new PIDController(0.1, 0.0, 0.0);
   private State currentState;
   private double desiredHeight;
