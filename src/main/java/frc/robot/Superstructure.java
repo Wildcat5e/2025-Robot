@@ -4,6 +4,7 @@ import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.Outtake;
 import frc.robot.subsystems.Limelight;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 
@@ -19,14 +20,14 @@ public class Superstructure {
   }
   
   public SequentialCommandGroup moveElevatorToLevelOneAndOuttake() {
-    return new SequentialCommandGroup(elevator.moveToLevelOneCommand(), new WaitUntilCommand(() -> elevator.isElevatorNotMoving()), new ParallelDeadlineGroup(new WaitUntilCommand(() -> outtake.getProximitySensor()), outtake.outtakeCommand()), elevator.moveToHomePositionCommand(), new WaitUntilCommand(() -> elevator.isElevatorNotMoving()));
+    return new SequentialCommandGroup(elevator.moveToLevelOneCommand(), new WaitUntilCommand(() -> elevator.isElevatorNotMoving()), new ParallelDeadlineGroup(new WaitCommand(1.5), outtake.outtakeCommand()), elevator.moveToHomePositionCommand(), new WaitUntilCommand(() -> elevator.isElevatorNotMoving()));
   }
 
   public SequentialCommandGroup moveElevatorToLevelTwoAndOuttake() {
-    return new SequentialCommandGroup(elevator.moveToLevelTwoCommand(), new WaitUntilCommand(() -> elevator.isElevatorNotMoving()), new ParallelDeadlineGroup(new WaitUntilCommand(() -> outtake.getProximitySensor()), outtake.outtakeCommand()), elevator.moveToHomePositionCommand(), new WaitUntilCommand(() -> elevator.isElevatorNotMoving()));
+    return new SequentialCommandGroup(elevator.moveToLevelTwoCommand(), new WaitUntilCommand(() -> elevator.isElevatorNotMoving()), new ParallelDeadlineGroup(new WaitCommand(1.5), outtake.outtakeCommand()), elevator.moveToHomePositionCommand(), new WaitUntilCommand(() -> elevator.isElevatorNotMoving()));
   }
   
   public SequentialCommandGroup moveElevatorToLevelThreeAndOuttake() {
-    return new SequentialCommandGroup(elevator.moveToLevelThreeCommand(), new WaitUntilCommand(() -> elevator.isElevatorNotMoving()), new ParallelDeadlineGroup(new WaitUntilCommand(() -> outtake.getProximitySensor()), outtake.outtakeCommand()), elevator.moveToHomePositionCommand(), new WaitUntilCommand(() -> elevator.isElevatorNotMoving()));
+    return new SequentialCommandGroup(elevator.moveToLevelThreeCommand(), new WaitUntilCommand(() -> elevator.isElevatorNotMoving()), new ParallelDeadlineGroup(new WaitCommand(1.5), outtake.outtakeCommand()), elevator.moveToHomePositionCommand(), new WaitUntilCommand(() -> elevator.isElevatorNotMoving()));
   }
 }

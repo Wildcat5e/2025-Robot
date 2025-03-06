@@ -18,7 +18,7 @@ import static edu.wpi.first.units.Units.Volts;
 public class ElevatorFalconPID extends SubsystemBase implements Elevator {
   public static final double TOLERANCE = 0.0;
   public static final double MAX_ELEVATOR_SPEED = 12.0;
-  private final TalonFX motor = new TalonFX(9);
+  private final TalonFX motor = new TalonFX(14);
   private final DoubleSubscriber pConstantSubscriber;
   private final DoubleSubscriber iConstantSubscriber;
   private final DoubleSubscriber dConstantSubscriber;
@@ -55,7 +55,7 @@ public class ElevatorFalconPID extends SubsystemBase implements Elevator {
     currentState = State.NOT_MOVING;
     motor.setPosition(0.0);
     slot0Configs = new Slot0Configs();
-    slot0Configs.kP = 0.1;
+    slot0Configs.kP = 0.0;
     slot0Configs.kI = 0.0;
     slot0Configs.kD = 0.0;
     motor.getConfigurator().apply(slot0Configs);
