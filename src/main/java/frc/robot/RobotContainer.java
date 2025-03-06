@@ -5,14 +5,22 @@
 package frc.robot;
 
 import frc.robot.subsystems.CommandSwerveDrivetrain;
+import frc.robot.subsystems.Elevator;
+import frc.robot.subsystems.ElevatorBangBangControl;
+import frc.robot.subsystems.Outtake;
 import frc.robot.generated.TunerConstants;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import com.ctre.phoenix6.swerve.SwerveRequest;
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+
 import static edu.wpi.first.units.Units.*;
 
 public class RobotContainer {
@@ -32,8 +40,20 @@ public class RobotContainer {
 
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
 
+    private final SendableChooser<Command> autoChooser;
+
+    private final Elevator elevator = new ElevatorBangBangControl();
+    private final Outtake outtake = new Outtake();
+
     public RobotContainer() {
         configureBindings();
+        autoChooser = AutoBuilder.buildAutoChooser();
+        SmartDashboard.putData("Auto Chooser", autoChooser);
+        
+        NamedCommands.registerCommand("moveToLevelOneCommand", elevator.moveToLevelOneCommand());
+        NamedCommands.registerCommand("moveToLevelTwoCommand", elevator.moveToLevelTwoCommand());
+        NamedCommands.registerCommand("moveToLevelThreeCommand", elevator.moveToLevelThreeCommand());
+        NamedCommands.registerCommand("outtakeCommand", outtake.outtakeCommand());
     }
 
     private void configureBindings() {
@@ -67,6 +87,6 @@ public class RobotContainer {
     }
 
     public Command getAutonomousCommand() {
-        return Commands.print("No autonomous command configured");
+        return autoChooser.getSelected();
     }
 }

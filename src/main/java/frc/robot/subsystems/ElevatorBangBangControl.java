@@ -25,8 +25,13 @@ public class ElevatorBangBangControl extends SubsystemBase implements Elevator {
     motor.setPosition(0.0);
   }
 
+  int counter = 0;
   @Override
   public void periodic() {
+    if(counter++ % 250 == 0) {
+      System.out.println("Current elevator height = " + motor.getPosition().getValueAsDouble());
+    }
+
     switch (currentState) {
       case NOT_MOVING:
         output = 0.0;

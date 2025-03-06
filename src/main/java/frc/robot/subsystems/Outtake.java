@@ -2,16 +2,11 @@ package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import com.ctre.phoenix6.hardware.TalonFX;
-import com.ctre.phoenix6.controls.Follower;
-import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj2.command.Command;
 
 public class Outtake extends SubsystemBase {
   public static final double TOLERANCE = 0.0;
-  private final TalonFX leftMotor = new TalonFX(15);
-  private final TalonFX rightMotor = new TalonFX(16);
-  private final Follower follower = new Follower(15, true);
-  private final DigitalInput proximitySensor = new DigitalInput(0);
+  private final TalonFX motor = new TalonFX(15);
   private State currentState;
 
   public enum State {
@@ -24,7 +19,6 @@ public class Outtake extends SubsystemBase {
 
   public Outtake() {
     currentState = State.NOT_MOVING;
-    rightMotor.setControl(follower);
   }
 
   @Override
@@ -49,7 +43,7 @@ public class Outtake extends SubsystemBase {
         break;
     }
 
-    leftMotor.setVoltage(output);
+    motor.setVoltage(output);
   }
 
   public Command outtakeCommand() {
@@ -62,9 +56,5 @@ public class Outtake extends SubsystemBase {
 
   public Command jogBackwardCommand() {
     return runEnd(() -> currentState = State.JOGGING_FORWARD, () -> currentState = State.NOT_MOVING);
-  }
-
-  public boolean getProximitySensor() {
-    return proximitySensor.get();
   }
 }
