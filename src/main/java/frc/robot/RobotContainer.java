@@ -52,7 +52,7 @@ public class RobotContainer {
     private final SendableChooser<Command> autoChooser;
 
     private final Elevator elevator = new ElevatorBangBangControl();
-    // private final Outtake outtake = new Outtake();
+    private final Outtake outtake = new Outtake();
     private final Superstructure superstructure = new Superstructure(elevator);
 
     public RobotContainer() {
@@ -99,8 +99,8 @@ public class RobotContainer {
         buttonFive.onTrue(superstructure.moveElevatorToLevelThreeTest());
         buttonNine.whileTrue(elevator.jogDownCommand());
         buttonSeven.whileTrue(elevator.jogUpCommand());
-        // buttonTen.whileTrue(outtake.jogBackwardCommand());
-        // buttonTwelve.whileTrue(outtake.jogForwardCommand());
+        buttonTen.whileTrue(outtake.jogForwardCommand());
+        buttonTwelve.whileTrue(outtake.jogBackwardCommand());
     }
 
     public Command getAutonomousCommand() {

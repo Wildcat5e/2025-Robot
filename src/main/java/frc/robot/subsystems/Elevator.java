@@ -32,5 +32,5 @@ public interface Elevator {
 
     Command sysIdDynamicCommand(SysIdRoutine.Direction direction);
 
-    boolean isElevatorAtHomePosition();
+    // boolean isElevatorAtHomePosition();
 }

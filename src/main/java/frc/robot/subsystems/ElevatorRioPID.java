@@ -165,9 +165,9 @@ public class ElevatorRioPID extends SubsystemBase implements Elevator {
     throw new UnsupportedOperationException("Unimplemented method 'sysIdDynamicCommand'");
   }
 
-  @Override
-  public boolean isElevatorAtHomePosition() {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'isElevatorAtHomePosition'");
-  }
+  // @Override
+  // public boolean isElevatorAtHomePosition() {
+  //   // TODO Auto-generated method stub
+  //   throw new UnsupportedOperationException("Unimplemented method 'isElevatorAtHomePosition'");
+  // }
 }

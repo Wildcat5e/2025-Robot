@@ -17,7 +17,7 @@ public class Superstructure {
   }
 
   public SequentialCommandGroup moveElevatorToHomePositionTest() {
-    return new SequentialCommandGroup(elevator.moveToHomePositionCommand(), new WaitUntilCommand(() -> elevator.isElevatorNotMoving()), new WaitUntilCommand(() -> elevator.isElevatorAtHomePosition()), new PrintCommand("finished"));
+    return new SequentialCommandGroup(elevator.moveToHomePositionCommand(), new WaitUntilCommand(() -> elevator.isElevatorNotMoving()), new PrintCommand("finished"));
   }
 
   public SequentialCommandGroup moveElevatorToLevelOneTest() {

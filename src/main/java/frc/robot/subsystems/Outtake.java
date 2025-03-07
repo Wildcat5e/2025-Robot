@@ -55,6 +55,6 @@ public class Outtake extends SubsystemBase {
   }
 
   public Command jogBackwardCommand() {
-    return runEnd(() -> currentState = State.JOGGING_FORWARD, () -> currentState = State.NOT_MOVING);
+    return runEnd(() -> currentState = State.JOGGING_BACKWARD, () -> currentState = State.NOT_MOVING);
   }
 }

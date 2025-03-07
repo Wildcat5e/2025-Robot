@@ -188,9 +188,9 @@ public class ElevatorFalconPID extends SubsystemBase implements Elevator {
     return m_sysIdRoutine.dynamic(direction);
   }
 
-  @Override
-  public boolean isElevatorAtHomePosition() {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'isElevatorAtHomePosition'");
-  }
+  // @Override
+  // public boolean isElevatorAtHomePosition() {
+  //   // TODO Auto-generated method stub
+  //   throw new UnsupportedOperationException("Unimplemented method 'isElevatorAtHomePosition'");
+  // }
 }

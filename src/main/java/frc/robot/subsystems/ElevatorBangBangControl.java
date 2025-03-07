@@ -13,7 +13,7 @@ public class ElevatorBangBangControl extends SubsystemBase implements Elevator {
   private State currentState;
   private double desiredHeight;
   private double output;
-  DigitalInput beamBreak = new DigitalInput(0);
+  // DigitalInput beamBreak = new DigitalInput(0);
 
   public enum State {
     NOT_MOVING,
@@ -136,10 +136,10 @@ public class ElevatorBangBangControl extends SubsystemBase implements Elevator {
     throw new UnsupportedOperationException("Unimplemented method 'sysIdDynamicCommand'");
   }
 
-  public boolean isElevatorAtHomePosition() {
-    if(!beamBreak.get()) {
-      desiredHeight = 0.0;
-    }
-    return !beamBreak.get();
-  }
+  // public boolean isElevatorAtHomePosition() {
+  //   if(!beamBreak.get()) {
+  //     desiredHeight = 0.0;
+  //   }
+  //   return !beamBreak.get();
+  // }
 }
