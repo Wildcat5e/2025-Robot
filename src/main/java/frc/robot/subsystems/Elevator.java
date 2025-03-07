@@ -8,9 +8,9 @@ public interface Elevator {
     double GEAR_RATIO = 48.0;
     double ENCODER_TICS_PER_INCH = GEAR_RATIO / WHEEL_CIRCUMFERENCE;
     double LEVEL_ZERO_POSITION = 0.0;
-    double LEVEL_ONE_POSITION = 4.0;
-    double LEVEL_TWO_POSITION = 8.0;
-    double LEVEL_THREE_POSITION = 12.0;
+    double LEVEL_ONE_POSITION = 0.0;
+    double LEVEL_TWO_POSITION = 50.0;
+    double LEVEL_THREE_POSITION = 370.0;
 
     Command jogUpCommand();
 
@@ -31,4 +31,6 @@ public interface Elevator {
     Command sysIdQuasistaticCommand(SysIdRoutine.Direction direction);
 
     Command sysIdDynamicCommand(SysIdRoutine.Direction direction);
+
+    boolean isElevatorAtHomePosition();
 }

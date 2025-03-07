@@ -92,10 +92,10 @@ public class ElevatorFalconPID extends SubsystemBase implements Elevator {
         motor.setControl(request.withPosition(desiredHeight));
         break;
       case JOGGING_UP:
-        speed = 1.0;
+        speed = 3.0;
         break;
       case JOGGING_DOWN:
-        speed = -1.0;
+        speed = -3.0;
         break;
       case SYSID:
         break;
@@ -186,5 +186,11 @@ public class ElevatorFalconPID extends SubsystemBase implements Elevator {
   @Override
   public Command sysIdDynamicCommand(SysIdRoutine.Direction direction) {
     return m_sysIdRoutine.dynamic(direction);
+  }
+
+  @Override
+  public boolean isElevatorAtHomePosition() {
+    // TODO Auto-generated method stub
+    throw new UnsupportedOperationException("Unimplemented method 'isElevatorAtHomePosition'");
   }
 }

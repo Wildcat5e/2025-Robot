@@ -2,15 +2,18 @@ package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import com.ctre.phoenix6.hardware.TalonFX;
+
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 
 public class ElevatorBangBangControl extends SubsystemBase implements Elevator {
-  public static final double TOLERANCE = 2.0;
+  public static final double TOLERANCE = 7.5;
   private final TalonFX motor = new TalonFX(14);
   private State currentState;
   private double desiredHeight;
   private double output;
+  DigitalInput beamBreak = new DigitalInput(0);
 
   public enum State {
     NOT_MOVING,
@@ -29,7 +32,7 @@ public class ElevatorBangBangControl extends SubsystemBase implements Elevator {
   @Override
   public void periodic() {
     if(counter++ % 250 == 0) {
-      System.out.println("Current elevator height = " + motor.getPosition().getValueAsDouble());
+      System.out.println("Current elevator height = " + getCurrentHeight());
     }
 
     switch (currentState) {
@@ -43,10 +46,10 @@ public class ElevatorBangBangControl extends SubsystemBase implements Elevator {
         output = -6.0;
         break;
       case JOGGING_UP:
-        output = 1.0;
+        output = 3.0;
         break;
       case JOGGING_DOWN:
-        output = -1.0;
+        output = -3.0;
         break;
     }
 
@@ -131,5 +134,12 @@ public class ElevatorBangBangControl extends SubsystemBase implements Elevator {
   public Command sysIdDynamicCommand(SysIdRoutine.Direction direction) {
     // TODO Auto-generated method stub
     throw new UnsupportedOperationException("Unimplemented method 'sysIdDynamicCommand'");
+  }
+
+  public boolean isElevatorAtHomePosition() {
+    if(!beamBreak.get()) {
+      desiredHeight = 0.0;
+    }
+    return !beamBreak.get();
   }
 }

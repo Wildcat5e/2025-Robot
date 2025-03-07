@@ -69,10 +69,10 @@ public class ElevatorRioPID extends SubsystemBase implements Elevator {
         speed = pidController.calculate(getCurrentHeight(), desiredHeight);
         break;
       case JOGGING_UP:
-        speed = 1.0;
+        speed = 3.0;
         break;
       case JOGGING_DOWN:
-        speed = -1.0;
+        speed = -3.0;
         break;
     }
 
@@ -163,5 +163,11 @@ public class ElevatorRioPID extends SubsystemBase implements Elevator {
   public Command sysIdDynamicCommand(SysIdRoutine.Direction direction) {
     // TODO Auto-generated method stub
     throw new UnsupportedOperationException("Unimplemented method 'sysIdDynamicCommand'");
+  }
+
+  @Override
+  public boolean isElevatorAtHomePosition() {
+    // TODO Auto-generated method stub
+    throw new UnsupportedOperationException("Unimplemented method 'isElevatorAtHomePosition'");
   }
 }
