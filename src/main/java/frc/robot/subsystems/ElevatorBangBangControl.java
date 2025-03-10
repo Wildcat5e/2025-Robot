@@ -2,7 +2,12 @@ package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import com.ctre.phoenix6.hardware.TalonFX;
+import edu.wpi.first.networktables.BooleanSubscriber;
+import edu.wpi.first.networktables.BooleanPublisher;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 
@@ -14,6 +19,8 @@ public class ElevatorBangBangControl extends SubsystemBase implements Elevator {
   private State currentState;
   private double desiredHeight;
   private double output;
+  private BooleanSubscriber beamBreakSubscriber;
+  private BooleanPublisher beamBreakPublisher;
 
   public enum State {
     NOT_MOVING,
@@ -26,21 +33,29 @@ public class ElevatorBangBangControl extends SubsystemBase implements Elevator {
   public ElevatorBangBangControl() {
     currentState = State.NOT_MOVING;
     motor.setPosition(0.0);
+    NetworkTable elevator = NetworkTableInstance.getDefault().getTable("Elevator");
+    beamBreakSubscriber = elevator.getBooleanTopic("BeamBreakSubscriber").subscribe(false);
+    beamBreakPublisher = elevator.getBooleanTopic("BeamBreakPublisher").publish();
   }
 
+  int counter = 0;
   @Override
   public void periodic() {
-    enforceBeamBreakLimits();
-    determineNextState(desiredHeight);
+    if (counter++ % 250 == 0) {
+      System.out.println("current state: " + currentState);
+    }
+    beamBreakPublisher.set(bottomLimiter.get());
+    // enforceBeamBreakLimits();
+    // determineNextState(desiredHeight);
     switch (currentState) {
       case NOT_MOVING:
         output = 0.0;
         break;
       case MOVING_UP:
-        output = 6.0;
+        output = 2.5;
         break;
       case MOVING_DOWN:
-        output = -6.0;
+        output = -2.0;
         break;
       case JOGGING_UP:
         output = 1.0;

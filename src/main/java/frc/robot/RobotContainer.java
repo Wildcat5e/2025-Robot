@@ -57,11 +57,7 @@ public class RobotContainer {
 
     public RobotContainer() {
         configureBindings();
-        // autoChooser = AutoBuilder.buildAutoChooser();
-
-        boolean isCompetition = true;
-
-        autoChooser = AutoBuilder.buildAutoChooserWithOptionsModifier((stream) -> isCompetition ? stream.filter(auto -> auto.getName().startsWith("comp")) : stream);
+        autoChooser = AutoBuilder.buildAutoChooser();
         SmartDashboard.putData("Auto Chooser", autoChooser);
         
         NamedCommands.registerCommand("moveToHomePositionCommand", superstructure.moveElevatorToHomePositionTest());
