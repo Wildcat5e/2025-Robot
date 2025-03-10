@@ -135,7 +135,8 @@ public class ElevatorRioPID extends SubsystemBase implements Elevator {
     return runOnce(() -> determineNextState(Elevator.LEVEL_THREE_POSITION * Elevator.ENCODER_TICS_PER_INCH));
   }
 
-  private void updateConfig() {
+  @Override
+  public void updateConfig() {
     pidController.setP(pConstantSubscriber.get());
     pidController.setI(iConstantSubscriber.get());
     pidController.setD(dConstantSubscriber.get());
@@ -164,10 +165,4 @@ public class ElevatorRioPID extends SubsystemBase implements Elevator {
     // TODO Auto-generated method stub
     throw new UnsupportedOperationException("Unimplemented method 'sysIdDynamicCommand'");
   }
-
-  // @Override
-  // public boolean isElevatorAtHomePosition() {
-  //   // TODO Auto-generated method stub
-  //   throw new UnsupportedOperationException("Unimplemented method 'isElevatorAtHomePosition'");
-  // }
 }

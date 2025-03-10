@@ -36,10 +36,10 @@ public class Outtake extends SubsystemBase {
         output = -6.0;
         break;
       case JOGGING_FORWARD:
-        output = 1.0;
+        output = 3.0;
         break;
       case JOGGING_BACKWARD:
-        output = -1.0;
+        output = -3.0;
         break;
     }
 

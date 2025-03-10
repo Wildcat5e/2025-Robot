@@ -2,18 +2,18 @@ package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import com.ctre.phoenix6.hardware.TalonFX;
-
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 
 public class ElevatorBangBangControl extends SubsystemBase implements Elevator {
-  public static final double TOLERANCE = 7.5;
+  public static final double TOLERANCE = 0.25;
   private final TalonFX motor = new TalonFX(14);
+  private final DigitalInput bottomLimiter = new DigitalInput(0);
+  private final DigitalInput topLimiter = new DigitalInput(1);
   private State currentState;
   private double desiredHeight;
   private double output;
-  // DigitalInput beamBreak = new DigitalInput(0);
 
   public enum State {
     NOT_MOVING,
@@ -28,13 +28,10 @@ public class ElevatorBangBangControl extends SubsystemBase implements Elevator {
     motor.setPosition(0.0);
   }
 
-  int counter = 0;
   @Override
   public void periodic() {
-    if(counter++ % 250 == 0) {
-      System.out.println("Current elevator height = " + getCurrentHeight());
-    }
-
+    enforceBeamBreakLimits();
+    determineNextState(desiredHeight);
     switch (currentState) {
       case NOT_MOVING:
         output = 0.0;
@@ -46,15 +43,14 @@ public class ElevatorBangBangControl extends SubsystemBase implements Elevator {
         output = -6.0;
         break;
       case JOGGING_UP:
-        output = 3.0;
+        output = 1.0;
         break;
       case JOGGING_DOWN:
-        output = -3.0;
+        output = -1.0;
         break;
     }
 
     motor.setVoltage(output);
-    determineNextState(desiredHeight);
   }
 
   private void determineNextState(double desiredHeight) {
@@ -70,13 +66,35 @@ public class ElevatorBangBangControl extends SubsystemBase implements Elevator {
     }
   }
 
+  private void enforceBeamBreakLimits() {
+    if (currentState == State.MOVING_UP && topLimiter.get() ||
+        currentState == State.MOVING_DOWN && bottomLimiter.get()) {
+      motor.setPosition(0.0);
+      currentState = State.NOT_MOVING;
+    }
+  }
+
   private double getCurrentHeight() {
     return motor.getPosition().getValueAsDouble();
   }
 
-  private void stop() {
-    currentState = State.NOT_MOVING;
-    desiredHeight = getCurrentHeight();
+  public Command moveToHomePositionCommand() {
+    return runOnce(() -> determineNextState(Elevator.LEVEL_ZERO_POSITION));
+  }
+
+  @Override
+  public Command moveToLevelOneCommand() {
+    return runOnce(() -> determineNextState(Elevator.LEVEL_ONE_POSITION));
+  }
+
+  @Override
+  public Command moveToLevelTwoCommand() {
+    return runOnce(() -> determineNextState(Elevator.LEVEL_TWO_POSITION));
+  }
+
+  @Override
+  public Command moveToLevelThreeCommand() {
+    return runOnce(() -> determineNextState(Elevator.LEVEL_THREE_POSITION));
   }
 
   @Override
@@ -89,25 +107,17 @@ public class ElevatorBangBangControl extends SubsystemBase implements Elevator {
     return runEnd(() -> currentState = State.JOGGING_DOWN, () -> stop());
   }
 
-  public Command moveToHomePositionCommand() {
-    return runOnce(() -> determineNextState(Elevator.LEVEL_ZERO_POSITION * Elevator.ENCODER_TICS_PER_INCH));
+  private void stop() {
+    currentState = State.NOT_MOVING;
+    desiredHeight = getCurrentHeight();
   }
 
   @Override
-  public Command moveToLevelOneCommand() {
-    return runOnce(() -> determineNextState(Elevator.LEVEL_ONE_POSITION * Elevator.ENCODER_TICS_PER_INCH));
+  public boolean isElevatorNotMoving() {
+    return currentState == State.NOT_MOVING;
   }
 
   @Override
-  public Command moveToLevelTwoCommand() {
-    return runOnce(() -> determineNextState(Elevator.LEVEL_TWO_POSITION * Elevator.ENCODER_TICS_PER_INCH));
-  }
-
-  @Override
-  public Command moveToLevelThreeCommand() {
-    return runOnce(() -> determineNextState(Elevator.LEVEL_THREE_POSITION * Elevator.ENCODER_TICS_PER_INCH));
-  }
-
   public void updateConfig() {
     // TODO Auto-generated method stub
     throw new UnsupportedOperationException("Unimplemented method 'updateConfig'");
@@ -117,11 +127,6 @@ public class ElevatorBangBangControl extends SubsystemBase implements Elevator {
   public Command updateConfigCommand() {
     // TODO Auto-generated method stub
     throw new UnsupportedOperationException("Unimplemented method 'updateConfigCommand'");
-  }
-
-  @Override
-  public boolean isElevatorNotMoving() {
-    return currentState == State.NOT_MOVING;
   }
 
   @Override
@@ -135,11 +140,4 @@ public class ElevatorBangBangControl extends SubsystemBase implements Elevator {
     // TODO Auto-generated method stub
     throw new UnsupportedOperationException("Unimplemented method 'sysIdDynamicCommand'");
   }
-
-  // public boolean isElevatorAtHomePosition() {
-  //   if(!beamBreak.get()) {
-  //     desiredHeight = 0.0;
-  //   }
-  //   return !beamBreak.get();
-  // }
 }

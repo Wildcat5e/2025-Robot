@@ -160,7 +160,8 @@ public class ElevatorFalconPID extends SubsystemBase implements Elevator {
     return runOnce(() -> determineNextState(Elevator.LEVEL_THREE_POSITION * Elevator.ENCODER_TICS_PER_INCH));
   }
 
-  private void updateConfig() {
+  @Override
+  public void updateConfig() {
     slot0Configs.kP = pConstantSubscriber.get();
     slot0Configs.kI = iConstantSubscriber.get();
     slot0Configs.kD = dConstantSubscriber.get();
@@ -187,10 +188,4 @@ public class ElevatorFalconPID extends SubsystemBase implements Elevator {
   public Command sysIdDynamicCommand(SysIdRoutine.Direction direction) {
     return m_sysIdRoutine.dynamic(direction);
   }
-
-  // @Override
-  // public boolean isElevatorAtHomePosition() {
-  //   // TODO Auto-generated method stub
-  //   throw new UnsupportedOperationException("Unimplemented method 'isElevatorAtHomePosition'");
-  // }
 }
