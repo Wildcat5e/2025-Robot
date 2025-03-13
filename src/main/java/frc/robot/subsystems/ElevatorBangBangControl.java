@@ -12,12 +12,12 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 
 public class ElevatorBangBangControl extends SubsystemBase implements Elevator {
-  public static final double TOLERANCE = 0.25;
+  public static final double TOLERANCE = 15.0;
   private final TalonFX motor = new TalonFX(14);
   private final DigitalInput bottomLimiter = new DigitalInput(0);
-  private final DigitalInput topLimiter = new DigitalInput(1);
   private State currentState;
   private double desiredHeight;
+  private double currentHeight;
   private double output;
   private BooleanSubscriber beamBreakSubscriber;
   private BooleanPublisher beamBreakPublisher;
@@ -41,18 +41,24 @@ public class ElevatorBangBangControl extends SubsystemBase implements Elevator {
   int counter = 0;
   @Override
   public void periodic() {
-    if (counter++ % 250 == 0) {
-      System.out.println("current state: " + currentState);
+    currentHeight = getCurrentHeight();
+    if ((currentState == State.MOVING_DOWN || currentState == State.JOGGING_DOWN) && !bottomLimiter.get()) {
+      motor.setPosition(0.0);
+      currentState = State.NOT_MOVING;
+      System.out.println("Beam broken " + currentHeight);
     }
+    if (counter++ % 250 == 0) {
+      System.out.println("elevator current height = " + currentHeight);
+    }
+    determineNextState();
     beamBreakPublisher.set(bottomLimiter.get());
-    // enforceBeamBreakLimits();
-    // determineNextState(desiredHeight);
+
     switch (currentState) {
       case NOT_MOVING:
         output = 0.0;
         break;
       case MOVING_UP:
-        output = 2.5;
+        output = 8.0;
         break;
       case MOVING_DOWN:
         output = -2.0;
@@ -68,11 +74,12 @@ public class ElevatorBangBangControl extends SubsystemBase implements Elevator {
     motor.setVoltage(output);
   }
 
-  private void determineNextState(double desiredHeight) {
-    double currentHeight = getCurrentHeight();
-    this.desiredHeight = desiredHeight;
-
-    if (desiredHeight > currentHeight + TOLERANCE) {
+  private void determineNextState() {
+    if(currentState == State.JOGGING_UP) {
+      return;
+    } else if (currentState == State.JOGGING_DOWN) {
+      return;
+    } else if (desiredHeight > currentHeight + TOLERANCE) {
       currentState = State.MOVING_UP;
     } else if (desiredHeight < currentHeight - TOLERANCE) {
       currentState = State.MOVING_DOWN;
@@ -81,12 +88,9 @@ public class ElevatorBangBangControl extends SubsystemBase implements Elevator {
     }
   }
 
-  private void enforceBeamBreakLimits() {
-    if (currentState == State.MOVING_UP && topLimiter.get() ||
-        currentState == State.MOVING_DOWN && bottomLimiter.get()) {
-      motor.setPosition(0.0);
-      currentState = State.NOT_MOVING;
-    }
+  private void move(double desiredHeight) {
+    this.desiredHeight = desiredHeight;
+    determineNextState();
   }
 
   private double getCurrentHeight() {
@@ -94,22 +98,22 @@ public class ElevatorBangBangControl extends SubsystemBase implements Elevator {
   }
 
   public Command moveToHomePositionCommand() {
-    return runOnce(() -> determineNextState(Elevator.LEVEL_ZERO_POSITION));
+    return runOnce(() -> move(Elevator.LEVEL_ZERO_POSITION));
   }
 
   @Override
   public Command moveToLevelOneCommand() {
-    return runOnce(() -> determineNextState(Elevator.LEVEL_ONE_POSITION));
+    return runOnce(() -> move(Elevator.LEVEL_ONE_POSITION));
   }
 
   @Override
   public Command moveToLevelTwoCommand() {
-    return runOnce(() -> determineNextState(Elevator.LEVEL_TWO_POSITION));
+    return runOnce(() -> move(Elevator.LEVEL_TWO_POSITION));
   }
 
   @Override
   public Command moveToLevelThreeCommand() {
-    return runOnce(() -> determineNextState(Elevator.LEVEL_THREE_POSITION));
+    return runOnce(() -> move(Elevator.LEVEL_THREE_POSITION));
   }
 
   @Override
@@ -122,7 +126,8 @@ public class ElevatorBangBangControl extends SubsystemBase implements Elevator {
     return runEnd(() -> currentState = State.JOGGING_DOWN, () -> stop());
   }
 
-  private void stop() {
+  @Override
+  public void stop() {
     currentState = State.NOT_MOVING;
     desiredHeight = getCurrentHeight();
   }

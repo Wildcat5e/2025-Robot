@@ -9,8 +9,8 @@ public interface Elevator {
     double ENCODER_TICS_PER_INCH = GEAR_RATIO / WHEEL_CIRCUMFERENCE;
     double LEVEL_ZERO_POSITION = 0.0;
     double LEVEL_ONE_POSITION = 0.0;
-    double LEVEL_TWO_POSITION = 0.0;
-    double LEVEL_THREE_POSITION = 0.0;
+    double LEVEL_TWO_POSITION = 100.0;
+    double LEVEL_THREE_POSITION = 215.0;
 
     Command moveToHomePositionCommand();
 
@@ -23,6 +23,8 @@ public interface Elevator {
     Command jogUpCommand();
 
     Command jogDownCommand();
+
+    void stop();
 
     void updateConfig();
 
