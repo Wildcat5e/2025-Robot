@@ -8,6 +8,7 @@ public class Outtake extends SubsystemBase {
   public static final double TOLERANCE = 0.0;
   private final TalonFX motor = new TalonFX(15);
   private State currentState;
+  private double output;
 
   public enum State {
     NOT_MOVING,
@@ -23,23 +24,21 @@ public class Outtake extends SubsystemBase {
 
   @Override
   public void periodic() {
-    double output = 0.0;
-
     switch (currentState) {
       case NOT_MOVING:
         output = 0.0;
         break;
       case MOVING_FORWARD:
-        output = 6.0;
+        output = 1.0;
         break;
       case MOVING_BACKWARD:
-        output = -6.0;
+        output = -1.0;
         break;
       case JOGGING_FORWARD:
-        output = 3.0;
+        output = 1.0;
         break;
       case JOGGING_BACKWARD:
-        output = -3.0;
+        output = -1.0;
         break;
     }
 
@@ -51,10 +50,14 @@ public class Outtake extends SubsystemBase {
   }
 
   public Command jogForwardCommand() {
-    return runEnd(() -> currentState = State.JOGGING_FORWARD, () -> currentState = State.NOT_MOVING);
+    return runEnd(() -> currentState = State.JOGGING_FORWARD, () -> stop());
   }
 
   public Command jogBackwardCommand() {
-    return runEnd(() -> currentState = State.JOGGING_BACKWARD, () -> currentState = State.NOT_MOVING);
+    return runEnd(() -> currentState = State.JOGGING_BACKWARD, () -> stop());
+  }
+
+  public Command stop() {
+    return runOnce(() -> currentState = State.NOT_MOVING);
   }
 }

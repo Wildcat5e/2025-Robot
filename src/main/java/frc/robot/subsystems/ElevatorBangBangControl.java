@@ -14,7 +14,7 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 public class ElevatorBangBangControl extends SubsystemBase implements Elevator {
   public static final double TOLERANCE = 15.0;
   private final TalonFX motor = new TalonFX(14);
-  private final DigitalInput bottomLimiter = new DigitalInput(0);
+  private final DigitalInput beamBreak = new DigitalInput(0);
   private State currentState;
   private double desiredHeight;
   private double currentHeight;
@@ -42,7 +42,7 @@ public class ElevatorBangBangControl extends SubsystemBase implements Elevator {
   @Override
   public void periodic() {
     currentHeight = getCurrentHeight();
-    if ((currentState == State.MOVING_DOWN || currentState == State.JOGGING_DOWN) && !bottomLimiter.get()) {
+    if ((currentState == State.MOVING_DOWN || currentState == State.JOGGING_DOWN) && !beamBreak.get()) {
       motor.setPosition(0.0);
       currentState = State.NOT_MOVING;
       System.out.println("Beam broken " + currentHeight);
@@ -51,7 +51,7 @@ public class ElevatorBangBangControl extends SubsystemBase implements Elevator {
       System.out.println("elevator current height = " + currentHeight);
     }
     determineNextState();
-    beamBreakPublisher.set(bottomLimiter.get());
+    beamBreakPublisher.set(beamBreak.get());
 
     switch (currentState) {
       case NOT_MOVING:

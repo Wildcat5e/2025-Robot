@@ -66,7 +66,9 @@ public class Limelight extends SubsystemBase {
         new GoalEndState(0, Rotation2d.fromDegrees(yaw))
       );
 
-      return AutoBuilder.followPath(path);
+      Command autoAlign = AutoBuilder.followPath(path);
+      System.out.println(autoAlign.isScheduled());
+      return autoAlign;
     } else {
       return runOnce(() -> {});
     }
@@ -89,7 +91,9 @@ public class Limelight extends SubsystemBase {
         new GoalEndState(0, Rotation2d.fromDegrees(yaw))
       );
 
-      return AutoBuilder.followPath(path);
+      Command autoAlign = AutoBuilder.followPath(path);
+      System.out.println(autoAlign.isScheduled());
+      return autoAlign;
     } else {
       return runOnce(() -> {});
     }
