@@ -100,21 +100,6 @@ public class ElevatorRioPID extends SubsystemBase implements Elevator {
     return motor.getPosition().getValueAsDouble();
   }
 
-  private void stop() {
-    currentState = State.NOT_MOVING;
-    desiredHeight = getCurrentHeight();
-  }
-
-  @Override
-  public Command jogUpCommand() {
-    return runEnd(() -> currentState = State.JOGGING_UP, () -> stop());
-  }
-
-  @Override
-  public Command jogDownCommand() {
-    return runEnd(() -> currentState = State.JOGGING_DOWN, () -> stop());
-  }
-
   @Override
   public Command moveToHomePositionCommand() {
     return runOnce(() -> determineNextState(Elevator.LEVEL_ZERO_POSITION * Elevator.ENCODER_TICS_PER_INCH));
@@ -133,6 +118,22 @@ public class ElevatorRioPID extends SubsystemBase implements Elevator {
   @Override
   public Command moveToLevelThreeCommand() {
     return runOnce(() -> determineNextState(Elevator.LEVEL_THREE_POSITION * Elevator.ENCODER_TICS_PER_INCH));
+  }
+
+  @Override
+  public Command jogUpCommand() {
+    return runEnd(() -> currentState = State.JOGGING_UP, () -> stop());
+  }
+
+  @Override
+  public Command jogDownCommand() {
+    return runEnd(() -> currentState = State.JOGGING_DOWN, () -> stop());
+  }
+
+  @Override
+  public void stop() {
+    currentState = State.NOT_MOVING;
+    desiredHeight = getCurrentHeight();
   }
 
   @Override
