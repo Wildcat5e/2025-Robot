@@ -30,8 +30,6 @@ public class Limelight extends SubsystemBase {
   private double ty;
   private double yaw;
   private double xOffset;
-  private DoubleSubscriber xOffsetSubscriber;
-  private DoublePublisher xOffsetPublisher;
 
   public Limelight() {
     limelight = NetworkTableInstance.getDefault().getTable("Limelight");
@@ -39,8 +37,6 @@ public class Limelight extends SubsystemBase {
     tvPublisher = limelight.getDoubleTopic("tv").publish();
     targetPoseRobotSpaceSubscriber = limelight.getDoubleArrayTopic("targetpose_robotspace").subscribe(new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 });
     targetPoseRobotSpacePublisher = limelight.getDoubleArrayTopic("targetpose_robotspace").publish();
-    xOffsetSubscriber = limelight.getDoubleTopic("X Offset Subscriber").subscribe(0.0);
-    xOffsetPublisher = limelight.getDoubleTopic("X Offset Publisher").publish();
   }
 
   @Override
@@ -51,15 +47,16 @@ public class Limelight extends SubsystemBase {
     ty = targetPoseRobotSpaceSubscriber.get()[1];
     yaw = targetPoseRobotSpaceSubscriber.get()[4];
     targetPoseRobotSpacePublisher.set(new double[] { tx, ty, 0.0, 0.0, yaw, 0.0 });
-    xOffset = xOffsetSubscriber.get();
-    xOffsetPublisher.set(xOffset);
   }
 
   public Command alignLeft() {
+    System.out.println("Called");
+
     if(tv == 1.0) {
+      System.out.println("Sees tag");
       List<Waypoint> waypoints = PathPlannerPath.waypointsFromPoses(
         new Pose2d(tx, ty, Rotation2d.fromDegrees(yaw)),
-        new Pose2d(xOffset - tx, ty, Rotation2d.fromDegrees(yaw))
+        new Pose2d(tx + xOffset, ty, Rotation2d.fromDegrees(yaw))
       );
       
       PathPlannerPath path = new PathPlannerPath(
@@ -76,10 +73,13 @@ public class Limelight extends SubsystemBase {
   }
 
   public Command alignRight() {
+    System.out.println("Called");
+
     if(tv == 1.0) {
+      System.out.println("Sees tag");
       List<Waypoint> waypoints = PathPlannerPath.waypointsFromPoses(
         new Pose2d(tx, ty, Rotation2d.fromDegrees(yaw)),
-        new Pose2d(xOffset + tx, ty, Rotation2d.fromDegrees(yaw))
+        new Pose2d(tx - xOffset, ty, Rotation2d.fromDegrees(yaw))
       );
       
       PathPlannerPath path = new PathPlannerPath(
