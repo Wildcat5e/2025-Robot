@@ -42,7 +42,7 @@ public class RobotContainer {
     public final Drivetrain drivetrain = TunerConstants.createDrivetrain();
     private final Elevator elevator = new ElevatorBangBangControl();
     private final Outtake outtake = new Outtake();
-    Limelight limelight = new Limelight();
+    private final Limelight limelight = new Limelight();
     private final Superstructure superstructure = new Superstructure(elevator);
     
     private final SendableChooser<Command> autoChooser;
@@ -81,13 +81,14 @@ public class RobotContainer {
         driver.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
 
         // drivetrain.registerTelemetry(logger::telemeterize);
-        button4.onTrue(limelight.alignLeftCommand());
+        button1.onTrue(limelight.alignLeftCommand());
+        button2.onTrue(limelight.alignRightCommand());
         button5.onTrue(superstructure.moveElevatorToLevelThreeTest());
-        button6.onTrue(limelight.alignRightCommand());
+        button6.whileTrue(outtake.jogForwardCommand());
         button7.whileTrue(elevator.jogUpCommand());
         button8.onTrue(superstructure.moveElevatorToLevelTwoTest());
-        button9.whileTrue(elevator.jogDownCommand());
-        button10.whileTrue(outtake.jogForwardCommand());
+        button9.onTrue(outtake.loadingCoralCommand());
+        button10.whileTrue(elevator.jogDownCommand());
         button11.onTrue(superstructure.moveElevatorToHomePositionTest());
         button12.whileTrue(outtake.jogBackwardCommand());
 

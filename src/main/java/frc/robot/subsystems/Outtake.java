@@ -15,42 +15,38 @@ public class Outtake extends SubsystemBase {
   private final DigitalInput beamBreak = new DigitalInput(1);
   private State currentState;
   private double output;
-    private BooleanSubscriber outtakeSubscriber;
-  private BooleanPublisher outtakePublisher;
+  private BooleanSubscriber beamBreakSubscriber;
+  private BooleanPublisher beamBreakPublisher;
 
   public enum State {
-    NOT_MOVING,
-    MOVING_FORWARD,
-    MOVING_BACKWARD,
+    IDLE,
+    LOADING,
+    SHOOTING,
     JOGGING_FORWARD,
     JOGGING_BACKWARD;
   }
 
   public Outtake() {
-    currentState = State.NOT_MOVING;
+    currentState = State.IDLE;
     NetworkTable outtake = NetworkTableInstance.getDefault().getTable("Outtake");
-    outtakeSubscriber = outtake.getBooleanTopic("outtakeSubscriber").subscribe(false);
-    outtakePublisher = outtake.getBooleanTopic("outtakePublisher").publish();
+    beamBreakSubscriber = outtake.getBooleanTopic("beamBreakSubscriber").subscribe(false);
+    beamBreakPublisher = outtake.getBooleanTopic("beamBreakPublisher").publish();
   }
 
   @Override
   public void periodic() {
-    outtakePublisher.set(beamBreak.get());
-    if(!beamBreak.get()) {
-      if(motor.getPosition().getValueAsDouble() < 5.0) {
-        motor.setVoltage(1.0);
-      }
-    }
+    determineNextState();
+    beamBreakPublisher.set(beamBreak.get());
 
     switch (currentState) {
-      case NOT_MOVING:
+      case IDLE:
         output = 0.0;
         break;
-      case MOVING_FORWARD:
+      case LOADING:
         output = 2.0;
         break;
-      case MOVING_BACKWARD:
-        output = -2.0;
+      case SHOOTING:
+        output = 3.0;
         break;
       case JOGGING_FORWARD:
         output = 1.0;
@@ -63,6 +59,22 @@ public class Outtake extends SubsystemBase {
     motor.setVoltage(output);
   }
 
+  private void determineNextState() {
+    if(currentState == State.JOGGING_FORWARD) {
+      return;
+    } else if(currentState == State.JOGGING_BACKWARD) {
+      return;
+    } else if (beamBreak.get()) {
+      currentState = State.LOADING;
+    } else {
+      currentState = State.IDLE;
+    }
+  }
+
+  public Command loadingCoralCommand() {
+    return runOnce(() -> determineNextState());
+  }
+
   public Command jogForwardCommand() {
     return runEnd(() -> currentState = State.JOGGING_FORWARD, () -> stop());
   }
@@ -72,6 +84,6 @@ public class Outtake extends SubsystemBase {
   }
 
   public void stop() {
-    currentState = State.NOT_MOVING;
+    currentState = State.IDLE;
   }
 }
