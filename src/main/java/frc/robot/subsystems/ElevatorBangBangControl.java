@@ -3,11 +3,12 @@ package frc.robot.subsystems;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import com.ctre.phoenix6.hardware.TalonFX;
 import edu.wpi.first.networktables.BooleanSubscriber;
+import edu.wpi.first.networktables.DoublePublisher;
+import edu.wpi.first.networktables.DoubleSubscriber;
 import edu.wpi.first.networktables.BooleanPublisher;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DigitalInput;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 
@@ -21,6 +22,8 @@ public class ElevatorBangBangControl extends SubsystemBase implements Elevator {
   private double output;
   private BooleanSubscriber beamBreakSubscriber;
   private BooleanPublisher beamBreakPublisher;
+  private DoubleSubscriber level2Subscriber;
+  private DoublePublisher level2Publisher;
 
   public enum State {
     NOT_MOVING,
@@ -36,6 +39,8 @@ public class ElevatorBangBangControl extends SubsystemBase implements Elevator {
     NetworkTable elevator = NetworkTableInstance.getDefault().getTable("Elevator");
     beamBreakSubscriber = elevator.getBooleanTopic("BeamBreakSubscriber").subscribe(false);
     beamBreakPublisher = elevator.getBooleanTopic("BeamBreakPublisher").publish();
+    level2Subscriber = elevator.getDoubleTopic("Level2Subscriber").subscribe(Elevator.LEVEL_TWO_POSITION);
+    level2Publisher = elevator.getDoubleTopic("Level2Publisher").publish();
   }
 
   int counter = 0;
@@ -52,6 +57,7 @@ public class ElevatorBangBangControl extends SubsystemBase implements Elevator {
     }
     determineNextState();
     beamBreakPublisher.set(beamBreak.get());
+    level2Publisher.set(Elevator.LEVEL_TWO_POSITION);
 
     switch (currentState) {
       case NOT_MOVING:
@@ -61,7 +67,7 @@ public class ElevatorBangBangControl extends SubsystemBase implements Elevator {
         output = 8.0;
         break;
       case MOVING_DOWN:
-        output = -2.0;
+        output = -4.0;
         break;
       case JOGGING_UP:
         output = 1.0;

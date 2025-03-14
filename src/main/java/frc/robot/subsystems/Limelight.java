@@ -15,6 +15,10 @@ import edu.wpi.first.networktables.DoubleArrayPublisher;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj2.command.Command;
 import java.util.List;
+
+import edu.wpi.first.cameraserver.CameraServer;
+import edu.wpi.first.cscore.HttpCamera;
+import edu.wpi.first.cscore.HttpCamera.HttpCameraKind;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 
@@ -37,6 +41,9 @@ public class Limelight extends SubsystemBase {
     tvPublisher = limelight.getDoubleTopic("tv").publish();
     targetPoseRobotSpaceSubscriber = limelight.getDoubleArrayTopic("targetpose_robotspace").subscribe(new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 });
     targetPoseRobotSpacePublisher = limelight.getDoubleArrayTopic("targetpose_robotspace").publish();
+
+    HttpCamera limelightCamera = new HttpCamera("limelight", "http://limelight.local:5801/", HttpCameraKind.kMJPGStreamer);
+    CameraServer.startAutomaticCapture(limelightCamera);
   }
 
   @Override
@@ -49,7 +56,7 @@ public class Limelight extends SubsystemBase {
     targetPoseRobotSpacePublisher.set(new double[] { tx, ty, 0.0, 0.0, yaw, 0.0 });
   }
 
-  public Command alignLeft() {
+  public Command alignLeftCommand() {
     System.out.println("Called");
 
     if(tv == 1.0) {
@@ -66,15 +73,15 @@ public class Limelight extends SubsystemBase {
         new GoalEndState(0, Rotation2d.fromDegrees(yaw))
       );
 
-      Command autoAlign = AutoBuilder.followPath(path);
-      System.out.println(autoAlign.isScheduled());
-      return autoAlign;
+      path.preventFlipping = true;
+
+      return AutoBuilder.followPath(path);
     } else {
       return runOnce(() -> {});
     }
   }
 
-  public Command alignRight() {
+  public Command alignRightCommand() {
     System.out.println("Called");
 
     if(tv == 1.0) {
@@ -91,9 +98,9 @@ public class Limelight extends SubsystemBase {
         new GoalEndState(0, Rotation2d.fromDegrees(yaw))
       );
 
-      Command autoAlign = AutoBuilder.followPath(path);
-      System.out.println(autoAlign.isScheduled());
-      return autoAlign;
+      path.preventFlipping = true;
+      
+      return AutoBuilder.followPath(path);
     } else {
       return runOnce(() -> {});
     }

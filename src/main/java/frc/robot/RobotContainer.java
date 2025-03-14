@@ -17,7 +17,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
-import edu.wpi.first.math.geometry.Rotation2d;
 import static edu.wpi.first.units.Units.*;
 
 public class RobotContainer {
@@ -43,8 +42,8 @@ public class RobotContainer {
     public final Drivetrain drivetrain = TunerConstants.createDrivetrain();
     private final Elevator elevator = new ElevatorBangBangControl();
     private final Outtake outtake = new Outtake();
-    private final Limelight limelight = new Limelight();
-    private final Superstructure superstructure = new Superstructure(elevator, outtake, limelight);
+    Limelight limelight = new Limelight();
+    private final Superstructure superstructure = new Superstructure(elevator);
     
     private final SendableChooser<Command> autoChooser;
 
@@ -82,9 +81,9 @@ public class RobotContainer {
         driver.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
 
         // drivetrain.registerTelemetry(logger::telemeterize);
-        button4.onTrue(limelight.alignLeft());
+        button4.onTrue(limelight.alignLeftCommand());
         button5.onTrue(superstructure.moveElevatorToLevelThreeTest());
-        button6.onTrue(limelight.alignRight());
+        button6.onTrue(limelight.alignRightCommand());
         button7.whileTrue(elevator.jogUpCommand());
         button8.onTrue(superstructure.moveElevatorToLevelTwoTest());
         button9.whileTrue(elevator.jogDownCommand());
