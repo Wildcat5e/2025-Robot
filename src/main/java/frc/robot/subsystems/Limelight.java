@@ -75,6 +75,7 @@ public class Limelight extends SubsystemBase {
 
       return AutoBuilder.followPath(path);
     } else {
+      System.out.println("Not detected");
       return runOnce(() -> {});
     }
   }
@@ -100,6 +101,7 @@ public class Limelight extends SubsystemBase {
       
       return AutoBuilder.followPath(path);
     } else {
+      System.out.println("Not detected");
       return runOnce(() -> {});
     }
   }

@@ -43,16 +43,16 @@ public class Outtake extends SubsystemBase {
         output = 0.0;
         break;
       case LOADING:
-        output = 2.0;
+        output = 3.0;
         break;
       case SHOOTING:
         output = 3.0;
         break;
       case JOGGING_FORWARD:
-        output = 1.0;
+        output = 3.0;
         break;
       case JOGGING_BACKWARD:
-        output = -1.0;
+        output = -3.0;
         break;
     }
 
@@ -64,7 +64,7 @@ public class Outtake extends SubsystemBase {
       return;
     } else if(currentState == State.JOGGING_BACKWARD) {
       return;
-    } else if (beamBreak.get()) {
+    } else if (!beamBreak.get()) {
       currentState = State.LOADING;
     } else {
       currentState = State.IDLE;

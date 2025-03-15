@@ -84,13 +84,12 @@ public class RobotContainer {
         button1.onTrue(limelight.alignLeftCommand());
         button2.onTrue(limelight.alignRightCommand());
         button5.onTrue(superstructure.moveElevatorToLevelThreeTest());
-        button6.whileTrue(outtake.jogForwardCommand());
+        button6.whileTrue(outtake.jogBackwardCommand());
         button7.whileTrue(elevator.jogUpCommand());
         button8.onTrue(superstructure.moveElevatorToLevelTwoTest());
-        button9.onTrue(outtake.loadingCoralCommand());
         button10.whileTrue(elevator.jogDownCommand());
         button11.onTrue(superstructure.moveElevatorToHomePositionTest());
-        button12.whileTrue(outtake.jogBackwardCommand());
+        button12.whileTrue(outtake.jogForwardCommand());
 
         // operator.x().whileTrue(elevator.jogDownCommand());
         // operator.y().whileTrue(elevator.jogUpCommand());
