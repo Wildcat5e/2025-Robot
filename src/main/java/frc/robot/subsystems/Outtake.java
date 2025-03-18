@@ -5,18 +5,17 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DigitalInput;
-import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.networktables.BooleanPublisher;
 import edu.wpi.first.networktables.BooleanSubscriber;
+import edu.wpi.first.wpilibj2.command.Command;
 
 public class Outtake extends SubsystemBase {
-  public static final double TOLERANCE = 0.0;
   private final TalonFX motor = new TalonFX(15);
   private final DigitalInput beamBreak = new DigitalInput(1);
-  private State currentState;
-  private double output;
   private BooleanSubscriber beamBreakSubscriber;
   private BooleanPublisher beamBreakPublisher;
+  private State currentState;
+  private double volts;
 
   public enum State {
     IDLE,
@@ -40,23 +39,23 @@ public class Outtake extends SubsystemBase {
 
     switch (currentState) {
       case IDLE:
-        output = 0.0;
+        volts = 0.0;
         break;
       case LOADING:
-        output = 3.0;
+        volts = 1.5;
         break;
       case SHOOTING:
-        output = 3.0;
+        volts = 3.0;
         break;
       case JOGGING_FORWARD:
-        output = 3.0;
+        volts = 3.0;
         break;
       case JOGGING_BACKWARD:
-        output = -3.0;
+        volts = -3.0;
         break;
     }
 
-    motor.setVoltage(output);
+    motor.setVoltage(volts);
   }
 
   private void determineNextState() {
@@ -69,10 +68,6 @@ public class Outtake extends SubsystemBase {
     } else {
       currentState = State.IDLE;
     }
-  }
-
-  public Command loadingCoralCommand() {
-    return runOnce(() -> determineNextState());
   }
 
   public Command jogForwardCommand() {

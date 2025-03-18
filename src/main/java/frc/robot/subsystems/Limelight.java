@@ -19,6 +19,7 @@ import com.pathplanner.lib.path.GoalEndState;
 import edu.wpi.first.cscore.HttpCamera;
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.cscore.HttpCamera.HttpCameraKind;
+import java.util.function.DoubleSupplier;
 
 public class Limelight extends SubsystemBase {
   private final PathConstraints constraints = new PathConstraints(3.0, 3.0, 2 * Math.PI, 4 * Math.PI);
@@ -31,7 +32,7 @@ public class Limelight extends SubsystemBase {
   private double tx;
   private double ty;
   private double yaw;
-  private double xOffset;
+  private double xOffset = 5.0;
 
   public Limelight() {
     limelight = NetworkTableInstance.getDefault().getTable("Limelight");
@@ -55,53 +56,53 @@ public class Limelight extends SubsystemBase {
   }
 
   public Command alignLeftCommand() {
-    System.out.println("Called");
-
     if(tv == 1.0) {
-      System.out.println("Sees tag");
+      DoubleSupplier txDoubleSupplier = () -> tx;
+      DoubleSupplier tyDoubleSupplier = () -> ty;
+      DoubleSupplier yawDoubleSupplier = () -> yaw;
+
       List<Waypoint> waypoints = PathPlannerPath.waypointsFromPoses(
-        new Pose2d(tx, ty, Rotation2d.fromDegrees(yaw)),
-        new Pose2d(tx - xOffset, ty, Rotation2d.fromDegrees(yaw))
+        new Pose2d(txDoubleSupplier.getAsDouble(), tyDoubleSupplier.getAsDouble(), Rotation2d.fromDegrees(yawDoubleSupplier.getAsDouble())),
+        new Pose2d(txDoubleSupplier.getAsDouble() - (xOffset - txDoubleSupplier.getAsDouble()), tyDoubleSupplier.getAsDouble(), Rotation2d.fromDegrees(yawDoubleSupplier.getAsDouble()))
       );
       
       PathPlannerPath path = new PathPlannerPath(
         waypoints,
         constraints,
         null,
-        new GoalEndState(0, Rotation2d.fromDegrees(yaw))
+        new GoalEndState(0, Rotation2d.fromDegrees(yawDoubleSupplier.getAsDouble()))
       );
 
       path.preventFlipping = true;
 
       return AutoBuilder.followPath(path);
     } else {
-      System.out.println("Not detected");
       return runOnce(() -> {});
     }
   }
 
   public Command alignRightCommand() {
-    System.out.println("Called");
-
     if(tv == 1.0) {
-      System.out.println("Sees tag");
+      DoubleSupplier txDoubleSupplier = () -> tx;
+      DoubleSupplier tyDoubleSupplier = () -> ty;
+      DoubleSupplier yawDoubleSupplier = () -> yaw;
+      
       List<Waypoint> waypoints = PathPlannerPath.waypointsFromPoses(
-        new Pose2d(tx, ty, Rotation2d.fromDegrees(yaw)),
-        new Pose2d(tx + xOffset, ty, Rotation2d.fromDegrees(yaw))
+        new Pose2d(txDoubleSupplier.getAsDouble(), tyDoubleSupplier.getAsDouble(), Rotation2d.fromDegrees(yawDoubleSupplier.getAsDouble())),
+        new Pose2d(txDoubleSupplier.getAsDouble() + (xOffset - txDoubleSupplier.getAsDouble()), tyDoubleSupplier.getAsDouble(), Rotation2d.fromDegrees(yawDoubleSupplier.getAsDouble()))
       );
       
       PathPlannerPath path = new PathPlannerPath(
         waypoints,
         constraints,
         null,
-        new GoalEndState(0, Rotation2d.fromDegrees(yaw))
+        new GoalEndState(0, Rotation2d.fromDegrees(yawDoubleSupplier.getAsDouble()))
       );
 
       path.preventFlipping = true;
-      
+
       return AutoBuilder.followPath(path);
     } else {
-      System.out.println("Not detected");
       return runOnce(() -> {});
     }
   }
