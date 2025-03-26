@@ -24,9 +24,7 @@ This is WildCat5e code for the 2025 competition
 
 | Name                            | Number of Coral Scored | Level |
 |---------------------------------|------------------------|-------|
-| Right Taxi                      | 0                      | N/A   |
-| Mid Taxi                        | 0                      | N/A   |
-| Left Taxi                       | 0                      | N/A   |
+| Taxi                            | 0                      | N/A   |
 | Right Start to Front Right Reef | 1                      | 2     |
 | Left Start to Front Left Reef   | 1                      | 2     |
 | Right 2 Coral Auto              | 2                      | 2     |

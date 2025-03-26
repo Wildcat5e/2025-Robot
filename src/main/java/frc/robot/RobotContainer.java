@@ -5,10 +5,6 @@ import frc.robot.generated.TunerConstants;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import edu.wpi.first.cameraserver.CameraServer;
-import edu.wpi.first.cscore.CvSink;
-import edu.wpi.first.cscore.CvSource;
-import edu.wpi.first.cscore.UsbCamera;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.subsystems.Elevator;
@@ -17,22 +13,15 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import com.pathplanner.lib.auto.NamedCommands;
-import com.pathplanner.lib.commands.PathPlannerAuto;
+import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import static edu.wpi.first.units.Units.*;
-import org.opencv.core.Core;
-import org.opencv.core.Mat;
 
 public class RobotContainer {
     private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond);
     private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond);
 
     private final CommandXboxController driver = new CommandXboxController(0);
-    // private final CommandXboxController operator = new CommandXboxController(1);
     private final Joystick operator = new Joystick(1);
     private final JoystickButton button1 = new JoystickButton(operator, 1);
     private final JoystickButton button2 = new JoystickButton(operator, 2);
@@ -54,53 +43,17 @@ public class RobotContainer {
     
     private final SendableChooser<Command> autoChooser;
 
-    Thread m_visionThread;
-
     public RobotContainer() {
-        configureBindings();
-        
-        NamedCommands.registerCommand("moveToHomePositionCommand", superstructure.moveElevatorToHomePositionTest());
-        NamedCommands.registerCommand("moveToLevelTwoCommand", superstructure.moveElevatorToLevelTwoTest());
-        NamedCommands.registerCommand("moveToLevelThreeCommand", superstructure.moveElevatorToLevelThreeTest());
-        
-        autoChooser = AutoBuilder.buildAutoChooser();
-        SmartDashboard.putData("Auto Chooser", autoChooser);
-        CameraServer.startAutomaticCapture();
-        m_visionThread =
-        new Thread(
-            () -> {
-              // Get the UsbCamera from CameraServer
-              UsbCamera camera = CameraServer.startAutomaticCapture();
-              // Set the resolution
-              camera.setResolution(640,480);
-              // Get a CvSink. This will capture Mats from the camera
-              CvSink cvSink = CameraServer.getVideo();
-              // Setup a CvSource. This will send images back to the Dashboard
-              CvSource outputStream = CameraServer.putVideo("Rectangle", 640, 480);
+      NamedCommands.registerCommand("moveToHomePositionCommand", superstructure.moveElevatorToHomePositionTest());
+      NamedCommands.registerCommand("moveToLevelTwoCommand", superstructure.moveElevatorToLevelTwoTest());
+      NamedCommands.registerCommand("moveToLevelThreeCommand", superstructure.moveElevatorToLevelThreeTest());
+      
+      configureBindings();
+      
+      autoChooser = AutoBuilder.buildAutoChooser();
+      SmartDashboard.putData("Auto Chooser", autoChooser);
 
-              // Mats are very memory expensive. Lets reuse this Mat.
-              Mat mat = new Mat();
-
-              // This cannot be 'true'. The program will never exit if it is. This
-              // lets the robot stop this thread when restarting robot code or
-              // deploying.
-              Mat rotatedImage = new Mat();
-              while (!Thread.interrupted()) {
-                // Tell the CvSink to grab a frame from the camera and put it
-                // in the source mat.  If there is an error notify the output.
-                if (cvSink.grabFrame(mat) == 0) {
-                  // Send the output the error.
-                  outputStream.notifyError(cvSink.getError());
-                  // skip the rest of the current iteration
-                  continue;
-                }
-                Core.rotate(mat, rotatedImage, Core.ROTATE_180);
-                // Give the output stream a new image to display
-                outputStream.putFrame(rotatedImage);
-              }
-            });
-    m_visionThread.setDaemon(true);
-    // m_visionThread.start();
+      CameraServer.startAutomaticCapture();
     }
 
     private final SwerveRequest.RobotCentric drive = new SwerveRequest.RobotCentric()
@@ -108,7 +61,6 @@ public class RobotContainer {
             .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
     // private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
     // private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
-    // private final Telemetry logger = new Telemetry(MaxSpeed);
 
     private void configureBindings() {
         drivetrain.setDefaultCommand(
@@ -118,33 +70,18 @@ public class RobotContainer {
                     .withRotationalRate(-driver.getLeftX() * MaxAngularRate)
             )
         );
-        
-        driver.back().and(driver.y()).whileTrue(drivetrain.sysIdDynamic(Direction.kForward));
-        driver.back().and(driver.x()).whileTrue(drivetrain.sysIdDynamic(Direction.kReverse));
-        driver.start().and(driver.y()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
-        driver.start().and(driver.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
-        driver.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
 
-        // drivetrain.registerTelemetry(logger::telemeterize);
         button5.onTrue(superstructure.moveElevatorToLevelThreeTest());
-        button7.whileTrue(elevator.jogUpCommand());
+        button6.onTrue(outtake.shootCommand());
+        button7.whileTrue(elevator.manualUpCommand());
         button8.onTrue(superstructure.moveElevatorToLevelTwoTest());
-        button9.whileTrue(outtake.jogBackwardCommand());
-        button10.whileTrue(elevator.jogDownCommand());
+        button9.whileTrue(outtake.manualBackwardCommand());
+        button10.whileTrue(elevator.manualDownCommand());
         button11.onTrue(superstructure.moveElevatorToHomePositionTest());
-        button12.whileTrue(outtake.jogForwardCommand());
-
-        // operator.x().whileTrue(elevator.jogDownCommand());
-        // operator.y().whileTrue(elevator.jogUpCommand());
-        // operator.rightTrigger().whileTrue(outtake.jogForwardCommand());
-        // operator.leftTrigger().whileTrue(outtake.jogBackwardCommand());
-
-        // operator.povUp().onTrue(superstructure.moveElevatorToHomePositionTest());
-        // operator.povRight().onTrue(superstructure.moveElevatorToLevelTwoTest());
-        // operator.povDown().onTrue(superstructure.moveElevatorToLevelThreeTest());
+        button12.whileTrue(outtake.manualForwardCommand());
     }
 
     public Command getAutonomousCommand() {
-        return new SequentialCommandGroup(new PathPlannerAuto("Mid 1 Coral Auto"), new ParallelDeadlineGroup(new WaitCommand(2.5), outtake.jogForwardCommand()));
+      return autoChooser.getSelected();
     }
 }

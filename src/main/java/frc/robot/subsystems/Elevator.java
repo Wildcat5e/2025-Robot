@@ -3,8 +3,8 @@ package frc.robot.subsystems;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import com.ctre.phoenix6.hardware.TalonFX;
 import edu.wpi.first.wpilibj.DigitalInput;
-import edu.wpi.first.networktables.BooleanSubscriber;
 import edu.wpi.first.networktables.BooleanPublisher;
+import edu.wpi.first.networktables.StringPublisher;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -15,9 +15,9 @@ public class Elevator extends SubsystemBase {
   public static final double LEVEL_TWO_POSITION = 95.0;
   public static final double LEVEL_THREE_POSITION = 225.0;
   private final TalonFX motor = new TalonFX(14);
-  private final DigitalInput beamBreak = new DigitalInput(0);
-  private BooleanSubscriber beamBreakSubscriber;
-  private BooleanPublisher beamBreakPublisher;
+  private final DigitalInput bottomBeamBreak = new DigitalInput(0);
+  private BooleanPublisher bottomBeamBreakPublisher;
+  private StringPublisher currentStatePublisher;
   private State currentState;
   private double desiredHeight;
   private double currentHeight;
@@ -27,27 +27,28 @@ public class Elevator extends SubsystemBase {
     NOT_MOVING,
     MOVING_UP,
     MOVING_DOWN,
-    JOGGING_UP,
-    JOGGING_DOWN;
+    MANUAL_UP,
+    MANUAL_DOWN
   }
     
   public Elevator() {
     currentState = State.NOT_MOVING;
     motor.setPosition(0.0);
     NetworkTable elevator = NetworkTableInstance.getDefault().getTable("Elevator");
-    beamBreakSubscriber = elevator.getBooleanTopic("BeamBreakSubscriber").subscribe(false);
-    beamBreakPublisher = elevator.getBooleanTopic("BeamBreakPublisher").publish();
+    bottomBeamBreakPublisher = elevator.getBooleanTopic("Bottom Beam Break").publish();
+    currentStatePublisher = elevator.getStringTopic("Current State").publish();
   }
   
   @Override
   public void periodic() {
     currentHeight = getCurrentHeight();
-    if ((currentState == State.MOVING_DOWN || currentState == State.JOGGING_DOWN) && !beamBreak.get()) {
-      motor.setPosition(0.0);
+    if ((currentState == State.MOVING_DOWN || currentState == State.MANUAL_DOWN) && !bottomBeamBreak.get()) {
       currentState = State.NOT_MOVING;
+      motor.setPosition(0.0);
     }
     determineNextState();
-    beamBreakPublisher.set(beamBreak.get());
+    bottomBeamBreakPublisher.set(bottomBeamBreak.get());
+    currentStatePublisher.set(currentState.toString());
     
     switch (currentState) {
       case NOT_MOVING:
@@ -59,10 +60,10 @@ public class Elevator extends SubsystemBase {
       case MOVING_DOWN:
         volts = -8.0;
         break;
-      case JOGGING_UP:
+      case MANUAL_UP:
         volts = 3.0;
         break;
-      case JOGGING_DOWN:
+      case MANUAL_DOWN:
         volts = -3.0;
         break;
     }
@@ -71,16 +72,14 @@ public class Elevator extends SubsystemBase {
   }
   
   private void determineNextState() {
-    if(currentState == State.JOGGING_UP) {
+    if (currentState == State.MANUAL_UP || currentState == State.MANUAL_DOWN) {
       return;
-    } else if (currentState == State.JOGGING_DOWN) {
-      return;
+    } else if (Math.abs(currentHeight - desiredHeight) <= TOLERANCE && desiredHeight > 0.0) {
+      currentState = State.NOT_MOVING;
     } else if (desiredHeight > currentHeight + TOLERANCE) {
       currentState = State.MOVING_UP;
     } else if (desiredHeight < currentHeight - TOLERANCE) {
       currentState = State.MOVING_DOWN;
-    } else {
-      currentState = State.NOT_MOVING;
     }
   }
   
@@ -104,12 +103,12 @@ public class Elevator extends SubsystemBase {
     return runOnce(() -> move(LEVEL_THREE_POSITION));
   }
 
-  public Command jogUpCommand() {
-    return runEnd(() -> currentState = State.JOGGING_UP, () -> stop());
+  public Command manualUpCommand() {
+    return runEnd(() -> currentState = State.MANUAL_UP, () -> stop());
   }
 
-  public Command jogDownCommand() {
-    return runEnd(() -> currentState = State.JOGGING_DOWN, () -> stop());
+  public Command manualDownCommand() {
+    return runEnd(() -> currentState = State.MANUAL_DOWN, () -> stop());
   }
 
   private void stop() {

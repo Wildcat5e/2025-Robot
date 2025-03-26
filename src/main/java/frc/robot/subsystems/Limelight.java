@@ -16,9 +16,6 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.path.GoalEndState;
-import edu.wpi.first.cscore.HttpCamera;
-import edu.wpi.first.cameraserver.CameraServer;
-import edu.wpi.first.cscore.HttpCamera.HttpCameraKind;
 import java.util.function.DoubleSupplier;
 
 public class Limelight extends SubsystemBase {
@@ -32,7 +29,7 @@ public class Limelight extends SubsystemBase {
   private double tx;
   private double ty;
   private double yaw;
-  private double xOffset = 5.0;
+  private double xOffset;
 
   public Limelight() {
     limelight = NetworkTableInstance.getDefault().getTable("Limelight");
@@ -40,9 +37,6 @@ public class Limelight extends SubsystemBase {
     tvPublisher = limelight.getDoubleTopic("tv").publish();
     targetPoseRobotSpaceSubscriber = limelight.getDoubleArrayTopic("targetpose_robotspace").subscribe(new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 });
     targetPoseRobotSpacePublisher = limelight.getDoubleArrayTopic("targetpose_robotspace").publish();
-
-    HttpCamera limelightCamera = new HttpCamera("limelight", "http://limelight.local:5800/", HttpCameraKind.kMJPGStreamer);
-    CameraServer.startAutomaticCapture(limelightCamera);
   }
 
   @Override
