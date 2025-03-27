@@ -11,6 +11,12 @@
           }
         },
         {
+          "type": "named",
+          "data": {
+            "name": "moveToLevelTwoCommand"
+          }
+        },
+        {
           "type": "path",
           "data": {
             "pathName": "Front Left Reef to Left Coral Station"
@@ -20,6 +26,12 @@
           "type": "path",
           "data": {
             "pathName": "Left Coral Station to Back Center Reef"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "moveToLevelTwoCommand"
           }
         }
       ]

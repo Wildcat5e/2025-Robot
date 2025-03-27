@@ -9,6 +9,12 @@
           "data": {
             "pathName": "Right Start to Front Right Reef"
           }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "moveToLevelTwoCommand"
+          }
         }
       ]
     }

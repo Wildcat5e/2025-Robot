@@ -94,4 +94,8 @@ public class Outtake extends SubsystemBase {
   private void stop() {
     currentState = State.IDLE;
   }
+
+  public boolean isOuttakeNotShooting() {
+    return currentState == State.IDLE;
+  }
 }

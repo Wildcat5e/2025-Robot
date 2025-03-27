@@ -39,21 +39,19 @@ public class RobotContainer {
     public final Drivetrain drivetrain = TunerConstants.createDrivetrain();
     private final Elevator elevator = new Elevator();
     private final Outtake outtake = new Outtake();
-    private final Superstructure superstructure = new Superstructure(elevator);
+    private final Vision vision = new Vision();
+    private final Superstructure superstructure = new Superstructure(elevator, outtake, vision, drivetrain);
     
     private final SendableChooser<Command> autoChooser;
 
     public RobotContainer() {
-      NamedCommands.registerCommand("moveToHomePositionCommand", superstructure.moveElevatorToHomePositionTest());
-      NamedCommands.registerCommand("moveToLevelTwoCommand", superstructure.moveElevatorToLevelTwoTest());
-      NamedCommands.registerCommand("moveToLevelThreeCommand", superstructure.moveElevatorToLevelThreeTest());
+      NamedCommands.registerCommand("moveToLevelTwoCommand", superstructure.moveElevatorToLevelTwoCommands());
+      NamedCommands.registerCommand("moveToLevelThreeCommand", superstructure.moveElevatorToLevelThreeCommand());
       
       configureBindings();
       
       autoChooser = AutoBuilder.buildAutoChooser();
       SmartDashboard.putData("Auto Chooser", autoChooser);
-
-      CameraServer.startAutomaticCapture();
     }
 
     private final SwerveRequest.RobotCentric drive = new SwerveRequest.RobotCentric()
@@ -63,7 +61,7 @@ public class RobotContainer {
     // private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
 
     private void configureBindings() {
-        drivetrain.setDefaultCommand(
+      drivetrain.setDefaultCommand(
             drivetrain.applyRequest(() ->
                 drive.withVelocityX(-driver.getRightY() * MaxSpeed)
                     .withVelocityY(-driver.getRightX() * MaxSpeed)
@@ -71,14 +69,16 @@ public class RobotContainer {
             )
         );
 
-        button5.onTrue(superstructure.moveElevatorToLevelThreeTest());
+        button1.onTrue(vision.alignLeftCommand(drivetrain.getTv(), drivetrain.getTx(), drivetrain.getTy(), drivetrain.getYaw()));
+
+        button5.onTrue(superstructure.moveElevatorToLevelThreeCommand());
         button6.onTrue(outtake.shootCommand());
         button7.whileTrue(elevator.manualUpCommand());
-        button8.onTrue(superstructure.moveElevatorToLevelTwoTest());
+        button8.onTrue(superstructure.moveElevatorToLevelTwoCommands());
         button9.whileTrue(outtake.manualBackwardCommand());
         button10.whileTrue(elevator.manualDownCommand());
-        button11.onTrue(superstructure.moveElevatorToHomePositionTest());
-        button12.whileTrue(outtake.manualForwardCommand());
+        button11.onTrue(superstructure.shootOuttakeAndMoveElevatorToHomePosition());
+        button12.onTrue(outtake.manualForwardCommand());
     }
 
     public Command getAutonomousCommand() {
