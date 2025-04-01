@@ -23,8 +23,6 @@ import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.networktables.DoubleArrayPublisher;
 import edu.wpi.first.networktables.DoubleArraySubscriber;
-import edu.wpi.first.networktables.DoublePublisher;
-import edu.wpi.first.networktables.DoubleSubscriber;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
@@ -119,9 +117,6 @@ public class Drivetrain extends TunerSwerveDrivetrain implements Subsystem {
     private SysIdRoutine m_sysIdRoutineToApply = m_sysIdRoutineTranslation;
 
     private NetworkTable limelight;
-    private double tv;
-    private DoubleSubscriber tvSubscriber;
-    private DoublePublisher tvPublisher;
     private DoubleArraySubscriber targetPoseRobotSpaceSubscriber;
     private DoubleArrayPublisher targetPoseRobotSpacePublisher;
     private double tx;
@@ -249,8 +244,6 @@ public class Drivetrain extends TunerSwerveDrivetrain implements Subsystem {
 
     private void limelight() {
         limelight = NetworkTableInstance.getDefault().getTable("Limelight");
-        tvSubscriber = limelight.getDoubleTopic("tv").subscribe(0.0);
-        tvPublisher = limelight.getDoubleTopic("tv").publish();
         targetPoseRobotSpaceSubscriber = limelight.getDoubleArrayTopic("targetpose_robotspace").subscribe(new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 });
         targetPoseRobotSpacePublisher = limelight.getDoubleArrayTopic("targetpose_robotspace").publish();
     }
@@ -307,16 +300,10 @@ public class Drivetrain extends TunerSwerveDrivetrain implements Subsystem {
             });
         }
 
-        tv = tvSubscriber.get();
-        tvPublisher.set(tv);
         tx = targetPoseRobotSpaceSubscriber.get()[0];
         ty = targetPoseRobotSpaceSubscriber.get()[1];
         yaw = targetPoseRobotSpaceSubscriber.get()[4];
         targetPoseRobotSpacePublisher.set(new double[] { tx, ty, 0.0, 0.0, yaw, 0.0 });
-    }
-
-    public DoubleSupplier getTv() {
-        return () -> tv;
     }
 
     public DoubleSupplier getTx() {

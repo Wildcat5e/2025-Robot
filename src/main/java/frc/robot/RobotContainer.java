@@ -10,9 +10,9 @@ import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.Outtake;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.wpilibj2.command.Command;
 import static edu.wpi.first.units.Units.*;
@@ -40,18 +40,22 @@ public class RobotContainer {
     private final Elevator elevator = new Elevator();
     private final Outtake outtake = new Outtake();
     private final Vision vision = new Vision();
-    private final Superstructure superstructure = new Superstructure(elevator, outtake, vision, drivetrain);
+    private final Superstructure superstructure = new Superstructure(elevator);
     
     private final SendableChooser<Command> autoChooser;
 
     public RobotContainer() {
-      NamedCommands.registerCommand("moveToLevelTwoCommand", superstructure.moveElevatorToLevelTwoCommands());
+      NamedCommands.registerCommand("moveToPositionZeroCommand", superstructure.moveElevatorToPositionZeroCommand());
+      NamedCommands.registerCommand("moveToLevelTwoCommand", superstructure.moveElevatorToLevelTwoCommand());
       NamedCommands.registerCommand("moveToLevelThreeCommand", superstructure.moveElevatorToLevelThreeCommand());
+      NamedCommands.registerCommand("shootCommand", outtake.shootCommand());
       
       configureBindings();
       
       autoChooser = AutoBuilder.buildAutoChooser();
       SmartDashboard.putData("Auto Chooser", autoChooser);
+
+      CameraServer.startAutomaticCapture();
     }
 
     private final SwerveRequest.RobotCentric drive = new SwerveRequest.RobotCentric()
@@ -69,16 +73,16 @@ public class RobotContainer {
             )
         );
 
-        button1.onTrue(vision.alignLeftCommand(drivetrain.getTv(), drivetrain.getTx(), drivetrain.getTy(), drivetrain.getYaw()));
-
+        button1.onTrue(outtake.shootCommand());
+        button4.onTrue(vision.alignLeftCommand(drivetrain.getTx(), drivetrain.getTy(), drivetrain.getYaw()));
         button5.onTrue(superstructure.moveElevatorToLevelThreeCommand());
-        button6.onTrue(outtake.shootCommand());
+        button6.onTrue(vision.alignRightCommand(drivetrain.getTx(), drivetrain.getTy(), drivetrain.getYaw()));
         button7.whileTrue(elevator.manualUpCommand());
-        button8.onTrue(superstructure.moveElevatorToLevelTwoCommands());
+        button8.onTrue(superstructure.moveElevatorToLevelTwoCommand());
         button9.whileTrue(outtake.manualBackwardCommand());
         button10.whileTrue(elevator.manualDownCommand());
-        button11.onTrue(superstructure.shootOuttakeAndMoveElevatorToHomePosition());
-        button12.onTrue(outtake.manualForwardCommand());
+        button11.onTrue(superstructure.moveElevatorToPositionZeroCommand());
+        button12.whileTrue(outtake.manualForwardCommand());
     }
 
     public Command getAutonomousCommand() {

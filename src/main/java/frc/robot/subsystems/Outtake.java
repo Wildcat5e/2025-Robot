@@ -2,23 +2,25 @@ package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import com.ctre.phoenix6.hardware.TalonFX;
-import edu.wpi.first.networktables.NetworkTable;
-import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.networktables.StringPublisher;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.networktables.BooleanPublisher;
+import edu.wpi.first.networktables.StringPublisher;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj2.command.Command;
 
 public class Outtake extends SubsystemBase {
-  private final TalonFX motor = new TalonFX(15);
+  private final TalonFX leftMotor = new TalonFX(15);
+  private final TalonFX rightMotor = new TalonFX(16);
   private final DigitalInput startBeamBreak = new DigitalInput(1);
-  private final DigitalInput endBeamBreak = new DigitalInput(2);
-  private BooleanPublisher startBeamBreakPublisher;
-  private BooleanPublisher endBeamBreakPublisher;
-  private StringPublisher currentStatePublisher;
-  private boolean shootCommand = false;
   private State currentState;
-  private double volts;
+  private BooleanPublisher startBeamBreakPublisher;
+  private StringPublisher currentStatePublisher;
+  private double leftVolts;
+  private double rightVolts;
+  private long shootingStartTime = 0;
+  private long shootingEndTime;
+  private long shootingDeltaTime;
 
   public enum State {
     IDLE,
@@ -32,7 +34,6 @@ public class Outtake extends SubsystemBase {
     currentState = State.IDLE;
     NetworkTable outtake = NetworkTableInstance.getDefault().getTable("Outtake");
     startBeamBreakPublisher = outtake.getBooleanTopic("Start Beam Break").publish();
-    endBeamBreakPublisher = outtake.getBooleanTopic("End Beam Break").publish();
     currentStatePublisher = outtake.getStringTopic("Current State").publish();
   }
 
@@ -40,47 +41,56 @@ public class Outtake extends SubsystemBase {
   public void periodic() {
     determineNextState();
     startBeamBreakPublisher.set(startBeamBreak.get());
-    endBeamBreakPublisher.set(endBeamBreak.get());
     currentStatePublisher.set(currentState.toString());
 
     switch (currentState) {
       case IDLE:
-        volts = 0.0;
+        leftVolts = 0.0;
+        rightVolts = 0.0;
         break;
       case LOADING:
-        volts = 1.5;
+        leftVolts = -1.5;
+        rightVolts = 1.0;
         break;
       case SHOOTING:
-        volts = 3.0;
+        leftVolts = -6.0;
+        rightVolts = 4.0;
         break;
       case MANUAL_FORWARD:
-        volts = 3.0;
+        leftVolts = -3.0;
+        rightVolts = 2.0;
         break;
       case MANUAL_BACKWARD:
-        volts = -3.0;
+        leftVolts = 3.0;
+        rightVolts = -2.0;
         break;
     }
 
-    motor.setVoltage(volts);
+    leftMotor.setVoltage(leftVolts);
+    rightMotor.setVoltage(rightVolts);
   }
 
   private void determineNextState() {
-    if(currentState == State.MANUAL_FORWARD || currentState == State.MANUAL_BACKWARD) {
+    if (currentState == State.MANUAL_FORWARD || currentState == State.MANUAL_BACKWARD) {
       return;
-    } else if (currentState == State.IDLE && !startBeamBreak.get()) {
+    } else if (!startBeamBreak.get()) {
       currentState = State.LOADING;
-    } else if (currentState == State.LOADING && startBeamBreak.get()) {
+    } else if (currentState == State.SHOOTING && shootingStartTime == 0) {
+      shootingStartTime = System.currentTimeMillis();
+    } else if (shootingStartTime > 0) {
+      shootingEndTime = System.currentTimeMillis();
+      shootingDeltaTime = shootingEndTime - shootingStartTime;
+      if (shootingDeltaTime >= 500) {
+        currentState = State.IDLE;
+        shootingStartTime = 0;
+      }
+    } else if (startBeamBreak.get()) {
       currentState = State.IDLE;
-    } else if (shootCommand && !endBeamBreak.get()) {
-      currentState = State.SHOOTING;
-    } else if (shootCommand && endBeamBreak.get()) {
-      currentState = State.IDLE;
-      shootCommand = false;
     }
   }
 
   public Command shootCommand() {
-    return runOnce(() -> shootCommand = true);
+    return runOnce(() -> currentState = State.SHOOTING);
   }
 
   public Command manualForwardCommand() {
@@ -93,9 +103,5 @@ public class Outtake extends SubsystemBase {
 
   private void stop() {
     currentState = State.IDLE;
-  }
-
-  public boolean isOuttakeNotShooting() {
-    return currentState == State.IDLE;
   }
 }

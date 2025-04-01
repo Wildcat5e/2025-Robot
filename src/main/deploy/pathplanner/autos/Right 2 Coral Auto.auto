@@ -17,6 +17,18 @@
           }
         },
         {
+          "type": "named",
+          "data": {
+            "name": "shootCommand"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "moveToPositionZeroCommand"
+          }
+        },
+        {
           "type": "path",
           "data": {
             "pathName": "Front Right Reef to Right Coral Station"
@@ -32,6 +44,18 @@
           "type": "named",
           "data": {
             "name": "moveToLevelTwoCommand"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "shootCommand"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "moveToPositionZeroCommand"
           }
         }
       ]

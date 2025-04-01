@@ -10,15 +10,15 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj2.command.Command;
 
 public class Elevator extends SubsystemBase {
-  public static final double TOLERANCE = 5.0;
-  public static final double LEVEL_ZERO_POSITION = 0.0;
-  public static final double LEVEL_TWO_POSITION = 95.0;
-  public static final double LEVEL_THREE_POSITION = 225.0;
+  public static final double TOLERANCE = 5;
+  public static final double POSITION_ZERO = 0;
+  public static final double LEVEL_TWO_POSITION = 100;
+  public static final double LEVEL_THREE_POSITION = 230;
   private final TalonFX motor = new TalonFX(14);
   private final DigitalInput bottomBeamBreak = new DigitalInput(0);
+  private State currentState;
   private BooleanPublisher bottomBeamBreakPublisher;
   private StringPublisher currentStatePublisher;
-  private State currentState;
   private double desiredHeight;
   private double currentHeight;
   private double volts;
@@ -33,7 +33,7 @@ public class Elevator extends SubsystemBase {
     
   public Elevator() {
     currentState = State.NOT_MOVING;
-    motor.setPosition(0.0);
+    motor.setPosition(0);
     NetworkTable elevator = NetworkTableInstance.getDefault().getTable("Elevator");
     bottomBeamBreakPublisher = elevator.getBooleanTopic("Bottom Beam Break").publish();
     currentStatePublisher = elevator.getStringTopic("Current State").publish();
@@ -44,7 +44,7 @@ public class Elevator extends SubsystemBase {
     currentHeight = getCurrentHeight();
     if ((currentState == State.MOVING_DOWN || currentState == State.MANUAL_DOWN) && !bottomBeamBreak.get()) {
       currentState = State.NOT_MOVING;
-      motor.setPosition(0.0);
+      motor.setPosition(0);
     }
     determineNextState();
     bottomBeamBreakPublisher.set(bottomBeamBreak.get());
@@ -52,19 +52,19 @@ public class Elevator extends SubsystemBase {
     
     switch (currentState) {
       case NOT_MOVING:
-        volts = 0.0;
+        volts = 0;
         break;
       case MOVING_UP:
-        volts = 12.0;
+        volts = 12;
         break;
       case MOVING_DOWN:
-        volts = -8.0;
+        volts = -8;
         break;
       case MANUAL_UP:
-        volts = 3.0;
+        volts = 3;
         break;
       case MANUAL_DOWN:
-        volts = -3.0;
+        volts = -3;
         break;
     }
     
@@ -74,7 +74,7 @@ public class Elevator extends SubsystemBase {
   private void determineNextState() {
     if (currentState == State.MANUAL_UP || currentState == State.MANUAL_DOWN) {
       return;
-    } else if (Math.abs(currentHeight - desiredHeight) <= TOLERANCE && desiredHeight > 0.0) {
+    } else if (Math.abs(currentHeight - desiredHeight) <= TOLERANCE && desiredHeight > 0) {
       currentState = State.NOT_MOVING;
     } else if (desiredHeight > currentHeight + TOLERANCE) {
       currentState = State.MOVING_UP;
@@ -91,8 +91,8 @@ public class Elevator extends SubsystemBase {
     return motor.getPosition().getValueAsDouble();
   }
   
-  public Command moveToHomePositionCommand() {
-    return runOnce(() -> move(LEVEL_ZERO_POSITION));
+  public Command moveToPositionZeroCommand() {
+    return runOnce(() -> move(POSITION_ZERO));
   }
   
   public Command moveToLevelTwoCommand() {
