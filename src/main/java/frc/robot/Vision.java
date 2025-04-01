@@ -1,55 +1,55 @@
 package frc.robot;
 
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.path.GoalEndState;
 import com.pathplanner.lib.path.PathConstraints;
-import edu.wpi.first.wpilibj2.command.Command;
-import java.util.function.DoubleSupplier;
-import java.util.List;
-import com.pathplanner.lib.path.Waypoint;
 import com.pathplanner.lib.path.PathPlannerPath;
+import com.pathplanner.lib.path.Waypoint;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import com.pathplanner.lib.path.GoalEndState;
-import com.pathplanner.lib.auto.AutoBuilder;
+import edu.wpi.first.networktables.DoubleArraySubscriber;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj2.command.Command;
+
+import java.util.List;
 
 public class Vision {
-  private final PathConstraints constraints = new PathConstraints(3.0, 3.0, 2 * Math.PI, 4 * Math.PI);
-  private double yOffset = 1;
+    private final PathConstraints constraints = new PathConstraints(3.0, 3.0, 2 * Math.PI, 4 * Math.PI);
 
-  public Vision() {}
+    private final NetworkTable limelight = NetworkTableInstance.getDefault().getTable("Limelight");
+    private final DoubleArraySubscriber targetPoseRobotSpaceSubscriber =
+            limelight.getDoubleArrayTopic("targetpose_robotspace")
+                    .subscribe(new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0});
 
-  public Command alignLeftCommand(DoubleSupplier tx, DoubleSupplier ty, DoubleSupplier yaw) {
-    List<Waypoint> waypoints = PathPlannerPath.waypointsFromPoses(
-      new Pose2d(0, 0, Rotation2d.fromDegrees(0)),
-      new Pose2d(tx.getAsDouble(), ty.getAsDouble(), Rotation2d.fromDegrees(yaw.getAsDouble()))
-    );
-    
-    PathPlannerPath path = new PathPlannerPath(
-      waypoints,
-      constraints,
-      null,
-      new GoalEndState(0, Rotation2d.fromDegrees(0.0))
-    );
+    private final double Y_OFFSET = 1.0;
 
-    path.preventFlipping = true;
+    public Command alignLeftCommand() {
+        return align(-Y_OFFSET);
+    }
 
-    return AutoBuilder.followPath(path);
-  }
+    public Command alignRightCommand() {
+        return align(Y_OFFSET);
+    }
 
-  public Command alignRightCommand(DoubleSupplier tx, DoubleSupplier ty, DoubleSupplier yaw) {
-    List<Waypoint> waypoints = PathPlannerPath.waypointsFromPoses(
-      new Pose2d(0, 0, Rotation2d.fromDegrees(0)),
-      new Pose2d(tx.getAsDouble(), ty.getAsDouble(), Rotation2d.fromDegrees(yaw.getAsDouble()))
-    );
-    
-    PathPlannerPath path = new PathPlannerPath(
-      waypoints,
-      constraints,
-      null,
-      new GoalEndState(0, Rotation2d.fromDegrees(0.0))
-    );
 
-    path.preventFlipping = true;
+    public Command align(double yOffset) {
+        double[] targetPoseRobotSpace = targetPoseRobotSpaceSubscriber.get();
 
-    return AutoBuilder.followPath(path);
-  }
+        List<Waypoint> waypoints = PathPlannerPath.waypointsFromPoses(
+                new Pose2d(0, 0, Rotation2d.fromDegrees(-targetPoseRobotSpace[4])),
+                new Pose2d(targetPoseRobotSpace[0], targetPoseRobotSpace[1] + yOffset, Rotation2d.fromDegrees(0))
+        );
+
+        PathPlannerPath path = new PathPlannerPath(
+                waypoints,
+                constraints,
+                null,
+                new GoalEndState(0, Rotation2d.fromDegrees(0.0))
+        );
+
+        path.preventFlipping = true;
+
+        return AutoBuilder.followPath(path);
+    }
 }

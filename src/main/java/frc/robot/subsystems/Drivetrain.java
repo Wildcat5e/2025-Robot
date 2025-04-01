@@ -9,7 +9,6 @@ import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 
-import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.PIDConstants;
@@ -21,10 +20,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
-import edu.wpi.first.networktables.DoubleArrayPublisher;
-import edu.wpi.first.networktables.DoubleArraySubscriber;
-import edu.wpi.first.networktables.NetworkTable;
-import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import com.ctre.phoenix6.SignalLogger;
 import static edu.wpi.first.units.Units.*;
@@ -116,13 +111,6 @@ public class Drivetrain extends TunerSwerveDrivetrain implements Subsystem {
     /* The SysId routine to test */
     private SysIdRoutine m_sysIdRoutineToApply = m_sysIdRoutineTranslation;
 
-    private NetworkTable limelight;
-    private DoubleArraySubscriber targetPoseRobotSpaceSubscriber;
-    private DoubleArrayPublisher targetPoseRobotSpacePublisher;
-    private double tx;
-    private double ty;
-    private double yaw;
-
     /**
      * Constructs a CTRE SwerveDrivetrain using the specified constants.
      * <p>
@@ -139,7 +127,6 @@ public class Drivetrain extends TunerSwerveDrivetrain implements Subsystem {
     ) {
         super(drivetrainConstants, modules);
         configurePathPlanner();
-        limelight();
         if (Utils.isSimulation()) {
             startSimThread();
         }
@@ -165,7 +152,6 @@ public class Drivetrain extends TunerSwerveDrivetrain implements Subsystem {
     ) {
         super(drivetrainConstants, odometryUpdateFrequency, modules);
         configurePathPlanner();
-        limelight();
         if (Utils.isSimulation()) {
             startSimThread();
         }
@@ -199,7 +185,6 @@ public class Drivetrain extends TunerSwerveDrivetrain implements Subsystem {
     ) {
         super(drivetrainConstants, odometryUpdateFrequency, odometryStandardDeviation, visionStandardDeviation, modules);
         configurePathPlanner();
-        limelight();
         if (Utils.isSimulation()) {
             startSimThread();
         }
@@ -242,16 +227,10 @@ public class Drivetrain extends TunerSwerveDrivetrain implements Subsystem {
         }
     }
 
-    private void limelight() {
-        limelight = NetworkTableInstance.getDefault().getTable("Limelight");
-        targetPoseRobotSpaceSubscriber = limelight.getDoubleArrayTopic("targetpose_robotspace").subscribe(new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 });
-        targetPoseRobotSpacePublisher = limelight.getDoubleArrayTopic("targetpose_robotspace").publish();
-    }
-
     /**
      * Returns a command that applies the specified control request to this swerve drivetrain.
      *
-     * @param request Function returning the request to apply
+     * @param requestSupplier Function returning the request to apply
      * @return Command to run
      */
     public Command applyRequest(Supplier<SwerveRequest> requestSupplier) {
@@ -300,22 +279,6 @@ public class Drivetrain extends TunerSwerveDrivetrain implements Subsystem {
             });
         }
 
-        tx = targetPoseRobotSpaceSubscriber.get()[0];
-        ty = targetPoseRobotSpaceSubscriber.get()[1];
-        yaw = targetPoseRobotSpaceSubscriber.get()[4];
-        targetPoseRobotSpacePublisher.set(new double[] { tx, ty, 0.0, 0.0, yaw, 0.0 });
-    }
-
-    public DoubleSupplier getTx() {
-        return () -> tx;
-    }
-
-    public DoubleSupplier getTy() {
-        return () -> ty;
-    }
-
-    public DoubleSupplier getYaw() {
-        return () -> yaw;
     }
 
     private void startSimThread() {

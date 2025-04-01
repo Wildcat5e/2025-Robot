@@ -74,9 +74,9 @@ public class RobotContainer {
         );
 
         button1.onTrue(outtake.shootCommand());
-        button4.onTrue(vision.alignLeftCommand(drivetrain.getTx(), drivetrain.getTy(), drivetrain.getYaw()));
+        button4.onTrue(vision.alignLeftCommand());
         button5.onTrue(superstructure.moveElevatorToLevelThreeCommand());
-        button6.onTrue(vision.alignRightCommand(drivetrain.getTx(), drivetrain.getTy(), drivetrain.getYaw()));
+        button6.onTrue(vision.alignRightCommand());
         button7.whileTrue(elevator.manualUpCommand());
         button8.onTrue(superstructure.moveElevatorToLevelTwoCommand());
         button9.whileTrue(outtake.manualBackwardCommand());
