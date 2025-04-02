@@ -39,7 +39,6 @@ public class RobotContainer {
     public final Drivetrain drivetrain = TunerConstants.createDrivetrain();
     private final Elevator elevator = new Elevator();
     private final Outtake outtake = new Outtake();
-    private final Vision vision = new Vision();
     private final Superstructure superstructure = new Superstructure(elevator);
     
     private final SendableChooser<Command> autoChooser;
@@ -72,11 +71,10 @@ public class RobotContainer {
                     .withRotationalRate(-driver.getLeftX() * MaxAngularRate)
             )
         );
-
-        button1.onTrue(outtake.shootCommand());
-        button4.onTrue(vision.alignLeftCommand());
+        
+        button4.onTrue(AlignOnReef.left());
         button5.onTrue(superstructure.moveElevatorToLevelThreeCommand());
-        button6.onTrue(vision.alignRightCommand());
+        button6.onTrue(AlignOnReef.right());
         button7.whileTrue(elevator.manualUpCommand());
         button8.onTrue(superstructure.moveElevatorToLevelTwoCommand());
         button9.whileTrue(outtake.manualBackwardCommand());

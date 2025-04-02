@@ -14,7 +14,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 
 import java.util.List;
 
-public class AlignOnAprilTag extends Command {
+public class AlignOnReef extends Command {
 
     public static final Rotation2d ZERO_ROTATION = Rotation2d.fromDegrees(0);
     private final PathConstraints constraints = new PathConstraints(3.0, 3.0, 2 * Math.PI, 4 * Math.PI);
@@ -29,12 +29,20 @@ public class AlignOnAprilTag extends Command {
 
     private Command followPathCommand;
 
-    private AlignOnAprilTag(double xOffset, double yOffset) {
+    private AlignOnReef(double xOffset, double yOffset) {
         this.xOffset = xOffset;
         this.yOffset = yOffset;
     }
 
-    @Override public void initialize() {
+    public static AlignOnReef left() {
+        return new AlignOnReef(0.52, -0.12);
+    }
+
+    public static AlignOnReef right() {
+        return new AlignOnReef(0.52, 0.12);
+    }
+
+    @Override public void initialize() { // TODO: handle when april tag is not visible
         double[] targetPoseRobotSpace = targetPoseRobotSpaceSubscriber.get();
 
         double x = targetPoseRobotSpace[0] + xOffset;
