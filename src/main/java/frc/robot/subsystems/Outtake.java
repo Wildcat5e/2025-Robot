@@ -39,7 +39,7 @@ public class Outtake extends SubsystemBase {
 
   @Override
   public void periodic() {
-    determineNextState();
+    handleStateTransition();
     startBeamBreakPublisher.set(startBeamBreak.get());
     currentStatePublisher.set(currentState.toString());
 
@@ -49,20 +49,20 @@ public class Outtake extends SubsystemBase {
         rightVolts = 0.0;
         break;
       case LOADING:
-        leftVolts = -1.5;
-        rightVolts = 1.0;
+        leftVolts = -12.0;
+        rightVolts = 8.0;
         break;
       case SHOOTING:
-        leftVolts = -6.0;
-        rightVolts = 4.0;
+        leftVolts = -12.0;
+        rightVolts = 8.0;
         break;
       case MANUAL_FORWARD:
-        leftVolts = -3.0;
-        rightVolts = 2.0;
+        leftVolts = -12.0;
+        rightVolts = 8.0;
         break;
       case MANUAL_BACKWARD:
-        leftVolts = 3.0;
-        rightVolts = -2.0;
+        leftVolts = 12.0;
+        rightVolts = -8.0;
         break;
     }
 
@@ -70,7 +70,7 @@ public class Outtake extends SubsystemBase {
     rightMotor.setVoltage(rightVolts);
   }
 
-  private void determineNextState() {
+  private void handleStateTransition() {
     if (currentState == State.MANUAL_FORWARD || currentState == State.MANUAL_BACKWARD) {
       return;
     } else if (!startBeamBreak.get()) {
@@ -89,15 +89,15 @@ public class Outtake extends SubsystemBase {
     }
   }
 
-  public Command shootCommand() {
+  public Command shoot() {
     return runOnce(() -> currentState = State.SHOOTING);
   }
 
-  public Command manualForwardCommand() {
+  public Command manualForward() {
     return runEnd(() -> currentState = State.MANUAL_FORWARD, () -> stop());
   }
 
-  public Command manualBackwardCommand() {
+  public Command manualBackward() {
     return runEnd(() -> currentState = State.MANUAL_BACKWARD, () -> stop());
   }
 
