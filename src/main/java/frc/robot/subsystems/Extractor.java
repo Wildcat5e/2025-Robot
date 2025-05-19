@@ -1,9 +1,8 @@
 package frc.robot.subsystems;
 
-import com.ctre.phoenix6.hardware.TalonFX;
-
-import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import com.ctre.phoenix6.hardware.TalonFX;
+import edu.wpi.first.wpilibj2.command.Command;
 
 public class Extractor extends SubsystemBase {
   TalonFX motor = new TalonFX(17);
@@ -11,8 +10,8 @@ public class Extractor extends SubsystemBase {
 
   public enum State {
     IDLE,
-    JOG_UP,
-    JOG_DOWN
+    MANUAL_UP,
+    MANUAL_DOWN
   }
 
   public Extractor() {
@@ -25,21 +24,21 @@ public class Extractor extends SubsystemBase {
       case IDLE:
         motor.setVoltage(0);
         break;
-      case JOG_UP:
-        motor.setVoltage(3);
+      case MANUAL_UP:
+        motor.setVoltage(1.5);
         break;
-      case JOG_DOWN:
-        motor.setVoltage(-3);
+      case MANUAL_DOWN:
+        motor.setVoltage(-1.5);
         break;
     }
   }
 
-  public Command jogUp() {
-    return runEnd(() -> currentState = State.JOG_UP, () -> currentState = State.IDLE);
+  public Command manualUpCommand() {
+    return runEnd(() -> currentState = State.MANUAL_UP, () -> currentState = State.IDLE);
   }
 
-  public Command jogDown() {
-    return runEnd(() -> currentState = State.JOG_DOWN, () -> currentState = State.IDLE);
+  public Command manualDownCommand() {
+    return runEnd(() -> currentState = State.MANUAL_DOWN, () -> currentState = State.IDLE);
   }
 
 }
