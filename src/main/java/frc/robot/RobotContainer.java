@@ -1,30 +1,33 @@
 package frc.robot;
 
-import frc.robot.subsystems.Drivetrain;
-import frc.robot.commands.AlignOnReef;
 import frc.robot.generated.TunerConstants;
-import com.ctre.phoenix6.swerve.SwerveRequest;
-import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.Outtake;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj2.command.Command;
 import com.pathplanner.lib.auto.NamedCommands;
+import edu.wpi.first.wpilibj.DataLogManager;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.cameraserver.CameraServer;
 import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.cameraserver.CameraServer;
-import edu.wpi.first.cscore.HttpCamera;
-import edu.wpi.first.wpilibj2.command.Command;
+import com.ctre.phoenix6.swerve.SwerveRequest;
+import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import static edu.wpi.first.units.Units.*;
 
 public class RobotContainer {
     private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond);
     private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond);
 
+    private Telemetry logger = new Telemetry(MaxSpeed);
+
     private final CommandXboxController driver = new CommandXboxController(0);
     private final Joystick operator = new Joystick(1);
+    
     private final JoystickButton button1 = new JoystickButton(operator, 1);
     private final JoystickButton button2 = new JoystickButton(operator, 2);
     private final JoystickButton button3 = new JoystickButton(operator, 3);
@@ -38,55 +41,55 @@ public class RobotContainer {
     private final JoystickButton button11 = new JoystickButton(operator, 11);
     private final JoystickButton button12 = new JoystickButton(operator, 12);
 
-    public final Drivetrain drivetrain = TunerConstants.createDrivetrain();
-    private final Elevator elevator = new Elevator();
+    private final Drivetrain drivetrain = TunerConstants.createDrivetrain();
+    private final LED led = new LED();
+    private final Elevator elevator = new Elevator(led);
     private final Outtake outtake = new Outtake();
-    private final Superstructure superstructure = new Superstructure(elevator);
     
     private final SendableChooser<Command> autoChooser;
 
     public RobotContainer() {
-      NamedCommands.registerCommand("moveToPositionZeroCommand", superstructure.moveElevatorToPositionZeroCommand());
-      NamedCommands.registerCommand("moveToLevelTwoCommand", superstructure.moveElevatorToLevelTwoCommand());
-      NamedCommands.registerCommand("moveToLevelThreeCommand", superstructure.moveElevatorToLevelThreeCommand());
-      NamedCommands.registerCommand("shootCommand", outtake.shootCommand());
+      NamedCommands.registerCommand("moveToPositionZero", elevator.moveToPositionZero());
+      NamedCommands.registerCommand("moveToLevelTwo", elevator.moveToLevelTwo());
+      NamedCommands.registerCommand("moveToLevelThree", elevator.moveToLevelThree());
       
       configureBindings();
-      
+
+      DataLogManager.start();
+      DriverStation.startDataLog(DataLogManager.getLog());
+      elevator.configure();
+
+      CameraServer.startAutomaticCapture();
+
       autoChooser = AutoBuilder.buildAutoChooser();
       SmartDashboard.putData("Auto Chooser", autoChooser);
-
-      
-      HttpCamera limelight = new HttpCamera("limelight", "http://limelight.local:5800/");
-      CameraServer.startAutomaticCapture(limelight);
-      
-      CameraServer.startAutomaticCapture();
     }
 
     private final SwerveRequest.RobotCentric drive = new SwerveRequest.RobotCentric()
             .withDeadband(MaxSpeed * 0.1).withRotationalDeadband(MaxAngularRate * 0.1)
             .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
+    
     // private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
     // private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
 
     private void configureBindings() {
       drivetrain.setDefaultCommand(
-            drivetrain.applyRequest(() ->
-                drive.withVelocityX(-driver.getRightY() * MaxSpeed)
-                    .withVelocityY(-driver.getRightX() * MaxSpeed)
-                    .withRotationalRate(-driver.getLeftX() * MaxAngularRate)
-            )
-        );
-        
-        button4.onTrue(AlignOnReef.left());
-        button5.onTrue(superstructure.moveElevatorToLevelThreeCommand());
-        button6.onTrue(AlignOnReef.right());
-        button7.whileTrue(elevator.manualUpCommand());
-        button8.onTrue(superstructure.moveElevatorToLevelTwoCommand());
-        button9.whileTrue(outtake.manualBackwardCommand());
-        button10.whileTrue(elevator.manualDownCommand());
-        button11.onTrue(superstructure.moveElevatorToPositionZeroCommand());
-        button12.whileTrue(outtake.manualForwardCommand());
+      drivetrain.applyRequest(() ->
+        drive.withVelocityX(-driver.getLeftY() * MaxSpeed)
+          .withVelocityY(-driver.getLeftX() * MaxSpeed)
+          .withRotationalRate(-driver.getRightX() * MaxAngularRate)
+      )
+    );
+    
+    button5.onTrue(elevator.moveToLevelThree());
+    button8.onTrue(elevator.moveToLevelTwo());
+    button11.onTrue(elevator.moveToPositionZero());
+    button9.onTrue(outtake.shoot());
+
+    
+    driver.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
+
+    drivetrain.registerTelemetry(logger::telemeterize);
     }
 
     public Command getAutonomousCommand() {
