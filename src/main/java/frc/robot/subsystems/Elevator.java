@@ -1,122 +1,132 @@
 package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.networktables.BooleanPublisher;
+import edu.wpi.first.networktables.DoublePublisher;
 import edu.wpi.first.networktables.StringPublisher;
+import frc.robot.LED;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj2.command.Command;
 
 public class Elevator extends SubsystemBase {
-  public static final double TOLERANCE = 5;
-  public static final double POSITION_ZERO = 0;
-  public static final double LEVEL_TWO_POSITION = 100;
-  public static final double LEVEL_THREE_POSITION = 230;
+  private static final double TOLERANCE = 0.0127;
+  private static final double POSITION_ZERO = 0.0;
+  private static final double LEVEL_TWO = 0.30;
+  private static final double LEVEL_THREE = 0.70;
+  private static final double GEAR_RATIO = 20.0;
+  private static final double SPOOL_RADIUS_METERS = 0.0099949;
+  private static final double SPOOL_CIRCUMFERENCE_METERS = 2 * Math.PI * SPOOL_RADIUS_METERS;
   private final TalonFX motor = new TalonFX(14);
   private final DigitalInput bottomBeamBreak = new DigitalInput(0);
+  private final BooleanPublisher bottomBeamBreakPublisher;
+  private final DoublePublisher currentHeightPublisher;
+  private final DoublePublisher targetHeightPublisher;
+  private final StringPublisher currentStatePublisher;
+  private final LED led;
   private State currentState;
-  private BooleanPublisher bottomBeamBreakPublisher;
-  private StringPublisher currentStatePublisher;
-  private double desiredHeight;
   private double currentHeight;
-  private double volts;
+  private double targetHeight;
   
   public enum State {
     NOT_MOVING,
     MOVING_UP,
-    MOVING_DOWN,
-    MANUAL_UP,
-    MANUAL_DOWN
+    MOVING_DOWN
   }
     
-  public Elevator() {
+  public Elevator(LED led) {
+    TalonFXConfiguration config = new TalonFXConfiguration();
+    config.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+    config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+    motor.getConfigurator().apply(config);
+
     currentState = State.NOT_MOVING;
-    motor.setPosition(0);
+    motor.setPosition(0.0);
+
     NetworkTable elevator = NetworkTableInstance.getDefault().getTable("Elevator");
     bottomBeamBreakPublisher = elevator.getBooleanTopic("Bottom Beam Break").publish();
     currentStatePublisher = elevator.getStringTopic("Current State").publish();
+    currentHeightPublisher = elevator.getDoubleTopic("Current Height").publish();
+    targetHeightPublisher = elevator.getDoubleTopic("Target Height").publish();
+
+    this.led = led;
   }
   
   @Override
   public void periodic() {
     currentHeight = getCurrentHeight();
-    if ((currentState == State.MOVING_DOWN || currentState == State.MANUAL_DOWN) && !bottomBeamBreak.get()) {
+
+    if ((currentState == State.MOVING_DOWN) && !bottomBeamBreak.get()) {
       currentState = State.NOT_MOVING;
-      motor.setPosition(0);
+      motor.setPosition(0.0);
+      setTargetHeight(0.0);
     }
-    determineNextState();
+
+    handleStateTransition(currentHeight);
+
     bottomBeamBreakPublisher.set(bottomBeamBreak.get());
     currentStatePublisher.set(currentState.toString());
+    currentHeightPublisher.set(currentHeight);
+    targetHeightPublisher.set(targetHeight);
     
     switch (currentState) {
       case NOT_MOVING:
-        volts = 0;
+        motor.setVoltage(0.0);
+        led.setLEDs(LED.BLACK);
         break;
       case MOVING_UP:
-        volts = 12;
+        motor.setVoltage(5.0);
+        led.setLEDs(LED.GREEN);
         break;
       case MOVING_DOWN:
-        volts = -8;
-        break;
-      case MANUAL_UP:
-        volts = 3;
-        break;
-      case MANUAL_DOWN:
-        volts = -3;
+        motor.setVoltage(-5.0);
+        led.setLEDs(LED.RED);
         break;
     }
-    
-    motor.setVoltage(volts);
   }
   
-  private void determineNextState() {
-    if (currentState == State.MANUAL_UP || currentState == State.MANUAL_DOWN) {
-      return;
-    } else if (Math.abs(currentHeight - desiredHeight) <= TOLERANCE && desiredHeight > 0) {
+  private void handleStateTransition(double currentHeight) {
+    if (Math.abs(targetHeight - currentHeight) <= TOLERANCE && targetHeight > 0) {
       currentState = State.NOT_MOVING;
-    } else if (desiredHeight > currentHeight + TOLERANCE) {
+    } else if (targetHeight > currentHeight + TOLERANCE) {
       currentState = State.MOVING_UP;
-    } else if (desiredHeight < currentHeight - TOLERANCE) {
+    } else if (targetHeight < currentHeight - TOLERANCE) {
       currentState = State.MOVING_DOWN;
     }
   }
   
-  private void move(double desiredHeight) {
-    this.desiredHeight = desiredHeight;
+  private void setTargetHeight(double targetHeight) {
+    this.targetHeight = targetHeight;
   }
   
   private double getCurrentHeight() {
-    return motor.getPosition().getValueAsDouble();
+    return motor.getPosition().getValueAsDouble() / GEAR_RATIO * SPOOL_CIRCUMFERENCE_METERS;
+  }
+
+  public Command moveToPositionZero() {
+    return runOnce(() -> setTargetHeight(POSITION_ZERO)).until(() -> withinTolerance());
   }
   
-  public Command moveToPositionZeroCommand() {
-    return runOnce(() -> move(POSITION_ZERO));
+  public Command moveToLevelTwo() {
+    return runOnce(() -> setTargetHeight(LEVEL_TWO)).until(() -> withinTolerance());
   }
   
-  public Command moveToLevelTwoCommand() {
-    return runOnce(() -> move(LEVEL_TWO_POSITION));
-  }
-  
-  public Command moveToLevelThreeCommand() {
-    return runOnce(() -> move(LEVEL_THREE_POSITION));
+  public Command moveToLevelThree() {
+    return runOnce(() -> setTargetHeight(LEVEL_THREE)).until(() -> withinTolerance());
   }
 
-  public Command manualUpCommand() {
-    return runEnd(() -> currentState = State.MANUAL_UP, () -> stop());
+  private boolean withinTolerance() {
+    return Math.abs(targetHeight - currentHeight) < TOLERANCE;
   }
 
-  public Command manualDownCommand() {
-    return runEnd(() -> currentState = State.MANUAL_DOWN, () -> stop());
-  }
-
-  private void stop() {
-    currentState = State.NOT_MOVING;
-    desiredHeight = getCurrentHeight();
-  }
-
-  public boolean isElevatorNotMoving() {
-    return currentState == State.NOT_MOVING;
+  public void configure() {
+    if(bottomBeamBreak.get()) {
+      setTargetHeight(Double.NEGATIVE_INFINITY);
+    }
   }
 }
