@@ -20,8 +20,8 @@ public class Elevator extends SubsystemBase {
   private static final double LEVEL_TWO = 0.30;
   private static final double LEVEL_THREE = 0.70;
   private static final double GEAR_RATIO = 20.0;
-  private static final double SPOOL_RADIUS_METERS = 0.0099949;
-  private static final double SPOOL_CIRCUMFERENCE_METERS = 2 * Math.PI * SPOOL_RADIUS_METERS;
+  private static final double SPOOL_DIAMETER_METERS = 0.0199898;
+  private static final double SPOOL_CIRCUMFERENCE_METERS = Math.PI * SPOOL_DIAMETER_METERS;
   private final TalonFX motor = new TalonFX(14);
   private final DigitalInput bottomBeamBreak = new DigitalInput(0);
   private final BooleanPublisher bottomBeamBreakPublisher;
