@@ -6,6 +6,7 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.Elevator;
+import frc.robot.subsystems.Extractor;
 import frc.robot.subsystems.Outtake;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -44,7 +45,8 @@ public class RobotContainer {
     private final Drivetrain drivetrain = TunerConstants.createDrivetrain();
     private final LED led = new LED();
     private final Elevator elevator = new Elevator(led);
-    private final Outtake outtake = new Outtake();
+    private final Outtake outtake = new Outtake(led);
+    Extractor extractor = new Extractor();
     
     private final SendableChooser<Command> autoChooser;
 
@@ -57,7 +59,7 @@ public class RobotContainer {
 
       DataLogManager.start();
       DriverStation.startDataLog(DataLogManager.getLog());
-      elevator.configure();
+      // elevator.configure();
 
       CameraServer.startAutomaticCapture();
 
@@ -65,7 +67,7 @@ public class RobotContainer {
       SmartDashboard.putData("Auto Chooser", autoChooser);
     }
 
-    private final SwerveRequest.RobotCentric drive = new SwerveRequest.RobotCentric()
+    private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
             .withDeadband(MaxSpeed * 0.1).withRotationalDeadband(MaxAngularRate * 0.1)
             .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
     
@@ -85,7 +87,10 @@ public class RobotContainer {
     button8.onTrue(elevator.moveToLevelTwo());
     button11.onTrue(elevator.moveToPositionZero());
     button9.onTrue(outtake.shoot());
-
+    button7.whileTrue(elevator.manualUp());
+    button10.whileTrue(elevator.manualDown());
+    button12.whileTrue(extractor.manualUpCommand());
+    button6.whileTrue(extractor.manualDownCommand());
     
     driver.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
 
