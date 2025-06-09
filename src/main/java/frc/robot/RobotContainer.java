@@ -7,6 +7,7 @@ import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.Extractor;
+import frc.robot.subsystems.LED;
 import frc.robot.subsystems.Outtake;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -43,9 +44,11 @@ public class RobotContainer {
     private final JoystickButton button12 = new JoystickButton(operator, 12);
 
     private final Drivetrain drivetrain = TunerConstants.createDrivetrain();
-    private final LED led = new LED();
-    private final Elevator elevator = new Elevator(led);
-    private final Outtake outtake = new Outtake(led);
+    
+    private final Elevator elevator = new Elevator();
+    private final Outtake outtake = new Outtake();
+    private final LED led = new LED(elevator, outtake);
+
     Extractor extractor = new Extractor();
     
     private final SendableChooser<Command> autoChooser;
@@ -57,8 +60,8 @@ public class RobotContainer {
       
       configureBindings();
 
-      DataLogManager.start();
-      DriverStation.startDataLog(DataLogManager.getLog());
+      // DataLogManager.start();
+      // DriverStation.startDataLog(DataLogManager.getLog());
       // elevator.configure();
 
       CameraServer.startAutomaticCapture();
@@ -79,22 +82,22 @@ public class RobotContainer {
       drivetrain.applyRequest(() ->
         drive.withVelocityX(-driver.getLeftY() * MaxSpeed)
           .withVelocityY(-driver.getLeftX() * MaxSpeed)
-          .withRotationalRate(-driver.getRightX() * MaxAngularRate)
+          .withRotationalRate(-driver.getRightTriggerAxis() * MaxAngularRate)
       )
     );
     
-    button5.onTrue(elevator.moveToLevelThree());
-    button8.onTrue(elevator.moveToLevelTwo());
-    button11.onTrue(elevator.moveToPositionZero());
-    button9.onTrue(outtake.shoot());
-    button7.whileTrue(elevator.manualUp());
-    button10.whileTrue(elevator.manualDown());
-    button12.whileTrue(extractor.manualUpCommand());
-    button6.whileTrue(extractor.manualDownCommand());
+      button5.onTrue(elevator.moveToLevelThree());
+      button8.onTrue(elevator.moveToLevelTwo());
+      button11.onTrue(elevator.moveToPositionZero());
+      button9.onTrue(outtake.shoot());
+      button7.whileTrue(elevator.manualUp());
+      button10.whileTrue(elevator.manualDown());
+      button12.whileTrue(extractor.manualUpCommand());
+      button6.whileTrue(extractor.manualDownCommand());
     
-    driver.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
+      // driver.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
 
-    drivetrain.registerTelemetry(logger::telemeterize);
+      drivetrain.registerTelemetry(logger::telemeterize);
     }
 
     public Command getAutonomousCommand() {
