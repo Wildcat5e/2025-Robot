@@ -84,8 +84,4 @@ public class Outtake extends SubsystemBase {
   public Command shoot() {
     return runOnce(() -> currentState = State.SHOOTING).withName("Shoot");
   }
-
-  public State getCurrentState() {
-    return currentState;
-  }
 }

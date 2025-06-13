@@ -18,8 +18,8 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 public class Elevator extends SubsystemBase {
   private static final double TOLERANCE = 0.0127;
   private static final double POSITION_ZERO = 0.0;
-  private static final double LEVEL_TWO = 0.30;
-  private static final double LEVEL_THREE = 0.70;
+  private static final double LEVEL_TWO = 0.3;
+  private static final double LEVEL_THREE = 0.7;
   private static final double GEAR_RATIO = 20.0;
   private static final double SPOOL_DIAMETER_METERS = 0.0199898;
   private static final double SPOOL_CIRCUMFERENCE_METERS = Math.PI * SPOOL_DIAMETER_METERS;
@@ -32,26 +32,28 @@ public class Elevator extends SubsystemBase {
   private State currentState;
   private double currentHeight;
   private double targetHeight;
-  private boolean manualUp;
-  private boolean manualDown;
   
   public enum State {
     NOT_MOVING,
     MOVING_UP,
     MOVING_DOWN,
-    HOLDING_POSITION
+    HOLDING_POSITION,
+    MANUAL_UP,
+    MANUAL_DOWN,
+    INIT
   }
     
   public Elevator() {
     TalonFXConfiguration config = new TalonFXConfiguration();
     config.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
     config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+    config.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
+    config.SoftwareLimitSwitch.ForwardSoftLimitThreshold = 0.7;
     motor.getConfigurator().apply(config);
 
-    currentState = State.NOT_MOVING;
+    currentState = State.INIT;
     motor.setPosition(0.0);
-    manualUp = false;
-    manualDown = false;
+    setTargetHeight(Double.NEGATIVE_INFINITY);
 
     NetworkTable elevator = NetworkTableInstance.getDefault().getTable("Elevator");
     bottomBeamBreakPublisher = elevator.getBooleanTopic("BottomBeamBreak").publish();
@@ -60,12 +62,12 @@ public class Elevator extends SubsystemBase {
     currentStatePublisher = elevator.getStringTopic("CurrentState").publish();
     SmartDashboard.putData(this);
   }
-  
+
   @Override
   public void periodic() {
     currentHeight = getCurrentHeight();
 
-    if ((currentState == State.MOVING_DOWN || manualDown) && !bottomBeamBreak.get()) {
+    if ((currentState == State.MOVING_DOWN || currentState == State.MANUAL_DOWN || currentState == State.INIT) && !bottomBeamBreak.get()) {
       motor.setPosition(0.0);
       setTargetHeight(0.0);
     }
@@ -76,12 +78,6 @@ public class Elevator extends SubsystemBase {
     currentStatePublisher.set(currentState.toString());
     currentHeightPublisher.set(currentHeight);
     targetHeightPublisher.set(targetHeight);
-
-    if (manualUp) {
-      motor.set(0.25);
-    } else if (manualDown) {
-      motor.set(-0.25);
-    }
 
     switch (currentState) {
       case NOT_MOVING:
@@ -96,17 +92,33 @@ public class Elevator extends SubsystemBase {
       case HOLDING_POSITION:
         motor.set(0.0);
         break;
+      case MANUAL_UP:
+        motor.set(0.25);
+        break;
+      case MANUAL_DOWN:
+        motor.set(-0.25);
+        break;
+      case INIT:
+        motor.set(-0.8);
+        break;
     }
   }
   
   private void handleStateTransition(double currentHeight) {
-    if((currentState == State.MOVING_DOWN || manualDown) && !bottomBeamBreak.get()) {
+    if (currentState == State.INIT) {
+      if (!bottomBeamBreak.get()) {
+        currentState = State.NOT_MOVING;
+      }
+      return;
+    } else if ((currentState == State.MOVING_DOWN || currentState == State.MANUAL_DOWN) && !bottomBeamBreak.get()) {
       currentState = State.NOT_MOVING;
+    } else if (currentState == State.MANUAL_UP || currentState == State.MANUAL_DOWN) {
+      return;
     } else if (Math.abs(targetHeight - currentHeight) <= TOLERANCE && targetHeight > 0.0) {
       currentState = State.HOLDING_POSITION;
-    } else if (targetHeight > currentHeight + TOLERANCE) {
+    } else if ((currentState == State.MOVING_UP || currentState == State.MOVING_DOWN) && targetHeight > currentHeight + TOLERANCE) {
       currentState = State.MOVING_UP;
-    } else if (targetHeight < currentHeight - TOLERANCE) {
+    } else if ((currentState == State.MOVING_UP || currentState == State.MOVING_DOWN) && targetHeight < currentHeight - TOLERANCE) {
       currentState = State.MOVING_DOWN;
     }
   }
@@ -150,34 +162,19 @@ public class Elevator extends SubsystemBase {
   }
 
   private boolean withinTolerance() {
-    return Math.abs(targetHeight - currentHeight) < TOLERANCE;
+    return Math.abs(targetHeight - currentHeight) <= TOLERANCE;
   }
 
   public Command manualUp() {
-    return startEnd(() -> manualUp = true, () -> stopManualUp());
+    return startEnd(() -> currentState = State.MANUAL_UP, () -> stop());
   }
 
   public Command manualDown() {
-    return startEnd(() -> manualDown = true, () -> stopManualDown());
+    return startEnd(() -> currentState = State.MANUAL_DOWN, () -> stop());
   }
 
-  public void stopManualUp() {
-    manualUp = false;
+  private void stop() {
+    currentState = State.HOLDING_POSITION;
     setTargetHeight(getCurrentHeight());
-  }
-
-  public void stopManualDown() {
-    manualDown = false;
-    setTargetHeight(getCurrentHeight());
-  }
-
-  public void configure() {
-    if(bottomBeamBreak.get()) {
-      setTargetHeight(Double.NEGATIVE_INFINITY);
-    }
-  }
-
-  public State getCurrentState() {
-    return currentState;
   }
 }
