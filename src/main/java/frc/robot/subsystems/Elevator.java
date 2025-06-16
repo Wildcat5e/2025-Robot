@@ -47,13 +47,10 @@ public class Elevator extends SubsystemBase {
     TalonFXConfiguration config = new TalonFXConfiguration();
     config.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
     config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
-    config.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
-    config.SoftwareLimitSwitch.ForwardSoftLimitThreshold = 0.7;
     motor.getConfigurator().apply(config);
 
     currentState = State.INIT;
     motor.setPosition(0.0);
-    setTargetHeight(Double.NEGATIVE_INFINITY);
 
     NetworkTable elevator = NetworkTableInstance.getDefault().getTable("Elevator");
     bottomBeamBreakPublisher = elevator.getBooleanTopic("BottomBeamBreak").publish();
@@ -81,25 +78,25 @@ public class Elevator extends SubsystemBase {
 
     switch (currentState) {
       case NOT_MOVING:
-        motor.set(0.0);
+        motor.setVoltage(0.0);
         break;
       case MOVING_UP:
-        motor.set(1.0);
+        motor.setVoltage(12.0);
         break;
       case MOVING_DOWN:
-        motor.set(-0.8);
+        motor.setVoltage(-8.0);
         break;
       case HOLDING_POSITION:
-        motor.set(0.0);
+        motor.setVoltage(0.0);
         break;
       case MANUAL_UP:
-        motor.set(0.25);
+        motor.setVoltage(3.0);
         break;
       case MANUAL_DOWN:
-        motor.set(-0.25);
+        motor.setVoltage(-3.0);
         break;
       case INIT:
-        motor.set(-0.8);
+        motor.setVoltage(-6.0);
         break;
     }
   }
@@ -116,9 +113,9 @@ public class Elevator extends SubsystemBase {
       return;
     } else if (Math.abs(targetHeight - currentHeight) <= TOLERANCE && targetHeight > 0.0) {
       currentState = State.HOLDING_POSITION;
-    } else if ((currentState == State.MOVING_UP || currentState == State.MOVING_DOWN) && targetHeight > currentHeight + TOLERANCE) {
+    } else if (targetHeight > currentHeight + TOLERANCE) {
       currentState = State.MOVING_UP;
-    } else if ((currentState == State.MOVING_UP || currentState == State.MOVING_DOWN) && targetHeight < currentHeight - TOLERANCE) {
+    } else if (targetHeight < currentHeight - TOLERANCE) {
       currentState = State.MOVING_DOWN;
     }
   }
