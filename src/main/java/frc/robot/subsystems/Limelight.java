@@ -29,37 +29,39 @@ public class Limelight extends SubsystemBase {
   NetworkTable limelight = NetworkTableInstance.getDefault().getTable("limelight");
   AprilTagFieldLayout layout = AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeWelded);
   PathConstraints constraints = new PathConstraints(3.0, 3.0, 2 * Math.PI, 4 * Math.PI);
+  Field2d field = new Field2d();
   NetworkTableEntry botPoseEntry;
   double[] botPose;
+  Pose2d[] aprilTagPoses;
+  Pose2d[] blueAprilTagPoses;
+  Pose2d[] redAprilTagPoses;
   boolean hasTarget;
   Pose2d updatedPose;
   double totalLatency;
   double timestamp;
   Pose2d currentPose;
-  Pose2d[] blueAprilTagPoses = new Pose2d[] {
-    layout.getTagPose(17).get().toPose2d(),
-    layout.getTagPose(18).get().toPose2d(),
-    layout.getTagPose(19).get().toPose2d(),
-    layout.getTagPose(20).get().toPose2d(),
-    layout.getTagPose(21).get().toPose2d(),
-    layout.getTagPose(22).get().toPose2d(),
-  };
-
-  Pose2d[] redAprilTagPoses = new Pose2d[] {
-    layout.getTagPose(6).get().toPose2d(),
-    layout.getTagPose(7).get().toPose2d(),
-    layout.getTagPose(8).get().toPose2d(),
-    layout.getTagPose(9).get().toPose2d(),
-    layout.getTagPose(10).get().toPose2d(),
-    layout.getTagPose(11).get().toPose2d(),
-  };
-
-  Pose2d[] aprilTagPoses;
-
-  Field2d field = new Field2d();
 
   public Limelight(Drivetrain drivetrain) {
     this.drivetrain = drivetrain;
+
+    blueAprilTagPoses = new Pose2d[] {
+      layout.getTagPose(17).get().toPose2d(),
+      layout.getTagPose(18).get().toPose2d(),
+      layout.getTagPose(19).get().toPose2d(),
+      layout.getTagPose(20).get().toPose2d(),
+      layout.getTagPose(21).get().toPose2d(),
+      layout.getTagPose(22).get().toPose2d(),
+    };
+
+    redAprilTagPoses = new Pose2d[] {
+      layout.getTagPose(6).get().toPose2d(),
+      layout.getTagPose(7).get().toPose2d(),
+      layout.getTagPose(8).get().toPose2d(),
+      layout.getTagPose(9).get().toPose2d(),
+      layout.getTagPose(10).get().toPose2d(),
+      layout.getTagPose(11).get().toPose2d(),
+    };
+
     Alliance alliance = DriverStation.getAlliance().orElse(Alliance.Blue);
     if(alliance == Alliance.Blue) {
       botPoseEntry = limelight.getEntry("botpose_wpiblue");
@@ -81,9 +83,9 @@ public class Limelight extends SubsystemBase {
       updatedPose = new Pose2d(botPose[0], botPose[1], Rotation2d.fromDegrees(botPose[5]));
       totalLatency = botPose[6];
       timestamp = Timer.getFPGATimestamp() - totalLatency;
-      drivetrain.addVisionMeasurement(currentPose, timestamp);
+      drivetrain.addVisionMeasurement(updatedPose, timestamp);
     }
-
+    
     field.setRobotPose(drivetrain.getState().Pose);
   }
 
@@ -97,7 +99,11 @@ public class Limelight extends SubsystemBase {
       double distance = currentPose.getTranslation().getDistance(pose.getTranslation());
       if (distance < minDistance) {
         minDistance = distance;
-        targetPose = new Pose2d(pose.getX(), pose.getY() + OFFSET_METERS, pose.getRotation());
+        targetPose = new Pose2d(
+          pose.getX() - OFFSET_METERS * Math.sin(pose.getRotation().getRadians()), 
+          pose.getY() + OFFSET_METERS * Math.cos(pose.getRotation().getRadians()),
+          pose.getRotation().plus(Rotation2d.fromDegrees(180.0))
+        );
       }
     }
 
@@ -110,7 +116,7 @@ public class Limelight extends SubsystemBase {
       waypoints,
       constraints,
       null,
-      new GoalEndState(0.0, Rotation2d.fromDegrees(-90))
+      new GoalEndState(0.0, Rotation2d.fromDegrees(targetPose.getRotation().getDegrees()))
     );
 
     path.preventFlipping = true;
@@ -128,7 +134,11 @@ public class Limelight extends SubsystemBase {
       double distance = currentPose.getTranslation().getDistance(pose.getTranslation());
       if (distance < minDistance) {
         minDistance = distance;
-        targetPose = new Pose2d(pose.getX(), pose.getY() - OFFSET_METERS, pose.getRotation());
+        targetPose = new Pose2d(
+          pose.getX() + OFFSET_METERS * Math.sin(pose.getRotation().getRadians()), 
+          pose.getY() - OFFSET_METERS * Math.cos(pose.getRotation().getRadians()),
+          pose.getRotation().plus(Rotation2d.fromDegrees(180.0))
+        );
       }
     }
 
@@ -141,7 +151,7 @@ public class Limelight extends SubsystemBase {
       waypoints,
       constraints,
       null,
-      new GoalEndState(0.0, Rotation2d.fromDegrees(-90))
+      new GoalEndState(0.0, Rotation2d.fromDegrees(targetPose.getRotation().getDegrees()))
     );
 
     path.preventFlipping = true;
