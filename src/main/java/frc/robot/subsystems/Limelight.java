@@ -31,7 +31,6 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 public class Limelight extends SubsystemBase {
   private static final double OFFSET_METERS = 0.165;
   Drivetrain drivetrain;
-  SwerveDrivePoseEstimator swerveDrivePoseEstimator;
   NetworkTable limelight = NetworkTableInstance.getDefault().getTable("limelight");
   AprilTagFieldLayout layout = AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeAndyMark);
   PathConstraints constraints = new PathConstraints(3.0, 3.0, 2 * Math.PI, 4 * Math.PI);
@@ -80,13 +79,6 @@ public class Limelight extends SubsystemBase {
       aprilTagPoses = redAprilTagPoses;
     }
 
-    swerveDrivePoseEstimator = new SwerveDrivePoseEstimator(
-      drivetrain.getKinematics(),
-      drivetrain.getState().Pose.getRotation(),
-      drivetrain.getState().ModulePositions,
-      drivetrain.getState().Pose
-    );
-
     SmartDashboard.putData("Field", field);
   }
 
@@ -108,7 +100,7 @@ public class Limelight extends SubsystemBase {
         stddevs = VecBuilder.fill(stddevsEntry[6], stddevsEntry[7], stddevsEntry[11]);
       }
 
-      swerveDrivePoseEstimator.addVisionMeasurement(updatedPose, timestamp, stddevs);
+      drivetrain.addVisionMeasurement(updatedPose, timestamp, stddevs);
     }
     
     field.setRobotPose(drivetrain.getState().Pose);
