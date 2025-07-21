@@ -10,9 +10,13 @@ import com.pathplanner.lib.path.Waypoint;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
+import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.numbers.N1;
+import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
@@ -29,7 +33,7 @@ public class Limelight extends SubsystemBase {
   Drivetrain drivetrain;
   SwerveDrivePoseEstimator swerveDrivePoseEstimator;
   NetworkTable limelight = NetworkTableInstance.getDefault().getTable("limelight");
-  AprilTagFieldLayout layout = AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeWelded);
+  AprilTagFieldLayout layout = AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeAndyMark);
   PathConstraints constraints = new PathConstraints(3.0, 3.0, 2 * Math.PI, 4 * Math.PI);
   Field2d field = new Field2d();
   NetworkTableEntry botPoseEntry;
@@ -41,6 +45,9 @@ public class Limelight extends SubsystemBase {
   Pose2d updatedPose;
   double totalLatencyMs;
   double timestamp;
+  double tagCount;
+  double[] stddevsEntry;
+  Matrix<N3, N1> stddevs;
   Pose2d currentPose;
 
   public Limelight(Drivetrain drivetrain) {
@@ -92,7 +99,16 @@ public class Limelight extends SubsystemBase {
       updatedPose = new Pose2d(botPose[0], botPose[1], Rotation2d.fromDegrees(botPose[5]));
       totalLatencyMs = botPose[6];
       timestamp = Timer.getFPGATimestamp() - totalLatencyMs / 1000;
-      swerveDrivePoseEstimator.addVisionMeasurement(updatedPose, timestamp);
+      tagCount = (double) botPose[7];
+      stddevsEntry = limelight.getEntry("stddevs").getDoubleArray(new double[11]);
+
+      if (tagCount == 1.0) {
+        stddevs = VecBuilder.fill(stddevsEntry[0], stddevsEntry[1], stddevsEntry[5]);
+      } else  if (tagCount > 1.0) {
+        stddevs = VecBuilder.fill(stddevsEntry[6], stddevsEntry[7], stddevsEntry[11]);
+      }
+
+      swerveDrivePoseEstimator.addVisionMeasurement(updatedPose, timestamp, stddevs);
     }
     
     field.setRobotPose(drivetrain.getState().Pose);
