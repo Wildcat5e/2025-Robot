@@ -10,6 +10,7 @@ import com.pathplanner.lib.path.Waypoint;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
+import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.networktables.NetworkTable;
@@ -26,6 +27,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 public class Limelight extends SubsystemBase {
   private static final double OFFSET_METERS = 0.165;
   Drivetrain drivetrain;
+  SwerveDrivePoseEstimator swerveDrivePoseEstimator;
   NetworkTable limelight = NetworkTableInstance.getDefault().getTable("limelight");
   AprilTagFieldLayout layout = AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeWelded);
   PathConstraints constraints = new PathConstraints(3.0, 3.0, 2 * Math.PI, 4 * Math.PI);
@@ -37,7 +39,7 @@ public class Limelight extends SubsystemBase {
   Pose2d[] redAprilTagPoses;
   boolean hasTarget;
   Pose2d updatedPose;
-  double totalLatency;
+  double totalLatencyMs;
   double timestamp;
   Pose2d currentPose;
 
@@ -71,6 +73,13 @@ public class Limelight extends SubsystemBase {
       aprilTagPoses = redAprilTagPoses;
     }
 
+    swerveDrivePoseEstimator = new SwerveDrivePoseEstimator(
+      drivetrain.getKinematics(),
+      drivetrain.getState().Pose.getRotation(),
+      drivetrain.getState().ModulePositions,
+      drivetrain.getState().Pose
+    );
+
     SmartDashboard.putData("Field", field);
   }
 
@@ -81,9 +90,9 @@ public class Limelight extends SubsystemBase {
     if (hasTarget) {
       botPose = botPoseEntry.getDoubleArray(new double[11]);
       updatedPose = new Pose2d(botPose[0], botPose[1], Rotation2d.fromDegrees(botPose[5]));
-      totalLatency = botPose[6];
-      timestamp = Timer.getFPGATimestamp() - totalLatency;
-      drivetrain.addVisionMeasurement(updatedPose, timestamp);
+      totalLatencyMs = botPose[6];
+      timestamp = Timer.getFPGATimestamp() - totalLatencyMs / 1000;
+      swerveDrivePoseEstimator.addVisionMeasurement(updatedPose, timestamp);
     }
     
     field.setRobotPose(drivetrain.getState().Pose);
