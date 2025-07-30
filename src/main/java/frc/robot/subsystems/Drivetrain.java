@@ -1,30 +1,34 @@
 package frc.robot.subsystems;
 
-import edu.wpi.first.wpilibj2.command.Subsystem;
-import frc.robot.generated.TunerConstants.TunerSwerveDrivetrain;
-import edu.wpi.first.wpilibj.RobotController;
-import com.ctre.phoenix6.swerve.SwerveRequest;
-import com.ctre.phoenix6.swerve.SwerveDrivetrainConstants;
-import com.ctre.phoenix6.swerve.SwerveModuleConstants;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import static edu.wpi.first.units.Units.*;
 
 import java.util.function.Supplier;
+
+import com.ctre.phoenix6.SignalLogger;
+import com.ctre.phoenix6.Utils;
+import com.ctre.phoenix6.swerve.SwerveDrivetrainConstants;
+import com.ctre.phoenix6.swerve.SwerveModuleConstants;
+import com.ctre.phoenix6.swerve.SwerveRequest;
+
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
-import edu.wpi.first.wpilibj2.command.Command;
+
+import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import com.ctre.phoenix6.SignalLogger;
-import static edu.wpi.first.units.Units.*;
-import com.ctre.phoenix6.Utils;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Notifier;
+import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Subsystem;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+
+import frc.robot.generated.TunerConstants.TunerSwerveDrivetrain;
 
 /**
  * Class that extends the Phoenix 6 SwerveDrivetrain class and implements
@@ -42,6 +46,7 @@ public class Drivetrain extends TunerSwerveDrivetrain implements Subsystem {
     /* Keep track if we've ever applied the operator perspective before or not */
     private boolean m_hasAppliedOperatorPerspective = false;
 
+    /** Swerve request to apply during robot-centric path following */
     private final SwerveRequest.ApplyRobotSpeeds m_pathApplyRobotSpeeds = new SwerveRequest.ApplyRobotSpeeds();
 
     /* Swerve requests to apply during SysId characterization */
@@ -118,18 +123,18 @@ public class Drivetrain extends TunerSwerveDrivetrain implements Subsystem {
      * the devices themselves. If they need the devices, they can access them through
      * getters in the classes.
      *
-     * @param drivetrainConstants   Drivetrain-wide constants for the swerve drive
-     * @param modules               Constants for each specific module
+     * @param drivetrainConstants Drivetrain-wide constants for the swerve drive
+     * @param modules             Constants for each specific module
      */
     public Drivetrain(
         SwerveDrivetrainConstants drivetrainConstants,
         SwerveModuleConstants<?, ?, ?>... modules
     ) {
         super(drivetrainConstants, modules);
-        configurePathPlanner();
         if (Utils.isSimulation()) {
             startSimThread();
         }
+        configureAutoBuilder();
     }
 
     /**
@@ -139,11 +144,11 @@ public class Drivetrain extends TunerSwerveDrivetrain implements Subsystem {
      * the devices themselves. If they need the devices, they can access them through
      * getters in the classes.
      *
-     * @param drivetrainConstants     Drivetrain-wide constants for the swerve drive
-     * @param odometryUpdateFrequency The frequency to run the odometry loop. If
-     *                                unspecified or set to 0 Hz, this is 250 Hz on
-     *                                CAN FD, and 100 Hz on CAN 2.0.
-     * @param modules                 Constants for each specific module
+     * @param drivetrainConstants        Drivetrain-wide constants for the swerve drive
+     * @param odometryUpdateFrequency    The frequency to run the odometry loop. If
+     *                                   unspecified or set to 0 Hz, this is 250 Hz on
+     *                                   CAN FD, and 100 Hz on CAN 2.0.
+     * @param modules                    Constants for each specific module
      */
     public Drivetrain(
         SwerveDrivetrainConstants drivetrainConstants,
@@ -151,10 +156,10 @@ public class Drivetrain extends TunerSwerveDrivetrain implements Subsystem {
         SwerveModuleConstants<?, ?, ?>... modules
     ) {
         super(drivetrainConstants, odometryUpdateFrequency, modules);
-        configurePathPlanner();
         if (Utils.isSimulation()) {
             startSimThread();
         }
+        configureAutoBuilder();
     }
 
     /**
@@ -164,17 +169,17 @@ public class Drivetrain extends TunerSwerveDrivetrain implements Subsystem {
      * the devices themselves. If they need the devices, they can access them through
      * getters in the classes.
      *
-     * @param drivetrainConstants       Drivetrain-wide constants for the swerve drive
-     * @param odometryUpdateFrequency   The frequency to run the odometry loop. If
-     *                                  unspecified or set to 0 Hz, this is 250 Hz on
-     *                                  CAN FD, and 100 Hz on CAN 2.0.
-     * @param odometryStandardDeviation The standard deviation for odometry calculation
+     * @param drivetrainConstants        Drivetrain-wide constants for the swerve drive
+     * @param odometryUpdateFrequency    The frequency to run the odometry loop. If
+     *                                   unspecified or set to 0 Hz, this is 250 Hz on
+     *                                   CAN FD, and 100 Hz on CAN 2.0.
+     * @param odometryStandardDeviation  The standard deviation for odometry calculation
      *                                  in the form [x, y, theta]ᵀ, with units in meters
      *                                  and radians
      * @param visionStandardDeviation   The standard deviation for vision calculation
      *                                  in the form [x, y, theta]ᵀ, with units in meters
      *                                  and radians
-     * @param modules                   Constants for each specific module
+     * @param modules                    Constants for each specific module
      */
     public Drivetrain(
         SwerveDrivetrainConstants drivetrainConstants,
@@ -184,53 +189,45 @@ public class Drivetrain extends TunerSwerveDrivetrain implements Subsystem {
         SwerveModuleConstants<?, ?, ?>... modules
     ) {
         super(drivetrainConstants, odometryUpdateFrequency, odometryStandardDeviation, visionStandardDeviation, modules);
-        configurePathPlanner();
         if (Utils.isSimulation()) {
             startSimThread();
         }
+        configureAutoBuilder();
     }
 
-    private void configurePathPlanner() {
-        try{
-            RobotConfig config = RobotConfig.fromGUISettings();
-            // Configure AutoBuilder last
+    private void configureAutoBuilder() {
+        try {
+            var config = RobotConfig.fromGUISettings();
             AutoBuilder.configure(
-                () -> this.getState().Pose, // Robot pose supplier
-                this::resetPose, // Method to reset odometry (will be called if your auto has a starting pose)
-                () -> this.getState().Speeds, // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
+                () -> getState().Pose,   // Supplier of current robot pose
+                this::resetPose,         // Consumer for seeding pose against auto
+                () -> getState().Speeds, // Supplier of current robot speeds
+                // Consumer of ChassisSpeeds and feedforwards to drive the robot
                 (speeds, feedforwards) -> setControl(
                     m_pathApplyRobotSpeeds.withSpeeds(speeds)
-                    .withWheelForceFeedforwardsX(feedforwards.robotRelativeForcesXNewtons())
-                    .withWheelForceFeedforwardsY(feedforwards.robotRelativeForcesYNewtons())
-                ), // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds. Also optionally outputs individual module feedforwards
-                new PPHolonomicDriveController( // PPHolonomicController is the built in path following controller for holonomic drive trains
-                    new PIDConstants(5.0, 0.0, 0.0), // Translation PID constants
-                    new PIDConstants(5.0, 0.0, 0.0) // Rotation PID constants
+                        .withWheelForceFeedforwardsX(feedforwards.robotRelativeForcesXNewtons())
+                        .withWheelForceFeedforwardsY(feedforwards.robotRelativeForcesYNewtons())
                 ),
-                config, // The robot configuration
-                () -> {
-                // Boolean supplier that controls when the path will be mirrored for the red alliance
-                // This will flip the path being followed to the red side of the field.
-                // THE ORIGIN WILL REMAIN ON THE BLUE SIDE
-
-                  var alliance = DriverStation.getAlliance();
-                  if (alliance.isPresent()) {
-                    return alliance.get() == DriverStation.Alliance.Red;
-                  }
-                
-                return false;
-                },
-                this // Reference to this subsystem to set requirements
+                new PPHolonomicDriveController(
+                    // PID constants for translation
+                    new PIDConstants(10, 0, 0),
+                    // PID constants for rotation
+                    new PIDConstants(7, 0, 0)
+                ),
+                config,
+                // Assume the path needs to be flipped for Red vs Blue, this is normally the case
+                () -> DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red,
+                this // Subsystem for requirements
             );
-        } catch (Exception e) {
-            System.out.println(e);
+        } catch (Exception ex) {
+            DriverStation.reportError("Failed to load PathPlanner config and configure AutoBuilder", ex.getStackTrace());
         }
     }
 
     /**
      * Returns a command that applies the specified control request to this swerve drivetrain.
      *
-     * @param requestSupplier Function returning the request to apply
+     * @param request Function returning the request to apply
      * @return Command to run
      */
     public Command applyRequest(Supplier<SwerveRequest> requestSupplier) {
@@ -278,7 +275,6 @@ public class Drivetrain extends TunerSwerveDrivetrain implements Subsystem {
                 m_hasAppliedOperatorPerspective = true;
             });
         }
-
     }
 
     private void startSimThread() {

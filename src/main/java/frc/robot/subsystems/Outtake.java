@@ -25,14 +25,13 @@ public class Outtake extends SubsystemBase {
   private StringPublisher currentStatePublisher;
 
   public enum State {
-    WAITING,
+    IDLE,
     LOADING,
-    HOLDING,
     SHOOTING
   }
 
   public Outtake() {
-    currentState = State.WAITING;
+    currentState = State.IDLE;
 
     NetworkTable outtake = NetworkTableInstance.getDefault().getTable("Outtake");
     startBeamBreakPublisher = outtake.getBooleanTopic("Start Beam Break").publish();
@@ -48,17 +47,13 @@ public class Outtake extends SubsystemBase {
     currentStatePublisher.set(currentState.toString());
 
     switch (currentState) {
-      case WAITING:
+      case IDLE:
         leftVolts = 0.0;
         rightVolts = 0.0;
         break;
       case LOADING:
         leftVolts = -12.0;
         rightVolts = 8.0;
-        break;
-      case HOLDING:
-        leftVolts = 0.0;
-        rightVolts = 0.0;
         break;
       case SHOOTING:
         leftVolts = -12.0;
@@ -71,19 +66,19 @@ public class Outtake extends SubsystemBase {
   }
 
   private void handleStateTransition() {    
-    if (currentState == State.WAITING && !entryBeamBreak.get()) {
+    if (!entryBeamBreak.get()) {
       currentState = State.LOADING;
-    } else if (currentState == State.LOADING && entryBeamBreak.get()) {
-      currentState = State.HOLDING;
     } else if (currentState == State.SHOOTING && shootingStartTime == 0) {
       shootingStartTime = System.currentTimeMillis();
     } else if (shootingStartTime > 0) {
       shootingEndTime = System.currentTimeMillis();
       shootingDeltaTime = shootingEndTime - shootingStartTime;
       if (shootingDeltaTime >= 500) {
-        currentState = State.WAITING;
+        currentState = State.IDLE;
         shootingStartTime = 0;
       }
+    } else {
+      currentState = State.IDLE;
     }
   }
 
