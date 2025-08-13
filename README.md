@@ -55,3 +55,8 @@ public Command moveToLevelTwo() {
     return run(() -> setTargetHeight(LEVEL_TWO)).until(() -> withinTolerance());
 }
 ```
+
+## LED
+
+- Elevator states: fifth priority IDLE, fourth priority MOVING_UP, fourth priority MOVING_DOWN, first priority HOLDING
+- Outtake  states: fifth priority IDLE, third priority LOADING, second priority priority SHOOTING

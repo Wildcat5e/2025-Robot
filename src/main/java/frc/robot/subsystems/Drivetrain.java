@@ -20,10 +20,13 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.util.sendable.Sendable;
+import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
@@ -34,7 +37,7 @@ import frc.robot.generated.TunerConstants.TunerSwerveDrivetrain;
  * Class that extends the Phoenix 6 SwerveDrivetrain class and implements
  * Subsystem so it can easily be used in command-based projects.
  */
-public class Drivetrain extends TunerSwerveDrivetrain implements Subsystem {
+public class Drivetrain extends TunerSwerveDrivetrain implements Subsystem, Sendable {
     private static final double kSimLoopPeriod = 0.005; // 5 ms
     private Notifier m_simNotifier = null;
     private double m_lastSimTime;
@@ -135,6 +138,7 @@ public class Drivetrain extends TunerSwerveDrivetrain implements Subsystem {
             startSimThread();
         }
         configureAutoBuilder();
+        SmartDashboard.putData(this);
     }
 
     /**
@@ -160,6 +164,7 @@ public class Drivetrain extends TunerSwerveDrivetrain implements Subsystem {
             startSimThread();
         }
         configureAutoBuilder();
+        SmartDashboard.putData(this);
     }
 
     /**
@@ -193,6 +198,7 @@ public class Drivetrain extends TunerSwerveDrivetrain implements Subsystem {
             startSimThread();
         }
         configureAutoBuilder();
+        SmartDashboard.putData(this);
     }
 
     private void configureAutoBuilder() {
@@ -325,4 +331,20 @@ public class Drivetrain extends TunerSwerveDrivetrain implements Subsystem {
     ) {
         super.addVisionMeasurement(visionRobotPoseMeters, Utils.fpgaToCurrentTime(timestampSeconds), visionMeasurementStdDevs);
     }
+
+    @Override
+  public void initSendable(SendableBuilder builder) {
+    builder.setSmartDashboardType("Subsystem");
+
+    builder.addBooleanProperty(".hasDefault", () -> getDefaultCommand() != null, null);
+    builder.addStringProperty(
+        ".default",
+        () -> getDefaultCommand() != null ? getDefaultCommand().getName() : "none",
+        null);
+    builder.addBooleanProperty(".hasCommand", () -> getCurrentCommand() != null, null);
+    builder.addStringProperty(
+        ".command",
+        () -> getCurrentCommand() != null ? getCurrentCommand().getName() : "none",
+        null);
+  }
 }
