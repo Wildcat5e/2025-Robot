@@ -9,13 +9,16 @@ import static edu.wpi.first.units.Units.*;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
 
 import edu.wpi.first.cameraserver.CameraServer;
+import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 
@@ -23,6 +26,7 @@ import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.ElevatorBangBang;
+import frc.robot.subsystems.Extractor;
 import frc.robot.subsystems.Limelight;
 import frc.robot.subsystems.Outtake;
 
@@ -41,16 +45,33 @@ public class RobotContainer {
 
     private final CommandXboxController joystick = new CommandXboxController(0);
 
-    // public final Outtake outtake = new Outtake();
+    private final Joystick operator = new Joystick(1);
+    
+    private final JoystickButton button1 = new JoystickButton(operator, 1);
+    private final JoystickButton button2 = new JoystickButton(operator, 2);
+    private final JoystickButton button3 = new JoystickButton(operator, 3);
+    private final JoystickButton button4 = new JoystickButton(operator, 4);
+    private final JoystickButton button5 = new JoystickButton(operator, 5);
+    private final JoystickButton button6 = new JoystickButton(operator, 6);
+    private final JoystickButton button7 = new JoystickButton(operator, 7);
+    private final JoystickButton button8 = new JoystickButton(operator, 8);
+    private final JoystickButton button9 = new JoystickButton(operator, 9);
+    private final JoystickButton button10 = new JoystickButton(operator, 10);
+    private final JoystickButton button11 = new JoystickButton(operator, 11);
+    private final JoystickButton button12 = new JoystickButton(operator, 12);
+
     public final Drivetrain drivetrain = TunerConstants.createDrivetrain();
     public final Limelight limelight = new Limelight(drivetrain);
+    public final Elevator elevator = new ElevatorBangBang();
+    public final Outtake outtake = new Outtake();
+    public final Extractor extractor = new Extractor();
 
     private final SendableChooser<Command> autoChooser;
 
     public RobotContainer() {
-        // NamedCommands.registerCommand("moveToPositionZero", elevator.moveToPositionZero());
-        // NamedCommands.registerCommand("moveToLevelTwo", elevator.moveToLevelTwo());
-        // NamedCommands.registerCommand("moveToLevelThree", elevator.moveToLevelThree());
+        NamedCommands.registerCommand("moveToPositionZero", elevator.moveToPositionZero());
+        NamedCommands.registerCommand("moveToLevelTwo", elevator.moveToLevelTwo());
+        NamedCommands.registerCommand("moveToLevelThree", elevator.moveToLevelThree());
         
         configureBindings();
 
@@ -92,9 +113,19 @@ public class RobotContainer {
         joystick.back().and(joystick.x()).whileTrue(drivetrain.sysIdDynamic(Direction.kReverse));
         joystick.start().and(joystick.y()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
         joystick.start().and(joystick.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
-
+        joystick.b().onTrue(outtake.shoot());
         // reset the field-centric heading on left bumper press
         joystick.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
+
+
+        button4.onTrue(outtake.shoot());
+        // button5.onTrue(elevator.moveToLevelThree());
+        // button7.whileTrue(elevator.manualUp());
+        // button8.onTrue(elevator.moveToLevelTwo());
+        button9.whileTrue(extractor.manualUpCommand());
+        // button10.whileTrue(elevator.manualDown());
+        // button11.onTrue(elevator.moveToPositionZero());
+        button12.whileTrue(extractor.manualDownCommand());
 
         // drivetrain.registerTelemetry(logger::telemeterize);
     }
