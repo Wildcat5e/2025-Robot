@@ -10,6 +10,7 @@ import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
+import com.pathplanner.lib.events.EventTrigger;
 
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.wpilibj.Joystick;
@@ -72,7 +73,12 @@ public class RobotContainer {
         NamedCommands.registerCommand("moveToPositionZero", elevator.moveToPositionZero());
         NamedCommands.registerCommand("moveToLevelTwo", elevator.moveToLevelTwo());
         NamedCommands.registerCommand("moveToLevelThree", elevator.moveToLevelThree());
+        NamedCommands.registerCommand("shoot", outtake.shoot());
+
+        new EventTrigger("shoot");
+
         
+
         configureBindings();
 
         // DataLogManager.start();
