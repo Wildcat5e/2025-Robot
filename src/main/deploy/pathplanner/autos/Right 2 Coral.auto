@@ -7,7 +7,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Right Start to Front Right Reef"
+            "pathName": "Right to Front Right RReef"
           }
         },
         {
@@ -17,7 +17,7 @@
           }
         },
         {
-          "type": "deadline",
+          "type": "sequential",
           "data": {
             "commands": [
               {
@@ -44,7 +44,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Front Right Reef to Right Coral Station"
+            "pathName": "Front Right RReef to Right Coral Station"
           }
         },
         {
@@ -56,7 +56,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Right Coral Station to Back Center Reef"
+            "pathName": "Right Coral Station to Back Center LReef"
           }
         },
         {
@@ -93,7 +93,7 @@
       ]
     }
   },
-  "resetOdom": false,
+  "resetOdom": true,
   "folder": null,
   "choreoAuto": false
 }

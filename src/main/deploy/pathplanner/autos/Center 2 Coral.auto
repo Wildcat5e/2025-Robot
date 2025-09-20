@@ -5,33 +5,33 @@
     "data": {
       "commands": [
         {
-          "type": "path",
-          "data": {
-            "pathName": "Left to Front Left RReef"
-          }
-        },
-        {
           "type": "named",
           "data": {
             "name": "moveToLevelTwoCommand"
           }
         },
         {
+          "type": "path",
+          "data": {
+            "pathName": "Center to Center LReef"
+          }
+        },
+        {
           "type": "named",
           "data": {
-            "name": "moveToPositionZeroCommand"
+            "name": "shootCommand"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "Front Left RReef to Left Coral Station"
+            "pathName": "Center LReef to Left Coral Station"
           }
         },
         {
-          "type": "wait",
+          "type": "named",
           "data": {
-            "waitTime": 2.5
+            "name": "moveToPositionZeroCommand"
           }
         },
         {
@@ -49,13 +49,13 @@
         {
           "type": "named",
           "data": {
-            "name": "moveToPositionZeroCommand"
+            "name": "shootCommand"
           }
         }
       ]
     }
   },
-  "resetOdom": false,
+  "resetOdom": true,
   "folder": null,
   "choreoAuto": false
 }

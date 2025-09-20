@@ -7,19 +7,19 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Left Start to Front Left Reef"
+            "pathName": "Center to Center Reef"
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "moveToLevelTwoCommand"
+            "name": "shootCommand"
           }
         }
       ]
     }
   },
-  "resetOdom": false,
+  "resetOdom": true,
   "folder": null,
   "choreoAuto": false
 }
