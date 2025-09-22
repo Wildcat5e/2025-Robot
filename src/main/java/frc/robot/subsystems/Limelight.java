@@ -136,7 +136,7 @@ public class Limelight extends SubsystemBase {
       ChassisSpeeds speeds = drivetrain.getState().Speeds;
 
       Rotation2d directionOfTravel;
-      double speed = Math.hypot(speeds.vxMetersPerSecond, speeds.vxMetersPerSecond);
+      double speed = Math.hypot(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond);
 
       // CHECK TO SEE IF PATH WILL RUN IF TARGET POSE IS NULL
       Pose2d targetPose = null;
@@ -185,7 +185,7 @@ public class Limelight extends SubsystemBase {
       ChassisSpeeds speeds = drivetrain.getState().Speeds;
 
       Rotation2d directionOfTravel;
-      double speed = Math.hypot(speeds.vxMetersPerSecond, speeds.vxMetersPerSecond);
+      double speed = Math.hypot(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond);
 
       directionOfTravel = new Rotation2d(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond);
 
@@ -235,33 +235,32 @@ public class Limelight extends SubsystemBase {
     }, Set.of(this));
   }
 
-  // at the end of a left/right auto align, the robot may not be at target
-  // position
-  // use auto align pid, pass in targetpose and currentpose to holonomic
-  // controller
-  // to calculate speeds that will be applied to drivetrain, to move robot to
-  // final destination
+  // at the end of a left/right auto align, the robot may not be at target position
+  // use auto align pid, pass in targetpose and currentpose to holonomic controller
+  // to calculate speeds that will be applied to drivetrain, to move robot to final destination
   // command ends when robot pose is within a tolerance of target pose
   public Command AutoAlignPID() {
     return Commands.defer(() -> {
-      Pose2d currentPose = drivetrain.getState().Pose;
-      PathPlannerTrajectoryState goalState = new PathPlannerTrajectoryState();
-      goalState.pose = targetPose;
+    PathPlannerTrajectoryState goalState = new PathPlannerTrajectoryState();
+    goalState.pose = targetPose;
 
-      double positionDistance = currentPose.getTranslation().getDistance(targetPose.getTranslation());
-      double rotationDistance = Math.abs(currentPose.getRotation().minus(targetPose.getRotation()).getRadians());
-      return new FunctionalCommand(
-          () -> {
-          },
-          () -> {
-            drivetrain.m_pathApplyRobotSpeeds
-                .withSpeeds(drivetrain.holonomicDriveController.calculateRobotRelativeSpeeds(currentPose, goalState));
-          },
-          null,
-          () -> {
-            return (positionDistance < POSITION_TOLERANCE && rotationDistance < ROTATION_TOLERANCE);
-          },
-          drivetrain);
-    }, Set.of(this));
+    return new FunctionalCommand(
+        () -> {},
+        () -> {
+          Pose2d currentPose = drivetrain.getState().Pose;
+
+          drivetrain.m_pathApplyRobotSpeeds
+              .withSpeeds(drivetrain.holonomicDriveController.calculateRobotRelativeSpeeds(currentPose, goalState));
+        },
+        null,
+        () -> {
+          Pose2d currentPose = drivetrain.getState().Pose;
+          double positionDistance = currentPose.getTranslation().getDistance(targetPose.getTranslation());
+          double rotationDistance = Math.abs(currentPose.getRotation().minus(targetPose.getRotation()).getRadians());
+          return (positionDistance < POSITION_TOLERANCE && rotationDistance < ROTATION_TOLERANCE);
+        },
+        drivetrain);
   }
+  , Set.of(this));
+}
 }
