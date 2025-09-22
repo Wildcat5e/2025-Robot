@@ -62,7 +62,7 @@ public class RobotContainer {
     private final JoystickButton button12 = new JoystickButton(operator, 12);
 
     public final Drivetrain drivetrain = TunerConstants.createDrivetrain();
-    public final Limelight limelight = new Limelight(drivetrain);
+    // public final Limelight limelight = new Limelight(drivetrain);
     public final Elevator elevator = new ElevatorBangBang();
     public final Outtake outtake = new Outtake();
     public final Extractor extractor = new Extractor();
@@ -70,21 +70,12 @@ public class RobotContainer {
     private final SendableChooser<Command> autoChooser;
 
     public RobotContainer() {
-        NamedCommands.registerCommand("moveToPositionZero", elevator.moveToPositionZero());
-        NamedCommands.registerCommand("moveToLevelTwo", elevator.moveToLevelTwo());
-        NamedCommands.registerCommand("moveToLevelThree", elevator.moveToLevelThree());
-<<<<<<< HEAD
-        NamedCommands.registerCommand("shoot", outtake.shoot());
-
-        new EventTrigger("shoot");
-
-        
-
-=======
+        // NamedCommands.registerCommand("moveToPositionZero", elevator.moveToPositionZero());
+        // NamedCommands.registerCommand("moveToLevelTwo", elevator.moveToLevelTwo());
+        // NamedCommands.registerCommand("moveToLevelThree", elevator.moveToLevelThree());
         NamedCommands.registerCommand("waitForLoading", outtake.loaded());
-        NamedCommands.registerCommand("shoot", outtake.shoot());
+        NamedCommands.registerCommand("shootCommand", outtake.shoot());
 
->>>>>>> 14dc660fe1ced14c8b5adb3e026e132ec6004c7e
         configureBindings();
 
         // DataLogManager.start();
@@ -128,27 +119,28 @@ public class RobotContainer {
         // joystick.b().onTrue(limelight.printDistances());
         // reset the field-centric heading on left bumper press
         // joystick.leftBumper().whileTrue(limelight.leftAutoAlign());
-        joystick.rightBumper().whileTrue(limelight.rightAutoAlign());
+        // joystick.rightBumper().whileTrue(limelight.rightAutoAlign());
 
         joystick.leftTrigger().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
         
 
         // Experimental
-        button1.onTrue(limelight.rightAutoAlign());
-        button2.onTrue(limelight.printDistances());
-        button3.onTrue(limelight.testAlign());
+        // button1.onTrue(limelight.rightAutoAlign());
+        // button2.onTrue(limelight.printDistances());
+        // button3.onTrue(limelight.testAlign());
+        // button5.onTrue(limelight.AutoAlignPID());
 
         
         // Standard Controls
         // Methods that return commands are ran once at init, saving the command
         // Commands.defer() is required the method to ensure the code is ran dynamically
         button4.onTrue(outtake.shoot());
-        button5.onTrue(elevator.moveToLevelThree());
+        // button5.onTrue(elevator.moveToLevelThree());
         button7.whileTrue(elevator.manualUp());
-        button8.onTrue(elevator.moveToLevelTwo());
+        // button8.onTrue(elevator.moveToLevelTwo());
         button9.whileTrue(extractor.manualUpCommand());
         button10.whileTrue(elevator.manualDown());
-        button11.onTrue(elevator.moveToPositionZero());
+        // button11.onTrue(elevator.moveToPositionZero());
         button12.whileTrue(extractor.manualDownCommand());
 
         // drivetrain.registerTelemetry(logger::telemeterize);

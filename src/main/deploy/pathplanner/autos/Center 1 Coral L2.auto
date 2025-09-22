@@ -9,18 +9,6 @@
           "data": {
             "pathName": "Center to Center LReef"
           }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "moveToLevelTwoCommand"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "shootCommand"
-          }
         }
       ]
     }

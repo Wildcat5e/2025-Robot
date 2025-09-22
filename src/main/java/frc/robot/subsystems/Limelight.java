@@ -196,7 +196,7 @@ public class Limelight extends SubsystemBase {
               directionOfTravel),
           new Pose2d(6.5, 4, Rotation2d.fromDegrees(0)));
 
-      PathConstraints constraints = new PathConstraints(1.0, 1.0, 1 * Math.PI, 1 * Math.PI);
+      PathConstraints constraints = new PathConstraints(4.0, 3.0, 2 * Math.PI, 2 * Math.PI);
 
       PathPlannerPath path = new PathPlannerPath(
           waypoints,
@@ -242,6 +242,7 @@ public class Limelight extends SubsystemBase {
   public Command AutoAlignPID() {
     return Commands.defer(() -> {
     PathPlannerTrajectoryState goalState = new PathPlannerTrajectoryState();
+    Pose2d targetPose = new Pose2d(6.5, 4, Rotation2d.fromDegrees(0));
     goalState.pose = targetPose;
 
     return new FunctionalCommand(
@@ -252,7 +253,7 @@ public class Limelight extends SubsystemBase {
           drivetrain.m_pathApplyRobotSpeeds
               .withSpeeds(drivetrain.holonomicDriveController.calculateRobotRelativeSpeeds(currentPose, goalState));
         },
-        null,
+        (interrupted) -> {},
         () -> {
           Pose2d currentPose = drivetrain.getState().Pose;
           double positionDistance = currentPose.getTranslation().getDistance(targetPose.getTranslation());
