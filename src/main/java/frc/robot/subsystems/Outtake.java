@@ -7,9 +7,11 @@ import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StringPublisher;
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.SynchronousInterrupt.WaitResult;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 
 public class Outtake extends SubsystemBase {
   private final TalonFX leftMotor = new TalonFX(15);
@@ -84,5 +86,11 @@ public class Outtake extends SubsystemBase {
 
   public Command shoot() {
     return runOnce(() -> currentState = State.SHOOTING).withName("Shoot");
+  }
+
+
+  //Command that only finishes when outtake is loaded, this command does not execute anything
+  public Command loaded(){
+    return new WaitUntilCommand(() -> !entryBeamBreak.get());
   }
 }

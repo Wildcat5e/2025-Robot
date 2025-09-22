@@ -73,12 +73,18 @@ public class RobotContainer {
         NamedCommands.registerCommand("moveToPositionZero", elevator.moveToPositionZero());
         NamedCommands.registerCommand("moveToLevelTwo", elevator.moveToLevelTwo());
         NamedCommands.registerCommand("moveToLevelThree", elevator.moveToLevelThree());
+<<<<<<< HEAD
         NamedCommands.registerCommand("shoot", outtake.shoot());
 
         new EventTrigger("shoot");
 
         
 
+=======
+        NamedCommands.registerCommand("waitForLoading", outtake.loaded());
+        NamedCommands.registerCommand("shoot", outtake.shoot());
+
+>>>>>>> 14dc660fe1ced14c8b5adb3e026e132ec6004c7e
         configureBindings();
 
         // DataLogManager.start();
@@ -104,7 +110,7 @@ public class RobotContainer {
 
         );
 
-        joystick.a().onTrue(limelight.leftAutoAlign());
+        // joystick.a().onTrue(limelight.leftAutoAlign());
 
         // Idle while the robot is disabled. This ensures the configured
         // neutral mode is applied to the drive motors while disabled.
@@ -119,18 +125,30 @@ public class RobotContainer {
         joystick.back().and(joystick.x()).whileTrue(drivetrain.sysIdDynamic(Direction.kReverse));
         joystick.start().and(joystick.y()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
         joystick.start().and(joystick.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
-        joystick.b().onTrue(outtake.shoot());
+        // joystick.b().onTrue(limelight.printDistances());
         // reset the field-centric heading on left bumper press
-        joystick.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
+        // joystick.leftBumper().whileTrue(limelight.leftAutoAlign());
+        joystick.rightBumper().whileTrue(limelight.rightAutoAlign());
 
+        joystick.leftTrigger().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
+        
 
+        // Experimental
+        button1.onTrue(limelight.rightAutoAlign());
+        button2.onTrue(limelight.printDistances());
+        button3.onTrue(limelight.testAlign());
+
+        
+        // Standard Controls
+        // Methods that return commands are ran once at init, saving the command
+        // Commands.defer() is required the method to ensure the code is ran dynamically
         button4.onTrue(outtake.shoot());
-        // button5.onTrue(elevator.moveToLevelThree());
-        // button7.whileTrue(elevator.manualUp());
-        // button8.onTrue(elevator.moveToLevelTwo());
+        button5.onTrue(elevator.moveToLevelThree());
+        button7.whileTrue(elevator.manualUp());
+        button8.onTrue(elevator.moveToLevelTwo());
         button9.whileTrue(extractor.manualUpCommand());
-        // button10.whileTrue(elevator.manualDown());
-        // button11.onTrue(elevator.moveToPositionZero());
+        button10.whileTrue(elevator.manualDown());
+        button11.onTrue(elevator.moveToPositionZero());
         button12.whileTrue(extractor.manualDownCommand());
 
         // drivetrain.registerTelemetry(logger::telemeterize);
