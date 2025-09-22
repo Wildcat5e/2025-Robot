@@ -83,12 +83,12 @@ public class Limelight extends SubsystemBase {
     blueAprilTagPoses.add(layout.getTagPose(21).get().toPose2d());
     blueAprilTagPoses.add(layout.getTagPose(22).get().toPose2d());
 
-    redAprilTagPoses.add(layout.getTagPose(17).get().toPose2d());
-    redAprilTagPoses.add(layout.getTagPose(18).get().toPose2d());
-    redAprilTagPoses.add(layout.getTagPose(19).get().toPose2d());
-    redAprilTagPoses.add(layout.getTagPose(20).get().toPose2d());
-    redAprilTagPoses.add(layout.getTagPose(21).get().toPose2d());
-    redAprilTagPoses.add(layout.getTagPose(22).get().toPose2d());
+    redAprilTagPoses.add(layout.getTagPose(6).get().toPose2d());
+    redAprilTagPoses.add(layout.getTagPose(7).get().toPose2d());
+    redAprilTagPoses.add(layout.getTagPose(8).get().toPose2d());
+    redAprilTagPoses.add(layout.getTagPose(9).get().toPose2d());
+    redAprilTagPoses.add(layout.getTagPose(10).get().toPose2d());
+    redAprilTagPoses.add(layout.getTagPose(11).get().toPose2d());
 
     this.drivetrain = drivetrain;
 
