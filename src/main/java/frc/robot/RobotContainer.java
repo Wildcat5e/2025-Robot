@@ -13,6 +13,7 @@ import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.events.EventTrigger;
 
 import edu.wpi.first.cameraserver.CameraServer;
+import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -61,6 +62,7 @@ public class RobotContainer {
     private final JoystickButton button11 = new JoystickButton(operator, 11);
     private final JoystickButton button12 = new JoystickButton(operator, 12);
 
+    public final SwerveDriveKinematics swerveKinematics = new SwerveDriveKinematics(null);
     public final Drivetrain drivetrain = TunerConstants.createDrivetrain();
     // public final Limelight limelight = new Limelight(drivetrain);
     public final Elevator elevator = new ElevatorBangBang();

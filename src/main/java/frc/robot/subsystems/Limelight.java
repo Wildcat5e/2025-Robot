@@ -244,14 +244,14 @@ public class Limelight extends SubsystemBase {
     PathPlannerTrajectoryState goalState = new PathPlannerTrajectoryState();
     Pose2d targetPose = new Pose2d(6.5, 4, Rotation2d.fromDegrees(0));
     goalState.pose = targetPose;
-
+      
     return new FunctionalCommand(
         () -> {},
         () -> {
           Pose2d currentPose = drivetrain.getState().Pose;
 
-          drivetrain.m_pathApplyRobotSpeeds
-              .withSpeeds(drivetrain.holonomicDriveController.calculateRobotRelativeSpeeds(currentPose, goalState));
+          drivetrain.setControl(drivetrain.m_pathApplyRobotSpeeds
+              .withSpeeds(drivetrain.holonomicDriveController.calculateRobotRelativeSpeeds(currentPose, goalState)));
         },
         (interrupted) -> {},
         () -> {
