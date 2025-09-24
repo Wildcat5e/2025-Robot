@@ -196,7 +196,7 @@ public class Limelight extends SubsystemBase {
               directionOfTravel),
           new Pose2d(6.5, 4, Rotation2d.fromDegrees(0)));
 
-      PathConstraints constraints = new PathConstraints(4.0, 3.0, 2 * Math.PI, 2 * Math.PI);
+      PathConstraints constraints = new PathConstraints(4.275, 2.8, 2 * Math.PI, 2 * Math.PI);
 
       PathPlannerPath path = new PathPlannerPath(
           waypoints,

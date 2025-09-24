@@ -62,7 +62,7 @@ public class RobotContainer {
     private final JoystickButton button12 = new JoystickButton(operator, 12);
 
     public final Drivetrain drivetrain = TunerConstants.createDrivetrain();
-    // public final Limelight limelight = new Limelight(drivetrain);
+    public final Limelight limelight = new Limelight(drivetrain);
     public final Elevator elevator = new ElevatorBangBang();
     public final Outtake outtake = new Outtake();
     public final Extractor extractor = new Extractor();
@@ -125,10 +125,10 @@ public class RobotContainer {
         
 
         // Experimental
-        // button1.onTrue(limelight.rightAutoAlign());
-        // button2.onTrue(limelight.printDistances());
-        // button3.onTrue(limelight.testAlign());
-        // button5.onTrue(limelight.AutoAlignPID());
+        button1.onTrue(limelight.rightAutoAlign());
+        button2.onTrue(limelight.printDistances());
+        button3.onTrue(limelight.testAlign());
+        button5.onTrue(limelight.AutoAlignPID());
 
         
         // Standard Controls
