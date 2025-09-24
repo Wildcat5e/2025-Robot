@@ -39,16 +39,16 @@ import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Limelight extends SubsystemBase {
-  private static final double POSITION_TOLERANCE = 0.05;
-  private static final double ROTATION_TOLERANCE = 0.05;
+  private static final double POSITION_TOLERANCE = 0.04;
+  private static final double ROTATION_TOLERANCE = 0.04;
 
   private static final Transform2d LEFT_ALIGN_DISTANCE = new Transform2d(
-      new Translation2d(0.5, -0.3),
-      Rotation2d.fromDegrees(0));
+      new Translation2d(0.5, -0.2),
+      Rotation2d.fromDegrees(180));
 
   private static final Transform2d RIGHT_ALIGN_DISTANCE = new Transform2d(
-      new Translation2d(0.5, 0.3),
-      Rotation2d.fromDegrees(0));
+      new Translation2d(0.5, 0.2),
+      Rotation2d.fromDegrees(180));
 
   double minDistance = 0.3;
 
@@ -112,19 +112,18 @@ public class Limelight extends SubsystemBase {
 
     if (hasTarget) {
       botPose = botPoseEntry.getDoubleArray(new double[11]);
-      updatedPose = new Pose2d(botPose[0], botPose[1], Rotation2d.fromDegrees(botPose[5]));
+      this.updatedPose = new Pose2d(botPose[0], botPose[1], Rotation2d.fromDegrees(botPose[5]));
       totalLatencyMs = botPose[6];
-      timestamp = Timer.getFPGATimestamp() - totalLatencyMs / 1000;
+      this.timestamp = Timer.getFPGATimestamp() - totalLatencyMs / 1000;
       tagCount = (double) botPose[7];
       stddevsDoubleArray = stddevsEntry.getDoubleArray(new double[11]);
 
       if (tagCount == 1.0) {
-        stddevs = VecBuilder.fill(stddevsDoubleArray[0], stddevsDoubleArray[1], stddevsDoubleArray[5]);
+        this.stddevs = VecBuilder.fill(stddevsDoubleArray[0], stddevsDoubleArray[1], stddevsDoubleArray[5]);
       } else if (tagCount > 1.0) {
-        stddevs = VecBuilder.fill(stddevsDoubleArray[6], stddevsDoubleArray[7], stddevsDoubleArray[11]);
+        this.stddevs = VecBuilder.fill(stddevsDoubleArray[6], stddevsDoubleArray[7], stddevsDoubleArray[11]);
       }
 
-      drivetrain.addVisionMeasurement(updatedPose, timestamp, stddevs);
     }
 
     field.setRobotPose(drivetrain.getState().Pose);
@@ -235,6 +234,14 @@ public class Limelight extends SubsystemBase {
     }, Set.of(this));
   }
 
+  public Command updateLimelight(){
+    return runOnce(() -> {
+      drivetrain.addVisionMeasurement(updatedPose, timestamp, stddevs);
+      System.out.println(blueAprilTagPoses.get(4).transformBy(LEFT_ALIGN_DISTANCE));
+    }
+      );
+  }
+
   // at the end of a left/right auto align, the robot may not be at target position
   // use auto align pid, pass in targetpose and currentpose to holonomic controller
   // to calculate speeds that will be applied to drivetrain, to move robot to final destination
@@ -242,16 +249,21 @@ public class Limelight extends SubsystemBase {
   public Command AutoAlignPID() {
     return Commands.defer(() -> {
     PathPlannerTrajectoryState goalState = new PathPlannerTrajectoryState();
-    Pose2d targetPose = new Pose2d(6.5, 4, Rotation2d.fromDegrees(180));
+    Pose2d targetPose = blueAprilTagPoses.get(4).transformBy(LEFT_ALIGN_DISTANCE);
     goalState.pose = targetPose;
       
     return new FunctionalCommand(
         () -> {},
         () -> {
+          drivetrain.addVisionMeasurement(updatedPose, timestamp, stddevs);
+
           Pose2d currentPose = drivetrain.getState().Pose;
 
           drivetrain.setControl(drivetrain.m_pathApplyRobotSpeeds
               .withSpeeds(drivetrain.holonomicDriveController.calculateRobotRelativeSpeeds(currentPose, goalState)));
+
+
+
         },
         (interrupted) -> {},
         () -> {

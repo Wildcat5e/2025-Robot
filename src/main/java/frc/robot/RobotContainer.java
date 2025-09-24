@@ -126,21 +126,21 @@ public class RobotContainer {
 
         // Experimental
         button1.onTrue(limelight.rightAutoAlign());
-        button2.onTrue(limelight.printDistances());
-        button3.onTrue(limelight.testAlign());
-        button5.onTrue(limelight.AutoAlignPID());
+        button2.onTrue(limelight.updateLimelight());
+        // button3.onTrue(limelight.testAlign());
+        button3.onTrue(limelight.AutoAlignPID());
 
         
         // Standard Controls
         // Methods that return commands are ran once at init, saving the command
         // Commands.defer() is required the method to ensure the code is ran dynamically
         button4.onTrue(outtake.shoot());
-        // button5.onTrue(elevator.moveToLevelThree());
+        button5.onTrue(elevator.moveToLevelThree());
         button7.whileTrue(elevator.manualUp());
-        // button8.onTrue(elevator.moveToLevelTwo());
+        button8.onTrue(elevator.moveToLevelTwo());
         button9.whileTrue(extractor.manualUpCommand());
         button10.whileTrue(elevator.manualDown());
-        // button11.onTrue(elevator.moveToPositionZero());
+        button11.onTrue(elevator.moveToPositionZero());
         button12.whileTrue(extractor.manualDownCommand());
 
         // drivetrain.registerTelemetry(logger::telemeterize);
