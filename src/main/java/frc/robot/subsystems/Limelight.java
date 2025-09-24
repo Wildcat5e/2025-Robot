@@ -242,7 +242,7 @@ public class Limelight extends SubsystemBase {
   public Command AutoAlignPID() {
     return Commands.defer(() -> {
     PathPlannerTrajectoryState goalState = new PathPlannerTrajectoryState();
-    Pose2d targetPose = new Pose2d(6.5, 4, Rotation2d.fromDegrees(0));
+    Pose2d targetPose = new Pose2d(6.5, 4, Rotation2d.fromDegrees(180));
     goalState.pose = targetPose;
       
     return new FunctionalCommand(
