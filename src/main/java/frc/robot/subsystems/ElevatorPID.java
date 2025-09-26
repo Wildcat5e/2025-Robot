@@ -76,6 +76,7 @@ public class ElevatorPID extends SubsystemBase implements Elevator {
         if ((currentState == State.MOVING_DOWN || currentState == State.MANUAL_DOWN || currentState == State.INIT) && !bottomBeamBreak.get()) {
             motor.setPosition(0.0);
             setTargetHeight(0.0);
+            //maybe set target height to a little above tolerance?
         }
         
         handleStateTransition(currentHeight);

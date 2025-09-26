@@ -70,11 +70,11 @@ public class RobotContainer {
     private final SendableChooser<Command> autoChooser;
 
     public RobotContainer() {
-        // NamedCommands.registerCommand("moveToPositionZero", elevator.moveToPositionZero());
-        // NamedCommands.registerCommand("moveToLevelTwo", elevator.moveToLevelTwo());
-        // NamedCommands.registerCommand("moveToLevelThree", elevator.moveToLevelThree());
-        NamedCommands.registerCommand("waitForLoading", outtake.loaded());
-        NamedCommands.registerCommand("shootCommand", outtake.shoot());
+        NamedCommands.registerCommand("moveToPositionZero", elevator.moveToPositionZero());
+        NamedCommands.registerCommand("moveToLevelTwo", elevator.moveToLevelTwo());
+        NamedCommands.registerCommand("moveToLevelThree", elevator.moveToLevelThree());
+        NamedCommands.registerCommand("waitForLoading", outtake.waitForLoading());
+        NamedCommands.registerCommand("shoot", outtake.shoot());
 
         configureBindings();
 
@@ -125,11 +125,10 @@ public class RobotContainer {
         
 
         // Experimental
-        button1.onTrue(limelight.rightAutoAlign());
         button2.onTrue(limelight.updateLimelight());
         // button3.onTrue(limelight.testAlign());
         button3.onTrue(limelight.AutoAlignPID());
-
+        button6.onTrue(limelight.printDistances());
         
         // Standard Controls
         // Methods that return commands are ran once at init, saving the command

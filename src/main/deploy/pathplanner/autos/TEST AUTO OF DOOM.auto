@@ -11,21 +11,33 @@
           }
         },
         {
-          "type": "path",
+          "type": "named",
           "data": {
-            "pathName": "Center LReef to Left Coral Station"
+            "name": "shoot"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "Left Coral Station to Back Left LReef"
+            "pathName": "Center LReef to Programmer"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "moveToLevelThree"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Programmer to Nowhere"
           }
         }
       ]
     }
   },
-  "resetOdom": true,
+  "resetOdom": false,
   "folder": null,
   "choreoAuto": false
 }

@@ -13,7 +13,7 @@
         {
           "type": "named",
           "data": {
-            "name": "moveToLevelTwoCommand"
+            "name": "moveToLevelTwo"
           }
         },
         {
@@ -29,7 +29,7 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "shootCommand"
+                  "name": "shoot"
                 }
               }
             ]
@@ -38,7 +38,7 @@
         {
           "type": "named",
           "data": {
-            "name": "moveToPositionZeroCommand"
+            "name": "moveToPositionZero"
           }
         },
         {
@@ -62,7 +62,7 @@
         {
           "type": "named",
           "data": {
-            "name": "moveToLevelTwoCommand"
+            "name": "moveToLevelTwo"
           }
         },
         {
@@ -78,7 +78,7 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "shootCommand"
+                  "name": "shoot"
                 }
               }
             ]
@@ -87,7 +87,7 @@
         {
           "type": "named",
           "data": {
-            "name": "moveToPositionZeroCommand"
+            "name": "moveToPositionZero"
           }
         }
       ]

@@ -90,7 +90,7 @@ public class Outtake extends SubsystemBase {
 
 
   //Command that only finishes when outtake is loaded, this command does not execute anything
-  public Command loaded(){
+  public Command waitForLoading(){
     return new WaitUntilCommand(() -> !entryBeamBreak.get());
   }
 }

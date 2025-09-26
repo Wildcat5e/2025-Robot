@@ -34,6 +34,7 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -41,6 +42,10 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 public class Limelight extends SubsystemBase {
   private static final double POSITION_TOLERANCE = 0.04;
   private static final double ROTATION_TOLERANCE = 0.04;
+
+  private static final Transform2d CENTER_ALGAE_ARM = new Transform2d(
+    new Translation2d(0.75, .3), 
+    Rotation2d.fromDegrees(180));
 
   private static final Transform2d LEFT_ALIGN_DISTANCE = new Transform2d(
       new Translation2d(0.5, -0.2),
@@ -50,7 +55,7 @@ public class Limelight extends SubsystemBase {
       new Translation2d(0.5, 0.2),
       Rotation2d.fromDegrees(180));
 
-  double minDistance = 0.3;
+  double minDistance = 0.5;
 
   private static final AprilTagFieldLayout layout = AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeWelded);
 
@@ -58,6 +63,8 @@ public class Limelight extends SubsystemBase {
   private static final List<Pose2d> redAprilTagPoses = new ArrayList<Pose2d>();
 
   private static final NetworkTable limelight = NetworkTableInstance.getDefault().getTable("limelight");
+
+  int counter = 0;
 
   Drivetrain drivetrain;
   Field2d field = new Field2d();
@@ -71,8 +78,10 @@ public class Limelight extends SubsystemBase {
   double timestamp;
   double tagCount;
   Matrix<N3, N1> stddevs;
-  NetworkTableEntry stddevsEntry;
   Pose2d targetPose;
+  double avgTagDistance;
+  double xyStdDevs;
+  double rotationalStdDevs;
 
   public Limelight(Drivetrain drivetrain) {
 
@@ -92,11 +101,10 @@ public class Limelight extends SubsystemBase {
 
     this.drivetrain = drivetrain;
 
-    stddevsEntry = limelight.getEntry("stddevs");
 
     Alliance alliance = DriverStation.getAlliance().orElse(Alliance.Blue);
+    botPoseEntry = limelight.getEntry("botpose_wpiblue");
     if (alliance == Alliance.Blue) {
-      botPoseEntry = limelight.getEntry("botpose_wpiblue");
       aprilTagPoses = blueAprilTagPoses;
     } else {
       aprilTagPoses = redAprilTagPoses;
@@ -112,101 +120,26 @@ public class Limelight extends SubsystemBase {
 
     if (hasTarget) {
       botPose = botPoseEntry.getDoubleArray(new double[11]);
-      this.updatedPose = new Pose2d(botPose[0], botPose[1], Rotation2d.fromDegrees(botPose[5]));
+      updatedPose = new Pose2d(botPose[0], botPose[1], Rotation2d.fromDegrees(botPose[5]));
       totalLatencyMs = botPose[6];
-      this.timestamp = Timer.getFPGATimestamp() - totalLatencyMs / 1000;
+      timestamp = Timer.getFPGATimestamp() - totalLatencyMs / 1000;
       tagCount = (double) botPose[7];
-      stddevsDoubleArray = stddevsEntry.getDoubleArray(new double[11]);
+      avgTagDistance = botPose[10];
+
+
+      // units in meters, every addition meter of tag distances means there is an additional 0.2 meter that the april tag is off actual location
+      xyStdDevs = 0.1 + 0.2 * avgTagDistance;
+      rotationalStdDevs = 0.1 + 0.1 * avgTagDistance;
 
       if (tagCount == 1.0) {
-        this.stddevs = VecBuilder.fill(stddevsDoubleArray[0], stddevsDoubleArray[1], stddevsDoubleArray[5]);
-      } else if (tagCount > 1.0) {
-        this.stddevs = VecBuilder.fill(stddevsDoubleArray[6], stddevsDoubleArray[7], stddevsDoubleArray[11]);
-      }
+        stddevs = VecBuilder.fill(xyStdDevs, xyStdDevs, rotationalStdDevs);
+      } 
+      // can lower stddev if tag count is greater than 1 for funsies
 
     }
 
     field.setRobotPose(drivetrain.getState().Pose);
-  }
 
-  public Command rightAutoAlign() {
-    return Commands.defer(() -> {
-      Pose2d currentPose = drivetrain.getState().Pose;
-      ChassisSpeeds speeds = drivetrain.getState().Speeds;
-
-      Rotation2d directionOfTravel;
-      double speed = Math.hypot(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond);
-
-      // CHECK TO SEE IF PATH WILL RUN IF TARGET POSE IS NULL
-      Pose2d targetPose = null;
-      Pose2d closestTag = currentPose.nearest(aprilTagPoses);
-      double distanceToClosestTag = currentPose.getTranslation().getDistance(closestTag.getTranslation());
-
-      if (distanceToClosestTag <= minDistance) {
-        targetPose = closestTag.transformBy(RIGHT_ALIGN_DISTANCE);
-        this.targetPose = targetPose;
-      }
-
-      if (speed < 0.25) {
-        Translation2d diff = targetPose.getTranslation().minus(currentPose.getTranslation());
-        directionOfTravel = diff.getAngle();
-      } else {
-        directionOfTravel = new Rotation2d(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond);
-      }
-
-      List<Waypoint> waypoints = PathPlannerPath.waypointsFromPoses(
-          new Pose2d(
-              currentPose.getX(),
-              currentPose.getY(),
-              directionOfTravel),
-          targetPose);
-
-      PathPlannerPath path = new PathPlannerPath(
-          waypoints,
-          new PathConstraints(1.0, 1.0, Math.PI, 2 * Math.PI),
-          new IdealStartingState(speed, directionOfTravel),
-          new GoalEndState(0.0, targetPose.getRotation().plus(Rotation2d.fromDegrees(180)))
-      // if robot is not facing right way after align, maybe try rotating
-      // the pose of the robot earlier
-      );
-
-      path.preventFlipping = true;
-
-      return AutoBuilder.followPath(path);
-    }, Set.of(this));
-  }
-
-  // ENSURE BLUE ALLIANCE IS SELECTED
-  public Command testAlign() {
-    return Commands.defer(() -> {
-
-      Pose2d currentPose = drivetrain.getState().Pose;
-      ChassisSpeeds speeds = drivetrain.getState().Speeds;
-
-      Rotation2d directionOfTravel;
-      double speed = Math.hypot(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond);
-
-      directionOfTravel = new Rotation2d(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond);
-
-      List<Waypoint> waypoints = PathPlannerPath.waypointsFromPoses(
-          new Pose2d(
-              currentPose.getX(),
-              currentPose.getY(),
-              directionOfTravel),
-          new Pose2d(6.5, 4, Rotation2d.fromDegrees(0)));
-
-      PathConstraints constraints = new PathConstraints(4.275, 2.8, 2 * Math.PI, 2 * Math.PI);
-
-      PathPlannerPath path = new PathPlannerPath(
-          waypoints,
-          constraints,
-          new IdealStartingState(speed, directionOfTravel),
-          new GoalEndState(0.0, Rotation2d.fromDegrees(0)));
-
-      path.preventFlipping = true;
-
-      return AutoBuilder.followPath(path);
-    }, Set.of(this));
   }
 
   public Command printDistances() {
@@ -223,8 +156,6 @@ public class Limelight extends SubsystemBase {
         System.out.println("AprilTag counter: " + counter + " Tag Pose: " + pose + "Robot Pose: " + currentPose
             + "Distance: " + distance);
         if (distance < minDistance) {
-          // Unsure the idea of this
-          // minDistance = distance;
           System.out.println("AprilTag counter: " + counter + " is close enough!!");
         }
         counter++;
@@ -248,12 +179,27 @@ public class Limelight extends SubsystemBase {
   // command ends when robot pose is within a tolerance of target pose
   public Command AutoAlignPID() {
     return Commands.defer(() -> {
+    
+    //robotpose and currentpose are same in this command
+    Pose2d robotPose = drivetrain.getState().Pose;
+    Pose2d nearestTagPose = robotPose.nearest(aprilTagPoses);
+    System.out.println("closest tag pose (before transform): "+ nearestTagPose);
+    nearestTagPose = nearestTagPose.transformBy(LEFT_ALIGN_DISTANCE);
+    System.out.println("closest tag pose (after transform): "+ nearestTagPose);
+    double distance = robotPose.getTranslation().getDistance(nearestTagPose.getTranslation());
+    System.out.println("robot pose: " + robotPose);
+    System.out.println("distance:" + distance + "min distancne: " + minDistance);
+
     PathPlannerTrajectoryState goalState = new PathPlannerTrajectoryState();
-    Pose2d targetPose = blueAprilTagPoses.get(4).transformBy(LEFT_ALIGN_DISTANCE);
-    goalState.pose = targetPose;
-      
-    return new FunctionalCommand(
-        () -> {},
+    goalState.pose = nearestTagPose;
+
+
+    if (distance < minDistance){
+      System.out.println("hooray");
+      return new FunctionalCommand(
+        () -> {
+
+        },
         () -> {
           drivetrain.addVisionMeasurement(updatedPose, timestamp, stddevs);
 
@@ -261,9 +207,6 @@ public class Limelight extends SubsystemBase {
 
           drivetrain.setControl(drivetrain.m_pathApplyRobotSpeeds
               .withSpeeds(drivetrain.holonomicDriveController.calculateRobotRelativeSpeeds(currentPose, goalState)));
-
-
-
         },
         (interrupted) -> {},
         () -> {
@@ -273,7 +216,23 @@ public class Limelight extends SubsystemBase {
           return (positionDistance < POSITION_TOLERANCE && rotationDistance < ROTATION_TOLERANCE);
         },
         drivetrain);
+    } else {
+      return Commands.none();
+    }
+
+
   }
-  , Set.of(this));
+  , Set.of(drivetrain));
 }
+
+  public Command centerRobotForAlgaeArm(){
+    return Commands.defer(() -> {
+
+
+      //TEST AUTO ALIGN FIRST, THEN COPY PASTE THAT CODE INTO HERE
+      return Commands.none();
+
+    }, Set.of(drivetrain));
+  }
+
 }
