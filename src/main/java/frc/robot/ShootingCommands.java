@@ -6,6 +6,7 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.Outtake;
 
@@ -21,6 +22,7 @@ public class ShootingCommands {
     public Command moveToLevelThreeShoot(){
         return new SequentialCommandGroup(
             elevator.moveToLevelThree(),
+            new WaitCommand(0.1),
             outtake.shoot()
         );
     }
@@ -28,6 +30,7 @@ public class ShootingCommands {
     public Command moveToLevelTwoShoot(){
         return new SequentialCommandGroup(
             elevator.moveToLevelTwo(),
+            new WaitCommand(0.1),
             outtake.shoot()
         );
     }
@@ -35,6 +38,7 @@ public class ShootingCommands {
     public Command moveToPositionZeroShoot(){
         return new SequentialCommandGroup(
             elevator.moveToPositionZero(),
+            new WaitCommand(0.1),
             outtake.shoot()
         );
     }

@@ -40,22 +40,22 @@ import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Limelight extends SubsystemBase {
-  private static final double POSITION_TOLERANCE = 0.04;
-  private static final double ROTATION_TOLERANCE = 0.04;
+  private static final double POSITION_TOLERANCE = 0.005;
+  private static final double ROTATION_TOLERANCE = 0.02;
 
   private static final Transform2d CENTER_ALGAE_ARM = new Transform2d(
     new Translation2d(0.75, .3), 
     Rotation2d.fromDegrees(180));
 
   private static final Transform2d LEFT_ALIGN_DISTANCE = new Transform2d(
-      new Translation2d(0.5, -0.2),
+      new Translation2d(0.375, -0.175),
       Rotation2d.fromDegrees(180));
 
   private static final Transform2d RIGHT_ALIGN_DISTANCE = new Transform2d(
-      new Translation2d(0.5, 0.2),
+      new Translation2d(0.375, 0.175),
       Rotation2d.fromDegrees(180));
 
-  double minDistance = 0.5;
+  double minDistance = 1.5;
 
   private static final AprilTagFieldLayout layout = AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeWelded);
 
@@ -128,13 +128,14 @@ public class Limelight extends SubsystemBase {
 
 
       // units in meters, every addition meter of tag distances means there is an additional 0.2 meter that the april tag is off actual location
-      xyStdDevs = 0.1 + 0.2 * avgTagDistance;
-      rotationalStdDevs = 0.1 + 0.1 * avgTagDistance;
+      xyStdDevs = 0.1 + 1 * avgTagDistance;
+      rotationalStdDevs = 0.1 + 1 * avgTagDistance;
 
       if (tagCount == 1.0) {
         stddevs = VecBuilder.fill(xyStdDevs, xyStdDevs, rotationalStdDevs);
       } 
       // can lower stddev if tag count is greater than 1 for funsies
+      drivetrain.addVisionMeasurement(updatedPose, timestamp, stddevs);
 
     }
 
@@ -177,7 +178,7 @@ public class Limelight extends SubsystemBase {
   // use auto align pid, pass in targetpose and currentpose to holonomic controller
   // to calculate speeds that will be applied to drivetrain, to move robot to final destination
   // command ends when robot pose is within a tolerance of target pose
-  public Command AutoAlignPID() {
+  public Command leftAutoAlignPID() {
     return Commands.defer(() -> {
     
     //robotpose and currentpose are same in this command
@@ -189,7 +190,7 @@ public class Limelight extends SubsystemBase {
     double distance = robotPose.getTranslation().getDistance(nearestTagPose.getTranslation());
     System.out.println("robot pose: " + robotPose);
     System.out.println("distance:" + distance + "min distancne: " + minDistance);
-
+    targetPose = nearestTagPose;
     PathPlannerTrajectoryState goalState = new PathPlannerTrajectoryState();
     goalState.pose = nearestTagPose;
 
@@ -201,7 +202,6 @@ public class Limelight extends SubsystemBase {
 
         },
         () -> {
-          drivetrain.addVisionMeasurement(updatedPose, timestamp, stddevs);
 
           Pose2d currentPose = drivetrain.getState().Pose;
 
@@ -223,6 +223,53 @@ public class Limelight extends SubsystemBase {
 
   }
   , Set.of(drivetrain));
+}
+
+public Command rightAutoAlignPID() {
+  return Commands.defer(() -> {
+  
+  //robotpose and currentpose are same in this command
+  Pose2d robotPose = drivetrain.getState().Pose;
+  Pose2d nearestTagPose = robotPose.nearest(aprilTagPoses);
+  System.out.println("closest tag pose (before transform): "+ nearestTagPose);
+  nearestTagPose = nearestTagPose.transformBy(RIGHT_ALIGN_DISTANCE);
+  System.out.println("closest tag pose (after transform): "+ nearestTagPose);
+  double distance = robotPose.getTranslation().getDistance(nearestTagPose.getTranslation());
+  System.out.println("robot pose: " + robotPose);
+  System.out.println("distance:" + distance + "min distancne: " + minDistance);
+  targetPose = nearestTagPose;
+  PathPlannerTrajectoryState goalState = new PathPlannerTrajectoryState();
+  goalState.pose = nearestTagPose;
+
+
+  if (distance < minDistance){
+    System.out.println("hooray");
+    return new FunctionalCommand(
+      () -> {
+
+      },
+      () -> {
+
+        Pose2d currentPose = drivetrain.getState().Pose;
+
+        drivetrain.setControl(drivetrain.m_pathApplyRobotSpeeds
+            .withSpeeds(drivetrain.holonomicDriveController.calculateRobotRelativeSpeeds(currentPose, goalState)));
+      },
+      (interrupted) -> {},
+      () -> {
+        Pose2d currentPose = drivetrain.getState().Pose;
+        double positionDistance = currentPose.getTranslation().getDistance(targetPose.getTranslation());
+        double rotationDistance = Math.abs(currentPose.getRotation().minus(targetPose.getRotation()).getRadians());
+        return (positionDistance < POSITION_TOLERANCE && rotationDistance < ROTATION_TOLERANCE);
+      },
+      drivetrain);
+  } else {
+    return Commands.none();
+  }
+
+
+}
+, Set.of(drivetrain));
 }
 
   public Command centerRobotForAlgaeArm(){

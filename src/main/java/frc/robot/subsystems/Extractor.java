@@ -8,13 +8,13 @@ import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 public class Extractor extends SubsystemBase {
   // meters all units
   private static final double TOLERANCE = 0.05;
-  private static final double GEAR_RATIO = 10;
-  private static final double ARM_LENGTH = 10;
-  private static final double ARM_CIRCUMFERENCE = 10;
+  private static final double GEAR_RATIO = 36;
+  private static final double ARM_LENGTH = .572;
+  private static final double ARM_CIRCUMFERENCE = 2 * Math.PI * ARM_LENGTH;
   // under position meaning arm will be below algae and push up
   // over position meaning arm will be above algae and drag out
   private static final double UNDER_ALGAE = 1;
-  private static final double OVER_ALGAE = 1;
+  private static final double OVER_ALGAE = 1.4;
 
 
   TalonFX motor = new TalonFX(17);
@@ -29,11 +29,15 @@ public class Extractor extends SubsystemBase {
     UP,
     DOWN,
     SLOW_DOWN,
-    SLOW_UP
+    SLOW_UP,
+    MANUAL_UP,
+    MANUAL_DOWN
   }
 
   public Extractor() {
     currentState = State.IDLE;
+    motor.setPosition(0);
+    targetHeight = 0;
   }
 
   @Override
@@ -53,6 +57,12 @@ public class Extractor extends SubsystemBase {
       case DOWN:
         motor.setVoltage(-1.5);
         break;
+      case MANUAL_UP:
+        motor.setVoltage(1.5);
+        break;
+      case MANUAL_DOWN:
+        motor.setVoltage(-1.5);
+        break;
       case SLOW_DOWN:
         motor.setVoltage(-0.5);
         break;
@@ -62,7 +72,7 @@ public class Extractor extends SubsystemBase {
     }
 
     counter++;
-    if (counter % 25 == 0){
+    if (counter % 100 == 0){
       System.out.println("current height: " + currentHeight);
       System.out.println("within tolerance?: " + withinTolerance());
     }
@@ -74,7 +84,9 @@ public class Extractor extends SubsystemBase {
   }
 
   public void handleStateTransition(double currentHeight){
-    if (targetHeight >= currentHeight + TOLERANCE){
+    if (currentState == State.MANUAL_DOWN || currentState == State.MANUAL_UP){
+      return;
+    } else if (targetHeight >= currentHeight + TOLERANCE){
       currentState = State.UP;
     } else if (targetHeight <= currentHeight - TOLERANCE){
       currentState = State.DOWN;
@@ -91,11 +103,29 @@ public class Extractor extends SubsystemBase {
     return motor.getPosition().getValueAsDouble() / GEAR_RATIO * ARM_CIRCUMFERENCE;
   }
 
-  public void setHeightZero(){
-    motor.setPosition(0);
+  public Command setHeightZero(){
+    return runOnce(() -> {
+      motor.setPosition(0);
+      setTargetHeight(0);});
   }
 
   public Command moveArmUnderAlgae(){
+    return new FunctionalCommand(
+      () -> {
+        setTargetHeight(UNDER_ALGAE);
+      System.out.println("INIT");}
+      , 
+      () -> {
+        System.out.println("current height: " + currentHeight);
+        System.out.println("target height: " + targetHeight);
+      }, 
+      (interrupted) -> {}, 
+      () -> withinTolerance(), 
+      this
+      );
+  }
+
+  public Command moveArmOverAlgae(){
     return new FunctionalCommand(
       () -> setTargetHeight(OVER_ALGAE), 
       () -> {}, 
@@ -105,22 +135,18 @@ public class Extractor extends SubsystemBase {
       );
   }
 
-  public Command moveArmOverAlgae(){
-    return new FunctionalCommand(
-      () -> setTargetHeight(UNDER_ALGAE), 
-      () -> {}, 
-      (interrupted) -> {}, 
-      () -> withinTolerance(), 
-      this
-      );
-  }
-
   public Command manualUpCommand() {
-    return runEnd(() -> currentState = State.UP, () -> currentState = State.IDLE);
+    return runEnd(() -> currentState = State.MANUAL_UP, 
+    () -> stop());
   }
 
   public Command manualDownCommand() {
-    return runEnd(() -> currentState = State.DOWN, () -> currentState = State.IDLE);
+    return runEnd(() -> currentState = State.MANUAL_DOWN, () -> stop());
   }
+
+  private void stop() {
+    currentState = State.IDLE;
+    setTargetHeight(getCurrentHeight());
+}
 
 }

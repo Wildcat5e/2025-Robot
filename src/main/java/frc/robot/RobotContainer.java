@@ -122,26 +122,33 @@ public class RobotContainer {
         // joystick.leftBumper().onTrue(limelight.leftAutoAlign());
         // joystick.rightBumper().onTrue(limelight.rightAutoAlign());
 
-        joystick.leftTrigger().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
-
-
+        // joystick.leftTrigger().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
+        joystick.leftBumper().onTrue(limelight.leftAutoAlignPID());
+        joystick.rightBumper().onTrue(limelight.rightAutoAlignPID());
+        joystick.rightTrigger().onTrue(extractor.moveArmOverAlgae());
+        joystick.a().onTrue(extractor.moveArmUnderAlgae());
+        joystick.x().whileTrue(extractor.manualDownCommand());
+        joystick.b().whileTrue(extractor.manualUpCommand());
+        joystick.y().onTrue(extractor.setHeightZero());
         // Experimental
         button2.onTrue(limelight.updateLimelight());
         // button3.onTrue(limelight.testAlign());
-        button3.onTrue(limelight.AutoAlignPID());
         button6.onTrue(limelight.printDistances());
         
+        // joystick.b().onTrue(elevator.moveToPositionZero());
+    
+
         // Standard Controls
         // Methods that return commands are ran once at init, saving the command
         // Commands.defer() is required the method to ensure the code is ran dynamically
-        button4.onTrue(outtake.shoot());
-        button5.onTrue(shootingCommands.moveToLevelThreeShoot());
-        button7.whileTrue(elevator.manualUp());
-        button8.onTrue(shootingCommands.moveToLevelTwoShoot());
-        button9.whileTrue(extractor.manualUpCommand());
-        button10.whileTrue(elevator.manualDown());
-        button11.onTrue(shootingCommands.moveToPositionZeroShoot());
-        button12.whileTrue(extractor.manualDownCommand());
+        // button4.onTrue(outtake.shoot());
+        // button5.onTrue(shootingCommands.moveToLevelThreeShoot());
+        // button7.whileTrue(elevator.manualUp());
+        // button8.onTrue(shootingCommands.moveToLevelTwoShoot());
+        // button9.whileTrue(extractor.manualUpCommand());
+        // button10.whileTrue(elevator.manualDown());
+        // button11.onTrue(shootingCommands.moveToPositionZeroShoot());
+        // button12.whileTrue(extractor.manualDownCommand());
 
         // drivetrain.registerTelemetry(logger::telemeterize);
     }

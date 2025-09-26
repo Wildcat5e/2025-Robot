@@ -69,7 +69,7 @@ public class ElevatorBangBang extends SubsystemBase implements Elevator {
         
         if ((currentState == State.MOVING_DOWN || currentState == State.MANUAL_DOWN || currentState == State.INIT) && !bottomBeamBreak.get()) {
             motor.setPosition(0.0);
-            setTargetHeight(0.0);
+            setTargetHeight(0.02);
         }
         
         handleStateTransition(currentHeight);
