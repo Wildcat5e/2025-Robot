@@ -66,6 +66,7 @@ public class RobotContainer {
     public final Elevator elevator = new ElevatorBangBang();
     public final Outtake outtake = new Outtake();
     public final Extractor extractor = new Extractor();
+    public final ShootingCommands shootingCommands = new ShootingCommands(elevator, outtake);
 
     private final SendableChooser<Command> autoChooser;
 
@@ -118,11 +119,11 @@ public class RobotContainer {
         joystick.start().and(joystick.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
         // joystick.b().onTrue(limelight.printDistances());
         // reset the field-centric heading on left bumper press
-        // joystick.leftBumper().whileTrue(limelight.leftAutoAlign());
-        // joystick.rightBumper().whileTrue(limelight.rightAutoAlign());
+        // joystick.leftBumper().onTrue(limelight.leftAutoAlign());
+        // joystick.rightBumper().onTrue(limelight.rightAutoAlign());
 
         joystick.leftTrigger().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
-        
+
 
         // Experimental
         button2.onTrue(limelight.updateLimelight());
@@ -134,12 +135,12 @@ public class RobotContainer {
         // Methods that return commands are ran once at init, saving the command
         // Commands.defer() is required the method to ensure the code is ran dynamically
         button4.onTrue(outtake.shoot());
-        button5.onTrue(elevator.moveToLevelThree());
+        button5.onTrue(shootingCommands.moveToLevelThreeShoot());
         button7.whileTrue(elevator.manualUp());
-        button8.onTrue(elevator.moveToLevelTwo());
+        button8.onTrue(shootingCommands.moveToLevelTwoShoot());
         button9.whileTrue(extractor.manualUpCommand());
         button10.whileTrue(elevator.manualDown());
-        button11.onTrue(elevator.moveToPositionZero());
+        button11.onTrue(shootingCommands.moveToPositionZeroShoot());
         button12.whileTrue(extractor.manualDownCommand());
 
         // drivetrain.registerTelemetry(logger::telemeterize);

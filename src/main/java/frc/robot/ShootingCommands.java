@@ -32,7 +32,7 @@ public class ShootingCommands {
         );
     }
 
-    public Command moveToLevelZeroShoot(){
+    public Command moveToPositionZeroShoot(){
         return new SequentialCommandGroup(
             elevator.moveToPositionZero(),
             outtake.shoot()
