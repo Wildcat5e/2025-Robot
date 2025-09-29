@@ -63,10 +63,10 @@ public class Extractor extends SubsystemBase {
         motor.setVoltage(-1.5);
         break;
       case SLOW_DOWN:
-        motor.setVoltage(-0.5);
+        motor.setVoltage(-1.5);
         break;
       case SLOW_UP:
-        motor.setVoltage(0.5);
+        motor.setVoltage(1.5);
         break;
     }
 

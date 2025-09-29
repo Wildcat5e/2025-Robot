@@ -27,10 +27,9 @@ public class AutoAlignCommands {
 
 private static final double POSITION_TOLERANCE = 0.005;
   private static final double ROTATION_TOLERANCE = 0.02;
-  SimpleMotorFeedforward feedforward = new SimpleMotorFeedforward(2, 0, 0);
 
   private static final Transform2d CENTER_ALGAE_ARM = new Transform2d(
-    new Translation2d(0.75, .2), 
+    new Translation2d(0.90, .2), 
     Rotation2d.fromDegrees(180));
 
   private static final Transform2d EXTRACT_ALGAE_ARM = new Transform2d(
@@ -57,8 +56,6 @@ private static final double POSITION_TOLERANCE = 0.005;
         this.drivetrain = drivetrain;
         this.extractor = extractor;
         this.limelight = limelight;
-        feedforward.calculate(1);
-
     }
 
     public Command leftAutoAlign() {
@@ -76,7 +73,7 @@ private static final double POSITION_TOLERANCE = 0.005;
         PathPlannerTrajectoryState goalState = new PathPlannerTrajectoryState();
         goalState.pose = nearestTagPose;
       
-      
+
         if (distance < MIN_DISTANCE && limelight.calibrate()){
           return new FunctionalCommand(
             () -> {
@@ -89,6 +86,8 @@ private static final double POSITION_TOLERANCE = 0.005;
 
               drivetrain.setControl(drivetrain.m_pathApplyRobotSpeeds
                   .withSpeeds(outputSpeeds));
+
+                System.out.println(outputSpeeds);
             },
             (interrupted) -> {
                 limelight.autoAligning = false;
@@ -100,6 +99,7 @@ private static final double POSITION_TOLERANCE = 0.005;
               Pose2d currentPose = drivetrain.getState().Pose;
               double positionDistance = currentPose.getTranslation().getDistance(goalState.pose.getTranslation());
               double rotationDistance = Math.abs(currentPose.getRotation().minus(goalState.pose.getRotation()).getRadians());
+              System.out.println("position distance: " + positionDistance + " rotation distance:" + rotationDistance);
               return ((positionDistance < POSITION_TOLERANCE && rotationDistance < ROTATION_TOLERANCE) || emergencyStop);
             },
             drivetrain);
@@ -140,7 +140,7 @@ private static final double POSITION_TOLERANCE = 0.005;
           Pose2d currentPose = drivetrain.getState().Pose;
   
           drivetrain.setControl(drivetrain.m_pathApplyRobotSpeeds
-              .withSpeeds(drivetrain.holonomicDriveController.calculateRobotRelativeSpeeds(currentPose, goalState)));
+              .withSpeeds(drivetrain.algaeDriveController.calculateRobotRelativeSpeeds(currentPose, goalState)));
         },
         (interrupted) -> {},
         () -> {
@@ -157,6 +157,10 @@ private static final double POSITION_TOLERANCE = 0.005;
   
   }
   , Set.of(drivetrain, extractor));
+  }
+
+  public Command printPose(){
+    return extractor.runOnce(() -> System.out.println(drivetrain.getState().Pose));
   }
 
   public Command driveToAlgae() {
@@ -181,7 +185,7 @@ private static final double POSITION_TOLERANCE = 0.005;
           Pose2d currentPose = drivetrain.getState().Pose;
   
           drivetrain.setControl(drivetrain.m_pathApplyRobotSpeeds
-              .withSpeeds(drivetrain.holonomicDriveController.calculateRobotRelativeSpeeds(currentPose, goalState)));
+              .withSpeeds(drivetrain.algaeDriveController.calculateRobotRelativeSpeeds(currentPose, goalState)));
         },
         (interrupted) -> {},
         () -> {

@@ -128,6 +128,7 @@ public class RobotContainer {
         joystick.a().onTrue(extractor.moveArmUnderAlgae());
         joystick.x().whileTrue(extractor.manualDownCommand());
         joystick.b().whileTrue(extractor.manualUpCommand());
+        // joystick.y().onTrue(autoAlignCommands.printPose());
         joystick.y().onTrue(extractor.setHeightZero());
         // Experimental
         // button3.onTrue(limelight.testAlign());
@@ -143,15 +144,15 @@ public class RobotContainer {
         button4.onTrue(extractor.removeAlgaeDown());
         button5.onTrue(autoAlignCommands.alignArmToAlgae());
 
-        // button1.whileTrue(shootingCommands.safetyStopExtractorPID());
-        // button4.onTrue(outtake.shoot());
-        // button5.onTrue(shootingCommands.moveToLevelThreeShoot());
-        // button8.onTrue(shootingCommands.moveToLevelTwoShoot());
-        // button11.onTrue(shootingCommands.moveToPositionZeroShoot());
-        // button7.whileTrue(elevator.manualUp());
-        // button10.whileTrue(elevator.manualDown());
-        // button9.whileTrue(extractor.manualUpCommand());
-        // button12.whileTrue(extractor.manualDownCommand());
+        button1.whileTrue(shootingCommands.safetyStopExtractorPID());
+        button4.onTrue(outtake.shoot());
+        button5.onTrue(shootingCommands.moveToLevelThreeShoot());
+        button8.onTrue(shootingCommands.moveToLevelTwoShoot());
+        button11.onTrue(shootingCommands.moveToPositionZeroShoot());
+        button7.whileTrue(elevator.manualUp());
+        button10.whileTrue(elevator.manualDown());
+        button9.whileTrue(extractor.manualUpCommand());
+        button12.whileTrue(extractor.manualDownCommand());
 
         // drivetrain.registerTelemetry(logger::telemeterize);
     }
