@@ -6,6 +6,7 @@ import java.util.function.Supplier;
 
 import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.Utils;
+import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.swerve.SwerveDrivetrainConstants;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.swerve.SwerveRequest;
@@ -57,8 +58,8 @@ public class Drivetrain extends TunerSwerveDrivetrain implements Subsystem, Send
     private final SwerveRequest.SysIdSwerveSteerGains m_steerCharacterization = new SwerveRequest.SysIdSwerveSteerGains();
     private final SwerveRequest.SysIdSwerveRotation m_rotationCharacterization = new SwerveRequest.SysIdSwerveRotation();
     public final PPHolonomicDriveController holonomicDriveController = new PPHolonomicDriveController(
-        new PIDConstants(5, 0, 0.1),
-        new PIDConstants(5, 0, 0.1));
+        new PIDConstants(3, 0, 0),
+        new PIDConstants(3, 0, 0));
 
     /* SysId routine for characterizing translation. This is used to find PID gains for the drive motors. */
     private final SysIdRoutine m_sysIdRoutineTranslation = new SysIdRoutine(

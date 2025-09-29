@@ -25,6 +25,12 @@
         {
           "type": "named",
           "data": {
+            "name": "waitForLoading"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
             "name": "moveToLevelThree"
           }
         },

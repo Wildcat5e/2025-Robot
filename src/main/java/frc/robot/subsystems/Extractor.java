@@ -21,13 +21,12 @@ public class Extractor extends SubsystemBase {
   State currentState;
   double currentHeight;
   double targetHeight;
-
   double counter = 0;
 
   public enum State {
     IDLE,
-    UP,
-    DOWN,
+    FAST_UP,
+    FAST_DOWN,
     SLOW_DOWN,
     SLOW_UP,
     MANUAL_UP,
@@ -51,11 +50,11 @@ public class Extractor extends SubsystemBase {
       case IDLE:
         motor.setVoltage(0);
         break;
-      case UP:
-        motor.setVoltage(1.5);
+      case FAST_UP:
+        motor.setVoltage(2);
         break;
-      case DOWN:
-        motor.setVoltage(-1.5);
+      case FAST_DOWN:
+        motor.setVoltage(-2);
         break;
       case MANUAL_UP:
         motor.setVoltage(1.5);
@@ -86,10 +85,19 @@ public class Extractor extends SubsystemBase {
   public void handleStateTransition(double currentHeight){
     if (currentState == State.MANUAL_DOWN || currentState == State.MANUAL_UP){
       return;
-    } else if (targetHeight >= currentHeight + TOLERANCE){
-      currentState = State.UP;
+      // for dragging out algae, allowing us to use a different state for slower voltage to bring out algae
+    } else if (currentState == State.SLOW_UP || currentState == State.SLOW_DOWN){
+        if (targetHeight >= currentHeight + TOLERANCE){
+          currentState = State.SLOW_UP;
+        } else if (targetHeight <= currentHeight - TOLERANCE){
+          currentState = State.SLOW_DOWN;
+        } else {
+          currentState = State.IDLE;
+        }
+    } else if (targetHeight >= currentHeight + TOLERANCE){ 
+      currentState = State.FAST_UP;
     } else if (targetHeight <= currentHeight - TOLERANCE){
-      currentState = State.DOWN;
+      currentState = State.FAST_DOWN;
     } else {
       currentState = State.IDLE;
     }
@@ -109,16 +117,34 @@ public class Extractor extends SubsystemBase {
       setTargetHeight(0);});
   }
 
-  public Command moveArmUnderAlgae(){
+  public Command removeAlgaeDown(){
     return new FunctionalCommand(
       () -> {
-        setTargetHeight(UNDER_ALGAE);
-      System.out.println("INIT");}
-      , 
+      currentState = State.SLOW_DOWN;
+      targetHeight = UNDER_ALGAE;}, 
+      () -> {}, 
+      (interrupted) -> {}, 
+      () -> withinTolerance(), 
+      this
+    );
+  }
+
+  public Command removeAlgaeUp(){
+    return new FunctionalCommand(
       () -> {
-        System.out.println("current height: " + currentHeight);
-        System.out.println("target height: " + targetHeight);
-      }, 
+      currentState = State.SLOW_UP;
+      targetHeight = OVER_ALGAE;}, 
+      () -> {}, 
+      (interrupted) -> {}, 
+      () -> withinTolerance(), 
+      this
+    );
+  }
+
+  public Command moveArmUnderAlgae(){
+    return new FunctionalCommand(
+      () -> setTargetHeight(UNDER_ALGAE), 
+      () -> {}, 
       (interrupted) -> {}, 
       () -> withinTolerance(), 
       this
@@ -135,6 +161,16 @@ public class Extractor extends SubsystemBase {
       );
   }
 
+  public Command moveArmToZero(){
+    return new FunctionalCommand(
+      () -> setTargetHeight(0), 
+      () -> {}, 
+      (interrupted) -> {}, 
+      () -> withinTolerance(), 
+      this
+      );
+  }
+
   public Command manualUpCommand() {
     return runEnd(() -> currentState = State.MANUAL_UP, 
     () -> stop());
@@ -144,7 +180,7 @@ public class Extractor extends SubsystemBase {
     return runEnd(() -> currentState = State.MANUAL_DOWN, () -> stop());
   }
 
-  private void stop() {
+  public void stop() {
     currentState = State.IDLE;
     setTargetHeight(getCurrentHeight());
 }

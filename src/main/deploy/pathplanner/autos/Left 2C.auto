@@ -19,13 +19,31 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Left Coral Station to Back Left LReef"
+            "pathName": "Left Coral Station to Front Left LReef"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Front Left LReef to Left Coral Station"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Left Coral Station to Back RReef"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "waitForLoading"
           }
         }
       ]
     }
   },
-  "resetOdom": false,
+  "resetOdom": true,
   "folder": null,
   "choreoAuto": false
 }

@@ -66,7 +66,8 @@ public class RobotContainer {
     public final Elevator elevator = new ElevatorBangBang();
     public final Outtake outtake = new Outtake();
     public final Extractor extractor = new Extractor();
-    public final ShootingCommands shootingCommands = new ShootingCommands(elevator, outtake);
+    public final AutoAlignCommands autoAlignCommands = new AutoAlignCommands(drivetrain, extractor, limelight);
+    public final ShootingCommands shootingCommands = new ShootingCommands(elevator, outtake, extractor, autoAlignCommands);
 
     private final SendableChooser<Command> autoChooser;
 
@@ -102,8 +103,6 @@ public class RobotContainer {
 
         );
 
-        // joystick.a().onTrue(limelight.leftAutoAlign());
-
         // Idle while the robot is disabled. This ensures the configured
         // neutral mode is applied to the drive motors while disabled.
         final var idle = new SwerveRequest.Idle();
@@ -123,31 +122,35 @@ public class RobotContainer {
         // joystick.rightBumper().onTrue(limelight.rightAutoAlign());
 
         // joystick.leftTrigger().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
-        joystick.leftBumper().onTrue(limelight.leftAutoAlignPID());
-        joystick.rightBumper().onTrue(limelight.rightAutoAlignPID());
+        joystick.leftBumper().onTrue(autoAlignCommands.leftAutoAlign());
+        // joystick.rightBumper().onTrue(autoAlignCommands.rightAutoAlign());
         joystick.rightTrigger().onTrue(extractor.moveArmOverAlgae());
         joystick.a().onTrue(extractor.moveArmUnderAlgae());
         joystick.x().whileTrue(extractor.manualDownCommand());
         joystick.b().whileTrue(extractor.manualUpCommand());
         joystick.y().onTrue(extractor.setHeightZero());
         // Experimental
-        button2.onTrue(limelight.updateLimelight());
         // button3.onTrue(limelight.testAlign());
-        button6.onTrue(limelight.printDistances());
         
-        // joystick.b().onTrue(elevator.moveToPositionZero());
     
 
-        // Standard Controls
         // Methods that return commands are ran once at init, saving the command
         // Commands.defer() is required the method to ensure the code is ran dynamically
+
+        button1.onTrue(autoAlignCommands.alignArmToAlgae());
+        button2.onTrue(extractor.moveArmOverAlgae());
+        button3.onTrue(autoAlignCommands.driveToAlgae());
+        button4.onTrue(extractor.removeAlgaeDown());
+        button5.onTrue(autoAlignCommands.alignArmToAlgae());
+
+        // button1.whileTrue(shootingCommands.safetyStopExtractorPID());
         // button4.onTrue(outtake.shoot());
         // button5.onTrue(shootingCommands.moveToLevelThreeShoot());
-        // button7.whileTrue(elevator.manualUp());
         // button8.onTrue(shootingCommands.moveToLevelTwoShoot());
-        // button9.whileTrue(extractor.manualUpCommand());
-        // button10.whileTrue(elevator.manualDown());
         // button11.onTrue(shootingCommands.moveToPositionZeroShoot());
+        // button7.whileTrue(elevator.manualUp());
+        // button10.whileTrue(elevator.manualDown());
+        // button9.whileTrue(extractor.manualUpCommand());
         // button12.whileTrue(extractor.manualDownCommand());
 
         // drivetrain.registerTelemetry(logger::telemeterize);

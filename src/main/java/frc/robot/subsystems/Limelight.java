@@ -17,6 +17,7 @@ import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -40,22 +41,6 @@ import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Limelight extends SubsystemBase {
-  private static final double POSITION_TOLERANCE = 0.005;
-  private static final double ROTATION_TOLERANCE = 0.02;
-
-  private static final Transform2d CENTER_ALGAE_ARM = new Transform2d(
-    new Translation2d(0.75, .3), 
-    Rotation2d.fromDegrees(180));
-
-  private static final Transform2d LEFT_ALIGN_DISTANCE = new Transform2d(
-      new Translation2d(0.375, -0.175),
-      Rotation2d.fromDegrees(180));
-
-  private static final Transform2d RIGHT_ALIGN_DISTANCE = new Transform2d(
-      new Translation2d(0.375, 0.175),
-      Rotation2d.fromDegrees(180));
-
-  double minDistance = 1.5;
 
   private static final AprilTagFieldLayout layout = AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeWelded);
 
@@ -70,7 +55,7 @@ public class Limelight extends SubsystemBase {
   Field2d field = new Field2d();
   NetworkTableEntry botPoseEntry;
   double[] botPose;
-  List<Pose2d> aprilTagPoses;
+  public List<Pose2d> aprilTagPoses;
   double[] stddevsDoubleArray;
   boolean hasTarget;
   Pose2d updatedPose;
@@ -82,8 +67,11 @@ public class Limelight extends SubsystemBase {
   double avgTagDistance;
   double xyStdDevs;
   double rotationalStdDevs;
+  boolean calibrate;
+  public boolean autoAligning;
 
   public Limelight(Drivetrain drivetrain) {
+    autoAligning = false;
 
     blueAprilTagPoses.add(layout.getTagPose(17).get().toPose2d());
     blueAprilTagPoses.add(layout.getTagPose(18).get().toPose2d());
@@ -112,28 +100,28 @@ public class Limelight extends SubsystemBase {
 
     SmartDashboard.putData("Field", field);
     SmartDashboard.putData(this);
+
+    calibrate = false;
   }
 
   @Override
   public void periodic() {
     hasTarget = limelight.getEntry("tv").getDouble(0.0) == 1.0;
 
-    if (hasTarget) {
+    if (hasTarget && DriverStation.isTeleop() && !autoAligning) {
+      calibrate = true;
       botPose = botPoseEntry.getDoubleArray(new double[11]);
       updatedPose = new Pose2d(botPose[0], botPose[1], Rotation2d.fromDegrees(botPose[5]));
       totalLatencyMs = botPose[6];
       timestamp = Timer.getFPGATimestamp() - totalLatencyMs / 1000;
       tagCount = (double) botPose[7];
-      avgTagDistance = botPose[10];
+      avgTagDistance = botPose[9];
 
 
-      // units in meters, every addition meter of tag distances means there is an additional 0.2 meter that the april tag is off actual location
-      xyStdDevs = 0.1 + 1 * avgTagDistance;
-      rotationalStdDevs = 0.1 + 1 * avgTagDistance;
+      xyStdDevs = 0.1 + avgTagDistance * avgTagDistance;
+      rotationalStdDevs = 0.1 + avgTagDistance * avgTagDistance;
 
-      if (tagCount == 1.0) {
-        stddevs = VecBuilder.fill(xyStdDevs, xyStdDevs, rotationalStdDevs);
-      } 
+      stddevs = VecBuilder.fill(xyStdDevs, xyStdDevs, rotationalStdDevs);
       // can lower stddev if tag count is greater than 1 for funsies
       drivetrain.addVisionMeasurement(updatedPose, timestamp, stddevs);
 
@@ -143,143 +131,14 @@ public class Limelight extends SubsystemBase {
 
   }
 
-  public Command printDistances() {
-    return Commands.defer(() -> {
-      Pose2d currentPose = drivetrain.getState().Pose;
-
-      ChassisSpeeds speeds = drivetrain.getState().Speeds;
-
-      Pose2d targetPose = null;
-      int counter = 1;
-
-      for (Pose2d pose : aprilTagPoses) {
-        double distance = currentPose.getTranslation().getDistance(pose.getTranslation());
-        System.out.println("AprilTag counter: " + counter + " Tag Pose: " + pose + "Robot Pose: " + currentPose
-            + "Distance: " + distance);
-        if (distance < minDistance) {
-          System.out.println("AprilTag counter: " + counter + " is close enough!!");
-        }
-        counter++;
-      }
-
-      return Commands.none();
-    }, Set.of(this));
+  public boolean calibrate(){
+    return calibrate;
   }
 
   public Command updateLimelight(){
     return runOnce(() -> {
       drivetrain.addVisionMeasurement(updatedPose, timestamp, stddevs);
-      System.out.println(blueAprilTagPoses.get(4).transformBy(LEFT_ALIGN_DISTANCE));
     }
       );
   }
-
-  // at the end of a left/right auto align, the robot may not be at target position
-  // use auto align pid, pass in targetpose and currentpose to holonomic controller
-  // to calculate speeds that will be applied to drivetrain, to move robot to final destination
-  // command ends when robot pose is within a tolerance of target pose
-  public Command leftAutoAlignPID() {
-    return Commands.defer(() -> {
-    
-    //robotpose and currentpose are same in this command
-    Pose2d robotPose = drivetrain.getState().Pose;
-    Pose2d nearestTagPose = robotPose.nearest(aprilTagPoses);
-    System.out.println("closest tag pose (before transform): "+ nearestTagPose);
-    nearestTagPose = nearestTagPose.transformBy(LEFT_ALIGN_DISTANCE);
-    System.out.println("closest tag pose (after transform): "+ nearestTagPose);
-    double distance = robotPose.getTranslation().getDistance(nearestTagPose.getTranslation());
-    System.out.println("robot pose: " + robotPose);
-    System.out.println("distance:" + distance + "min distancne: " + minDistance);
-    targetPose = nearestTagPose;
-    PathPlannerTrajectoryState goalState = new PathPlannerTrajectoryState();
-    goalState.pose = nearestTagPose;
-
-
-    if (distance < minDistance){
-      System.out.println("hooray");
-      return new FunctionalCommand(
-        () -> {
-
-        },
-        () -> {
-
-          Pose2d currentPose = drivetrain.getState().Pose;
-
-          drivetrain.setControl(drivetrain.m_pathApplyRobotSpeeds
-              .withSpeeds(drivetrain.holonomicDriveController.calculateRobotRelativeSpeeds(currentPose, goalState)));
-        },
-        (interrupted) -> {},
-        () -> {
-          Pose2d currentPose = drivetrain.getState().Pose;
-          double positionDistance = currentPose.getTranslation().getDistance(targetPose.getTranslation());
-          double rotationDistance = Math.abs(currentPose.getRotation().minus(targetPose.getRotation()).getRadians());
-          return (positionDistance < POSITION_TOLERANCE && rotationDistance < ROTATION_TOLERANCE);
-        },
-        drivetrain);
-    } else {
-      return Commands.none();
-    }
-
-
-  }
-  , Set.of(drivetrain));
-}
-
-public Command rightAutoAlignPID() {
-  return Commands.defer(() -> {
-  
-  //robotpose and currentpose are same in this command
-  Pose2d robotPose = drivetrain.getState().Pose;
-  Pose2d nearestTagPose = robotPose.nearest(aprilTagPoses);
-  System.out.println("closest tag pose (before transform): "+ nearestTagPose);
-  nearestTagPose = nearestTagPose.transformBy(RIGHT_ALIGN_DISTANCE);
-  System.out.println("closest tag pose (after transform): "+ nearestTagPose);
-  double distance = robotPose.getTranslation().getDistance(nearestTagPose.getTranslation());
-  System.out.println("robot pose: " + robotPose);
-  System.out.println("distance:" + distance + "min distancne: " + minDistance);
-  targetPose = nearestTagPose;
-  PathPlannerTrajectoryState goalState = new PathPlannerTrajectoryState();
-  goalState.pose = nearestTagPose;
-
-
-  if (distance < minDistance){
-    System.out.println("hooray");
-    return new FunctionalCommand(
-      () -> {
-
-      },
-      () -> {
-
-        Pose2d currentPose = drivetrain.getState().Pose;
-
-        drivetrain.setControl(drivetrain.m_pathApplyRobotSpeeds
-            .withSpeeds(drivetrain.holonomicDriveController.calculateRobotRelativeSpeeds(currentPose, goalState)));
-      },
-      (interrupted) -> {},
-      () -> {
-        Pose2d currentPose = drivetrain.getState().Pose;
-        double positionDistance = currentPose.getTranslation().getDistance(targetPose.getTranslation());
-        double rotationDistance = Math.abs(currentPose.getRotation().minus(targetPose.getRotation()).getRadians());
-        return (positionDistance < POSITION_TOLERANCE && rotationDistance < ROTATION_TOLERANCE);
-      },
-      drivetrain);
-  } else {
-    return Commands.none();
-  }
-
-
-}
-, Set.of(drivetrain));
-}
-
-  public Command centerRobotForAlgaeArm(){
-    return Commands.defer(() -> {
-
-
-      //TEST AUTO ALIGN FIRST, THEN COPY PASTE THAT CODE INTO HERE
-      return Commands.none();
-
-    }, Set.of(drivetrain));
-  }
-
 }
