@@ -76,7 +76,7 @@ public class RobotContainer {
         NamedCommands.registerCommand("moveToLevelTwo", elevator.moveToLevelTwo());
         NamedCommands.registerCommand("moveToLevelThree", elevator.moveToLevelThree());
         NamedCommands.registerCommand("waitForLoading", outtake.waitForLoading());
-        NamedCommands.registerCommand("shoot", outtake.shoot());
+        NamedCommands.registerCommand("coral", outtake.shoot());
 
         configureBindings();
 

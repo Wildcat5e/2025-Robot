@@ -37,13 +37,13 @@
         {
           "type": "named",
           "data": {
-            "name": "waitForLoading"
+            "name": null
           }
         }
       ]
     }
   },
-  "resetOdom": true,
+  "resetOdom": false,
   "folder": null,
   "choreoAuto": false
 }

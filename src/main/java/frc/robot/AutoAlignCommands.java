@@ -25,7 +25,7 @@ import frc.robot.subsystems.Limelight;
 /** Add your docs here. */
 public class AutoAlignCommands {
 
-private static final double POSITION_TOLERANCE = 0.005;
+private static final double POSITION_TOLERANCE = 0.02;
   private static final double ROTATION_TOLERANCE = 0.02;
   private static final double ALGAE_POSITION_TOLERANCE = 0.03;
   private static final double ALGAE_ROTATION_TOLERANCE = 0.03;
@@ -96,14 +96,15 @@ private static final double POSITION_TOLERANCE = 0.005;
                 System.out.println(outputSpeeds);
             },
             (interrupted) -> {
-                limelight.autoAligning = false;
+                tooLong = false;
                 System.out.println("POSE REACHED");
                 System.out.println("ROBOT POSE: " + drivetrain.getState().Pose);
                 System.out.println("TARGET POSE: " + goalState.pose);
+                System.out.println();
             },
             () -> {
               endTime = System.currentTimeMillis();
-              if (endTime - startTime >= 1500){
+              if (endTime - startTime >= 2000){
                 tooLong = true;
               }
 
@@ -112,6 +113,7 @@ private static final double POSITION_TOLERANCE = 0.005;
               double rotationDistance = Math.abs(currentPose.getRotation().minus(goalState.pose.getRotation()).getRadians());
               System.out.println("position distance: " + positionDistance + " rotation distance:" + rotationDistance);
               withinTolerance = (positionDistance < POSITION_TOLERANCE && rotationDistance < ROTATION_TOLERANCE);
+              System.out.println(withinTolerance + " " + emergencyStop + " " + tooLong);
               return (withinTolerance || emergencyStop || tooLong);
             },
             drivetrain);
@@ -156,14 +158,14 @@ private static final double POSITION_TOLERANCE = 0.005;
                 System.out.println(outputSpeeds);
             },
             (interrupted) -> {
-                limelight.autoAligning = false;
-                System.out.println("POSE REACHED");
+              tooLong = false;
+              System.out.println("POSE REACHED");
                 System.out.println("ROBOT POSE: " + drivetrain.getState().Pose);
                 System.out.println("TARGET POSE: " + goalState.pose);
             },
             () -> {
               endTime = System.currentTimeMillis();
-              if (endTime - startTime >= 1500){
+              if (endTime - startTime >= 2000){
                 tooLong = true;
               }
 
@@ -215,6 +217,7 @@ private static final double POSITION_TOLERANCE = 0.005;
               .withSpeeds(drivetrain.algaeDriveController.calculateRobotRelativeSpeeds(currentPose, goalState)));
         },
         (interrupted) -> {
+          tooLong = false;
 
           System.out.println("ALIGN ARM END");
 
@@ -270,6 +273,8 @@ private static final double POSITION_TOLERANCE = 0.005;
               .withSpeeds(drivetrain.algaeDriveController.calculateRobotRelativeSpeeds(currentPose, goalState)));
         },
         (interrupted) -> {
+          tooLong = false;
+
         },
         () -> {
           endTime = System.currentTimeMillis();

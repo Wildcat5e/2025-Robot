@@ -7,13 +7,19 @@
         {
           "type": "named",
           "data": {
-            "name": "waitForLoading"
+            "name": null
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "shoot"
+            "name": null
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.5
           }
         }
       ]
