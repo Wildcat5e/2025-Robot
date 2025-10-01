@@ -123,7 +123,7 @@ public class RobotContainer {
 
         joystick.leftTrigger().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
         joystick.leftBumper().onTrue(autoAlignCommands.leftAutoAlign());
-        // joystick.rightBumper().onTrue(autoAlignCommands.rightAutoAlign());
+        joystick.rightBumper().onTrue(autoAlignCommands.rightAutoAlign());
         joystick.rightTrigger().onTrue(shootingCommands.safetyStopExtractorPID());
         joystick.y().onTrue(shootingCommands.algaeAlignOver());
         joystick.b().onTrue(shootingCommands.algaeExtractOver());
@@ -138,28 +138,22 @@ public class RobotContainer {
         // Methods that return commands are ran once at init, saving the command
         // Commands.defer() is required the method to ensure the code is ran dynamically
 
-        button1.onTrue(autoAlignCommands.alignArmToAlgae());
-        button2.onTrue(extractor.moveArmOverAlgae());
-        button3.onTrue(autoAlignCommands.driveToAlgae());
-        button4.onTrue(extractor.removeAlgaeDown());
-        button5.onTrue(autoAlignCommands.alignArmToAlgae());
+        // button7.onTrue(extractor.moveArmUnderAlgae());
+        // button8.onTrue(autoAlignCommands.driveToAlgae());
+        // button9.onTrue(extractor.removeAlgaeUp());
+        // button10.onTrue(autoAlignCommands.alignArmToAlgae());
+        // button11.onTrue(elevator.moveToLevelTwo());
 
 
-        button6.onTrue(autoAlignCommands.alignArmToAlgae());
-        button7.onTrue(extractor.moveArmUnderAlgae());
-        button8.onTrue(autoAlignCommands.driveToAlgae());
-        button9.onTrue(extractor.removeAlgaeUp());
-        button10.onTrue(autoAlignCommands.alignArmToAlgae());
-
-        // button1.whileTrue(shootingCommands.safetyStopExtractorPID());
-        // button4.onTrue(outtake.shoot());
-        // button5.onTrue(elevator.moveToLevelThree());
-        // button8.onTrue(elevator.moveToLevelTwo());
-        // button11.onTrue(elevator.moveToPositionZero());
-        // button7.whileTrue(elevator.manualUp());
-        // button10.whileTrue(elevator.manualDown());
-        // button9.whileTrue(extractor.manualUpCommand());
-        // button12.whileTrue(extractor.manualDownCommand());
+        button1.whileTrue(shootingCommands.safetyStopExtractorPID());
+        button4.onTrue(outtake.shoot());
+        button5.onTrue(elevator.moveToLevelThree());
+        button8.onTrue(elevator.moveToLevelTwo());
+        button11.onTrue(elevator.moveToPositionZero());
+        button7.whileTrue(extractor.moveArmToZero());
+        button10.whileTrue(elevator.manualDown());
+        button9.whileTrue(extractor.manualUpCommand());
+        button12.whileTrue(extractor.manualDownCommand());
 
         // drivetrain.registerTelemetry(logger::telemeterize);
     }

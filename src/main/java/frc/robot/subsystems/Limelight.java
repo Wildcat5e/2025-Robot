@@ -114,7 +114,7 @@ public class Limelight extends SubsystemBase {
       timestamp = Timer.getFPGATimestamp() - totalLatencyMs / 1000;
       tagCount = (double) botPose[7];
       avgTagDistance = botPose[9];
-
+                              
 
       xyStdDevs = 0.1 + avgTagDistance * avgTagDistance;
       rotationalStdDevs = 0.1 + avgTagDistance * avgTagDistance;

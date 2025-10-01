@@ -7,14 +7,14 @@ import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 
 public class Extractor extends SubsystemBase {
   // meters all units
-  private static final double TOLERANCE = 0.05;
+  private static final double TOLERANCE = 0.03;
   private static final double GEAR_RATIO = 36;
   private static final double ARM_LENGTH = .572;
   private static final double ARM_CIRCUMFERENCE = 2 * Math.PI * ARM_LENGTH;
   // under position meaning arm will be below algae and push up
   // over position meaning arm will be above algae and drag out
   private static final double UNDER_ALGAE = .8;
-  private static final double OVER_ALGAE = 1.2;
+  private static final double OVER_ALGAE = 1.1;
 
 
   TalonFX motor = new TalonFX(17);
@@ -63,10 +63,10 @@ public class Extractor extends SubsystemBase {
         motor.setVoltage(-1.5);
         break;
       case SLOW_DOWN:
-        motor.setVoltage(-0.5);
+        motor.setVoltage(-1.5);
         break;
       case SLOW_UP:
-        motor.setVoltage(0.5);
+        motor.setVoltage(1.5);
         break;
     }
 
@@ -121,9 +121,11 @@ public class Extractor extends SubsystemBase {
     return new FunctionalCommand(
       () -> {
       currentState = State.SLOW_DOWN;
-      targetHeight = UNDER_ALGAE;}, 
+      targetHeight = 0;}, 
       () -> {}, 
-      (interrupted) -> {}, 
+      (interrupted) -> {
+        System.out.println("ENDEND END END");
+      }, 
       () -> withinTolerance(), 
       this
     );

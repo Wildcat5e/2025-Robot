@@ -65,7 +65,9 @@ public class ShootingCommands {
             autoAlignCommands.driveToAlgae(),
             new ParallelCommandGroup(
                 extractor.removeAlgaeDown(),
-                autoAlignCommands.alignArmToAlgae()
+                new SequentialCommandGroup(
+                    new WaitCommand(0.5),
+                    autoAlignCommands.alignArmToAlgae())
             )
         );
     }
@@ -79,12 +81,15 @@ public class ShootingCommands {
         extractor.moveArmUnderAlgae());
     }
 
+
     public Command algaeExtractUnder() {
         return new SequentialCommandGroup(
             autoAlignCommands.driveToAlgae(),
             new ParallelCommandGroup(
                 extractor.removeAlgaeUp(),
-                autoAlignCommands.alignArmToAlgae()
+                new SequentialCommandGroup(
+                    new WaitCommand(0.5),
+                    autoAlignCommands.alignArmToAlgae())
             )
         );
     }

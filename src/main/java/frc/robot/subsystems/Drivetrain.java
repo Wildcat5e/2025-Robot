@@ -61,12 +61,12 @@ public class Drivetrain extends TunerSwerveDrivetrain implements Subsystem, Send
         new PIDConstants(2, 0, 0),
         new PIDConstants(2, 0, 0));
     public final PPHolonomicDriveController holonomicDriveController = new PPHolonomicDriveController(
-        new PIDConstants(6, 0, 0),
+        new PIDConstants(5, 0, 0),
         new PIDConstants(6, 0, 0));
 
         public final PPHolonomicDriveController algaeDriveController = new PPHolonomicDriveController(
-            new PIDConstants(3, 0, 0),
-            new PIDConstants(3, 0, 0));
+            new PIDConstants(3.5, 0, 0),
+            new PIDConstants(4.5, 0, 0));
 
     /* SysId routine for characterizing translation. This is used to find PID gains for the drive motors. */
     private final SysIdRoutine m_sysIdRoutineTranslation = new SysIdRoutine(
