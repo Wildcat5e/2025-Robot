@@ -71,8 +71,6 @@ public class Limelight extends SubsystemBase {
   public boolean autoAligning;
 
   public Limelight(Drivetrain drivetrain) {
-    autoAligning = false;
-
     blueAprilTagPoses.add(layout.getTagPose(17).get().toPose2d());
     blueAprilTagPoses.add(layout.getTagPose(18).get().toPose2d());
     blueAprilTagPoses.add(layout.getTagPose(19).get().toPose2d());
@@ -108,7 +106,7 @@ public class Limelight extends SubsystemBase {
   public void periodic() {
     hasTarget = limelight.getEntry("tv").getDouble(0.0) == 1.0;
 
-    if (hasTarget && DriverStation.isTeleop() && !autoAligning) {
+    if (hasTarget && DriverStation.isTeleop()){
       calibrate = true;
       botPose = botPoseEntry.getDoubleArray(new double[11]);
       updatedPose = new Pose2d(botPose[0], botPose[1], Rotation2d.fromDegrees(botPose[5]));

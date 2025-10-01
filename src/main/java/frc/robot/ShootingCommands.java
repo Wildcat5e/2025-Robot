@@ -51,15 +51,44 @@ public class ShootingCommands {
                 outtake.shoot());
     }
 
-    public Command algeExtractOver() {
+    public Command algaeAlignOver() {
         return new SequentialCommandGroup(
-                autoAlignCommands.alignArmToAlgae(),
-                extractor.moveArmOverAlgae(),
-                autoAlignCommands.driveToAlgae(),
-                new ParallelDeadlineGroup(
-                        autoAlignCommands.alignArmToAlgae(),
-                        extractor.removeAlgaeDown()));
+        new ParallelCommandGroup(
+            autoAlignCommands.alignArmToAlgae(),
+            elevator.moveToLevelTwo()
+        ),
+        extractor.moveArmOverAlgae());
     }
+
+    public Command algaeExtractOver() {
+        return new SequentialCommandGroup(
+            autoAlignCommands.driveToAlgae(),
+            new ParallelCommandGroup(
+                extractor.removeAlgaeDown(),
+                autoAlignCommands.alignArmToAlgae()
+            )
+        );
+    }
+
+    public Command algaeAlignUnder() {
+        return new SequentialCommandGroup(
+        new ParallelCommandGroup(
+            autoAlignCommands.alignArmToAlgae(),
+            elevator.moveToLevelTwo()
+        ),
+        extractor.moveArmUnderAlgae());
+    }
+
+    public Command algaeExtractUnder() {
+        return new SequentialCommandGroup(
+            autoAlignCommands.driveToAlgae(),
+            new ParallelCommandGroup(
+                extractor.removeAlgaeUp(),
+                autoAlignCommands.alignArmToAlgae()
+            )
+        );
+    }
+
 
     public Command safetyStopExtractorPID() {
         return extractor.runEnd(() -> {

@@ -13,8 +13,8 @@ public class Extractor extends SubsystemBase {
   private static final double ARM_CIRCUMFERENCE = 2 * Math.PI * ARM_LENGTH;
   // under position meaning arm will be below algae and push up
   // over position meaning arm will be above algae and drag out
-  private static final double UNDER_ALGAE = 1;
-  private static final double OVER_ALGAE = 1.4;
+  private static final double UNDER_ALGAE = .8;
+  private static final double OVER_ALGAE = 1.2;
 
 
   TalonFX motor = new TalonFX(17);
@@ -63,18 +63,18 @@ public class Extractor extends SubsystemBase {
         motor.setVoltage(-1.5);
         break;
       case SLOW_DOWN:
-        motor.setVoltage(-1.5);
+        motor.setVoltage(-0.5);
         break;
       case SLOW_UP:
-        motor.setVoltage(1.5);
+        motor.setVoltage(0.5);
         break;
     }
 
-    counter++;
-    if (counter % 100 == 0){
-      System.out.println("current height: " + currentHeight);
-      System.out.println("within tolerance?: " + withinTolerance());
-    }
+    // counter++;
+    // if (counter % 100 == 0){
+    //   System.out.println("current height: " + currentHeight);
+    //   System.out.println("within tolerance?: " + withinTolerance());
+    // }
 
   }
 

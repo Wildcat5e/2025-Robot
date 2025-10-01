@@ -57,6 +57,9 @@ public class Drivetrain extends TunerSwerveDrivetrain implements Subsystem, Send
     private final SwerveRequest.SysIdSwerveTranslation m_translationCharacterization = new SwerveRequest.SysIdSwerveTranslation();
     private final SwerveRequest.SysIdSwerveSteerGains m_steerCharacterization = new SwerveRequest.SysIdSwerveSteerGains();
     private final SwerveRequest.SysIdSwerveRotation m_rotationCharacterization = new SwerveRequest.SysIdSwerveRotation();
+    public final PPHolonomicDriveController testDriveController = new PPHolonomicDriveController(
+        new PIDConstants(2, 0, 0),
+        new PIDConstants(2, 0, 0));
     public final PPHolonomicDriveController holonomicDriveController = new PPHolonomicDriveController(
         new PIDConstants(6, 0, 0),
         new PIDConstants(6, 0, 0));
