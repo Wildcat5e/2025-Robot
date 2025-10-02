@@ -27,10 +27,10 @@ public class ElevatorBangBang extends SubsystemBase implements Elevator {
     
     private final TalonFX motor = new TalonFX(14);
     private final DigitalInput bottomBeamBreak = new DigitalInput(0);
-    private final BooleanPublisher bottomBeamBreakPublisher;
-    private final DoublePublisher currentHeightPublisher;
-    private final DoublePublisher targetHeightPublisher;
-    private final StringPublisher currentStatePublisher;
+    // private final BooleanPublisher bottomBeamBreakPublisher;
+    // private final DoublePublisher currentHeightPublisher;
+    // private final DoublePublisher targetHeightPublisher;
+    // private final StringPublisher currentStatePublisher;
     
     private State currentState;
     private double currentHeight;
@@ -55,11 +55,11 @@ public class ElevatorBangBang extends SubsystemBase implements Elevator {
         currentState = State.INIT;
         motor.setPosition(0.0);
        
-        NetworkTable elevator = NetworkTableInstance.getDefault().getTable("Elevator");
-        bottomBeamBreakPublisher = elevator.getBooleanTopic("BottomBeamBreak").publish();
-        currentHeightPublisher = elevator.getDoubleTopic("CurrentHeight").publish();
-        targetHeightPublisher = elevator.getDoubleTopic("TargetHeight").publish();
-        currentStatePublisher = elevator.getStringTopic("CurrentState").publish();
+        // NetworkTable elevator = NetworkTableInstance.getDefault().getTable("Elevator");
+        // bottomBeamBreakPublisher = elevator.getBooleanTopic("BottomBeamBreak").publish();
+        // currentHeightPublisher = elevator.getDoubleTopic("CurrentHeight").publish();
+        // targetHeightPublisher = elevator.getDoubleTopic("TargetHeight").publish();
+        // currentStatePublisher = elevator.getStringTopic("CurrentState").publish();
         SmartDashboard.putData(this);
     }
     
@@ -74,10 +74,10 @@ public class ElevatorBangBang extends SubsystemBase implements Elevator {
         
         handleStateTransition(currentHeight);
         
-        bottomBeamBreakPublisher.set(bottomBeamBreak.get());
-        currentStatePublisher.set(currentState.toString());
-        currentHeightPublisher.set(currentHeight);
-        targetHeightPublisher.set(targetHeight);
+        // bottomBeamBreakPublisher.set(bottomBeamBreak.get());
+        // currentStatePublisher.set(currentState.toString());
+        // currentHeightPublisher.set(currentHeight);
+        // targetHeightPublisher.set(targetHeight);
         
         switch (currentState) {
             case NOT_MOVING:

@@ -76,7 +76,7 @@ public class RobotContainer {
         NamedCommands.registerCommand("moveToLevelTwo", elevator.moveToLevelTwo());
         NamedCommands.registerCommand("moveToLevelThree", elevator.moveToLevelThree());
         NamedCommands.registerCommand("waitForLoading", outtake.waitForLoading());
-        NamedCommands.registerCommand("coral", outtake.shoot());
+        NamedCommands.registerCommand("shoot", outtake.shoot());
 
         configureBindings();
 
@@ -145,13 +145,12 @@ public class RobotContainer {
         // button11.onTrue(elevator.moveToLevelTwo());
 
 
-        button1.whileTrue(shootingCommands.safetyStopExtractorPID());
+        button1.onTrue(shootingCommands.safetyStopExtractorPID());
         button4.onTrue(outtake.shoot());
         button5.onTrue(elevator.moveToLevelThree());
         button8.onTrue(elevator.moveToLevelTwo());
         button11.onTrue(elevator.moveToPositionZero());
-        button7.whileTrue(extractor.moveArmToZero());
-        button10.whileTrue(elevator.manualDown());
+        button10.onTrue(extractor.moveArmToZero());
         button9.whileTrue(extractor.manualUpCommand());
         button12.whileTrue(extractor.manualDownCommand());
 

@@ -14,7 +14,7 @@ public class Extractor extends SubsystemBase {
   // under position meaning arm will be below algae and push up
   // over position meaning arm will be above algae and drag out
   private static final double UNDER_ALGAE = .8;
-  private static final double OVER_ALGAE = 1.1;
+  private static final double OVER_ALGAE = 1.15;
 
 
   TalonFX motor = new TalonFX(17);
@@ -124,7 +124,6 @@ public class Extractor extends SubsystemBase {
       targetHeight = 0;}, 
       () -> {}, 
       (interrupted) -> {
-        System.out.println("ENDEND END END");
       }, 
       () -> withinTolerance(), 
       this

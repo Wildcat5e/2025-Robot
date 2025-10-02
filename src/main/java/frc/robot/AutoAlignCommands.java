@@ -97,6 +97,7 @@ private static final double POSITION_TOLERANCE = 0.02;
             },
             (interrupted) -> {
                 tooLong = false;
+                emergencyStop = false;
                 System.out.println("POSE REACHED");
                 System.out.println("ROBOT POSE: " + drivetrain.getState().Pose);
                 System.out.println("TARGET POSE: " + goalState.pose);
@@ -104,7 +105,7 @@ private static final double POSITION_TOLERANCE = 0.02;
             },
             () -> {
               endTime = System.currentTimeMillis();
-              if (endTime - startTime >= 2000){
+              if (endTime - startTime >= 1000){
                 tooLong = true;
               }
 
@@ -159,13 +160,15 @@ private static final double POSITION_TOLERANCE = 0.02;
             },
             (interrupted) -> {
               tooLong = false;
+              emergencyStop = false;
+
               System.out.println("POSE REACHED");
                 System.out.println("ROBOT POSE: " + drivetrain.getState().Pose);
                 System.out.println("TARGET POSE: " + goalState.pose);
             },
             () -> {
               endTime = System.currentTimeMillis();
-              if (endTime - startTime >= 2000){
+              if (endTime - startTime >= 1000){
                 tooLong = true;
               }
 
@@ -218,6 +221,7 @@ private static final double POSITION_TOLERANCE = 0.02;
         },
         (interrupted) -> {
           tooLong = false;
+          emergencyStop = false;
 
           System.out.println("ALIGN ARM END");
 
@@ -242,10 +246,6 @@ private static final double POSITION_TOLERANCE = 0.02;
   
   }
   , Set.of(drivetrain));
-  }
-
-  public Command printPose(){
-    return extractor.runOnce(() -> System.out.println(drivetrain.getState().Pose));
   }
 
   public Command driveToAlgae() {
@@ -274,6 +274,7 @@ private static final double POSITION_TOLERANCE = 0.02;
         },
         (interrupted) -> {
           tooLong = false;
+          emergencyStop = false;
 
         },
         () -> {
@@ -293,60 +294,6 @@ private static final double POSITION_TOLERANCE = 0.02;
       return Commands.none();
     }
   
-  
-  }
-  , Set.of(drivetrain));
-  }
-
-  public Command testMinimumSpeed() {
-    return Commands.defer(() -> {
-    
-    //robotpose and currentpose are same in this command
-    Pose2d robotPose = drivetrain.getState().Pose;
-    PathPlannerTrajectoryState goalState = new PathPlannerTrajectoryState();
-    goalState.pose = new Pose2d(6.5, 4, Rotation2d.fromDegrees(0));
-  
-  
-      return new FunctionalCommand(
-        () -> {
-        },
-        () -> {
-  
-          Pose2d currentPose = drivetrain.getState().Pose;
-          ChassisSpeeds outputSpeeds = new ChassisSpeeds(1, 1, 0);
-          // ChassisSpeeds outputSpeeds = drivetrain.holonomicDriveController.calculateRobotRelativeSpeeds(currentPose, goalState);
-          double vx = outputSpeeds.vxMetersPerSecond;
-          double vy = outputSpeeds.vyMetersPerSecond;
-          if (vx < 0 && vx > -1){
-            vx = -1;
-            outputSpeeds.vxMetersPerSecond = vx;
-          } else if (vx > 0 && vx < 1){
-            vx = 1;
-            outputSpeeds.vxMetersPerSecond = vx;
-          }
-          if (vy < 0 && vy > -1){
-            vy = -1;
-            outputSpeeds.vyMetersPerSecond = vy;
-          } else if (vy > 0 && vy < 1){
-            vy = 1;
-            outputSpeeds.vyMetersPerSecond = vy;
-          }
-          drivetrain.setControl(drivetrain.m_pathApplyRobotSpeeds
-              .withSpeeds(outputSpeeds));
-        },
-        (interrupted) -> {
-            limelight.autoAligning = false;
-            System.out.println("POSE REACHED");
-            System.out.println("ROBOT POSE: " + drivetrain.getState().Pose);
-            System.out.println("TARGET POSE: " + goalState.pose);
-        },
-        () -> {
-          Pose2d currentPose = drivetrain.getState().Pose;
-          double positionDistance = currentPose.getTranslation().getDistance(goalState.pose.getTranslation());
-          double rotationDistance = Math.abs(currentPose.getRotation().minus(goalState.pose.getRotation()).getRadians());
-          return (positionDistance < POSITION_TOLERANCE && rotationDistance < ROTATION_TOLERANCE);
-        },
-        drivetrain);
   
   }
   , Set.of(drivetrain));

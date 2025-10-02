@@ -45,8 +45,8 @@ public class Outtake extends SubsystemBase {
   public void periodic() {
     handleStateTransition();
 
-    startBeamBreakPublisher.set(entryBeamBreak.get());
-    currentStatePublisher.set(currentState.toString());
+    // startBeamBreakPublisher.set(entryBeamBreak.get());
+    // currentStatePublisher.set(currentState.toString());
 
     switch (currentState) {
       case IDLE:
@@ -85,7 +85,7 @@ public class Outtake extends SubsystemBase {
   }
 
   public Command shoot() {
-    return runOnce(() -> currentState = State.SHOOTING).withName("Shoot");
+    return runOnce(() -> currentState = State.SHOOTING);
   }
 
 
