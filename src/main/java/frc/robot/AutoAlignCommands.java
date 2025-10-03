@@ -70,12 +70,12 @@ private static final double POSITION_TOLERANCE = 0.02;
         //robotpose and currentpose are same in this command
         Pose2d robotPose = drivetrain.getState().Pose;
         Pose2d nearestTagPose = robotPose.nearest(limelight.aprilTagPoses);
-        System.out.println("closest tag pose (before transform): "+ nearestTagPose);
+        // System.out.println("closest tag pose (before transform): "+ nearestTagPose);
         nearestTagPose = nearestTagPose.transformBy(LEFT_ALIGN_DISTANCE);
-        System.out.println("closest tag pose (after transform): "+ nearestTagPose);
+        // System.out.println("closest tag pose (after transform): "+ nearestTagPose);
         double distance = robotPose.getTranslation().getDistance(nearestTagPose.getTranslation());
-        System.out.println("robot pose: " + robotPose);
-        System.out.println("distance:" + distance + "min distancne: " + MIN_DISTANCE);
+        // System.out.println("robot pose: " + robotPose);
+        // System.out.println("distance:" + distance + "min distancne: " + MIN_DISTANCE);
         PathPlannerTrajectoryState goalState = new PathPlannerTrajectoryState();
         goalState.pose = nearestTagPose;
       
@@ -93,15 +93,14 @@ private static final double POSITION_TOLERANCE = 0.02;
               drivetrain.setControl(drivetrain.m_pathApplyRobotSpeeds
                   .withSpeeds(outputSpeeds));
 
-                System.out.println(outputSpeeds);
+                // System.out.println(outputSpeeds);
             },
             (interrupted) -> {
                 tooLong = false;
                 emergencyStop = false;
-                System.out.println("POSE REACHED");
-                System.out.println("ROBOT POSE: " + drivetrain.getState().Pose);
-                System.out.println("TARGET POSE: " + goalState.pose);
-                System.out.println();
+                // System.out.println("POSE REACHED");
+                // System.out.println("ROBOT POSE: " + drivetrain.getState().Pose);
+                // System.out.println("TARGET POSE: " + goalState.pose);
             },
             () -> {
               endTime = System.currentTimeMillis();
@@ -112,7 +111,7 @@ private static final double POSITION_TOLERANCE = 0.02;
               Pose2d currentPose = drivetrain.getState().Pose;
               double positionDistance = currentPose.getTranslation().getDistance(goalState.pose.getTranslation());
               double rotationDistance = Math.abs(currentPose.getRotation().minus(goalState.pose.getRotation()).getRadians());
-              System.out.println("position distance: " + positionDistance + " rotation distance:" + rotationDistance);
+              // System.out.println("position distance: " + positionDistance + " rotation distance:" + rotationDistance);
               withinTolerance = (positionDistance < POSITION_TOLERANCE && rotationDistance < ROTATION_TOLERANCE);
               System.out.println(withinTolerance + " " + emergencyStop + " " + tooLong);
               return (withinTolerance || emergencyStop || tooLong);
@@ -133,12 +132,12 @@ private static final double POSITION_TOLERANCE = 0.02;
         //robotpose and currentpose are same in this command
         Pose2d robotPose = drivetrain.getState().Pose;
         Pose2d nearestTagPose = robotPose.nearest(limelight.aprilTagPoses);
-        System.out.println("closest tag pose (before transform): "+ nearestTagPose);
+        // System.out.println("closest tag pose (before transform): "+ nearestTagPose);
         nearestTagPose = nearestTagPose.transformBy(RIGHT_ALIGN_DISTANCE);
-        System.out.println("closest tag pose (after transform): "+ nearestTagPose);
+        // System.out.println("closest tag pose (after transform): "+ nearestTagPose);
         double distance = robotPose.getTranslation().getDistance(nearestTagPose.getTranslation());
-        System.out.println("robot pose: " + robotPose);
-        System.out.println("distance:" + distance + "min distancne: " + MIN_DISTANCE);
+        // System.out.println("robot pose: " + robotPose);
+        // System.out.println("distance:" + distance + "min distancne: " + MIN_DISTANCE);
         PathPlannerTrajectoryState goalState = new PathPlannerTrajectoryState();
         goalState.pose = nearestTagPose;
       
@@ -156,15 +155,15 @@ private static final double POSITION_TOLERANCE = 0.02;
               drivetrain.setControl(drivetrain.m_pathApplyRobotSpeeds
                   .withSpeeds(outputSpeeds));
 
-                System.out.println(outputSpeeds);
+                // System.out.println(outputSpeeds);
             },
             (interrupted) -> {
               tooLong = false;
               emergencyStop = false;
 
-              System.out.println("POSE REACHED");
-                System.out.println("ROBOT POSE: " + drivetrain.getState().Pose);
-                System.out.println("TARGET POSE: " + goalState.pose);
+              // System.out.println("POSE REACHED");
+              //   System.out.println("ROBOT POSE: " + drivetrain.getState().Pose);
+              //   System.out.println("TARGET POSE: " + goalState.pose);
             },
             () -> {
               endTime = System.currentTimeMillis();
@@ -175,7 +174,7 @@ private static final double POSITION_TOLERANCE = 0.02;
               Pose2d currentPose = drivetrain.getState().Pose;
               double positionDistance = currentPose.getTranslation().getDistance(goalState.pose.getTranslation());
               double rotationDistance = Math.abs(currentPose.getRotation().minus(goalState.pose.getRotation()).getRadians());
-              System.out.println("position distance: " + positionDistance + " rotation distance:" + rotationDistance);
+              // System.out.println("position distance: " + positionDistance + " rotation distance:" + rotationDistance);
               withinTolerance = (positionDistance < POSITION_TOLERANCE && rotationDistance < ROTATION_TOLERANCE);
               return (withinTolerance || emergencyStop || tooLong);
             },
@@ -196,18 +195,17 @@ private static final double POSITION_TOLERANCE = 0.02;
     //robotpose and currentpose are same in this command
     Pose2d robotPose = drivetrain.getState().Pose;
     Pose2d nearestTagPose = robotPose.nearest(limelight.aprilTagPoses);
-    System.out.println("closest tag pose (before transform): "+ nearestTagPose);
+    // System.out.println("closest tag pose (before transform): "+ nearestTagPose);
     nearestTagPose = nearestTagPose.transformBy(CENTER_ALGAE_ARM);
-    System.out.println("closest tag pose (after transform): "+ nearestTagPose);
+    // System.out.println("closest tag pose (after transform): "+ nearestTagPose);
     double distance = robotPose.getTranslation().getDistance(nearestTagPose.getTranslation());
-    System.out.println("robot pose: " + robotPose);
-    System.out.println("distance:" + distance + "min distancne: " + MIN_DISTANCE);
+    // System.out.println("robot pose: " + robotPose);
+    // System.out.println("distance:" + distance + "min distancne: " + MIN_DISTANCE);
     PathPlannerTrajectoryState goalState = new PathPlannerTrajectoryState();
     goalState.pose = nearestTagPose;
   
   
     if (distance < MIN_DISTANCE && limelight.calibrate()){
-      System.out.println("hooray");
       return new FunctionalCommand(
         () -> {
           startTime = System.currentTimeMillis();
@@ -223,7 +221,7 @@ private static final double POSITION_TOLERANCE = 0.02;
           tooLong = false;
           emergencyStop = false;
 
-          System.out.println("ALIGN ARM END");
+          // System.out.println("ALIGN ARM END");
 
         },
         () -> {
@@ -299,27 +297,27 @@ private static final double POSITION_TOLERANCE = 0.02;
   , Set.of(drivetrain));
   }
 
-  public Command printDistances() {
-    return Commands.defer(() -> {
-      Pose2d currentPose = drivetrain.getState().Pose;
+  // public Command printDistances() {
+  //   return Commands.defer(() -> {
+  //     Pose2d currentPose = drivetrain.getState().Pose;
 
-      ChassisSpeeds speeds = drivetrain.getState().Speeds;
+  //     ChassisSpeeds speeds = drivetrain.getState().Speeds;
 
-      Pose2d targetPose = null;
-      int counter = 1;
+  //     Pose2d targetPose = null;
+  //     int counter = 1;
 
-      for (Pose2d pose : limelight.aprilTagPoses) {
-        double distance = currentPose.getTranslation().getDistance(pose.getTranslation());
-        System.out.println("AprilTag counter: " + counter + " Tag Pose: " + pose + "Robot Pose: " + currentPose
-            + "Distance: " + distance);
-        if (distance < MIN_DISTANCE) {
-          System.out.println("AprilTag counter: " + counter + " is close enough!!");
-        }
-        counter++;
-      }
+  //     for (Pose2d pose : limelight.aprilTagPoses) {
+  //       double distance = currentPose.getTranslation().getDistance(pose.getTranslation());
+  //       // System.out.println("AprilTag counter: " + counter + " Tag Pose: " + pose + "Robot Pose: " + currentPose
+  //       //     + "Distance: " + distance);
+  //       if (distance < MIN_DISTANCE) {
+  //         // System.out.println("AprilTag counter: " + counter + " is close enough!!");
+  //       }
+  //       counter++;
+  //     }
 
-      return Commands.none();
-    }, Set.of());
-  }
+  //     return Commands.none();
+  //   }, Set.of());
+  // }
 
 }

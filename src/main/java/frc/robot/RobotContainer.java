@@ -129,6 +129,8 @@ public class RobotContainer {
         joystick.b().onTrue(shootingCommands.algaeExtractOver());
         joystick.x().onTrue(shootingCommands.algaeAlignUnder());
         joystick.a().onTrue(shootingCommands.algaeExtractUnder());
+
+        // joystick.a().onTrue(shootingCommands.algaeExtractUnder());
         // joystick.y().onTrue(autoAlignCommands.printPose());
         // Experimental
         // button3.onTrue(limelight.testAlign());
@@ -147,10 +149,10 @@ public class RobotContainer {
 
         button1.onTrue(shootingCommands.safetyStopExtractorPID());
         button4.onTrue(outtake.shoot());
+        button10.onTrue(extractor.moveArmToZero());
         button5.onTrue(elevator.moveToLevelThree());
         button8.onTrue(elevator.moveToLevelTwo());
         button11.onTrue(elevator.moveToPositionZero());
-        button10.onTrue(extractor.moveArmToZero());
         button9.whileTrue(extractor.manualUpCommand());
         button12.whileTrue(extractor.manualDownCommand());
 

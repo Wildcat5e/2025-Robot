@@ -9,6 +9,24 @@
           "data": {
             "waitTime": 0.5
           }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "shoot"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "waitForLoading"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "shoot"
+          }
         }
       ]
     }

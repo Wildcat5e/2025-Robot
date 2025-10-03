@@ -5,9 +5,15 @@
     "data": {
       "commands": [
         {
-          "type": "path",
+          "type": "named",
           "data": {
-            "pathName": "Center to Center LReef"
+            "name": "waitForLoading"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "shoot"
           }
         }
       ]
