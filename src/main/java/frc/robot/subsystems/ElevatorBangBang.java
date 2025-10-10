@@ -20,7 +20,7 @@ public class ElevatorBangBang extends SubsystemBase implements Elevator {
     private static final double TOLERANCE = 0.0127;
     private static final double POSITION_ZERO = 0.0;
     private static final double LEVEL_TWO = 0.3;
-    private static final double LEVEL_THREE = 0.7;
+    private static final double LEVEL_THREE = 0.675;
     private static final double GEAR_RATIO = 20.0;
     private static final double SPOOL_DIAMETER_METERS = 0.0199898;
     private static final double SPOOL_CIRCUMFERENCE_METERS = Math.PI * SPOOL_DIAMETER_METERS;
@@ -74,6 +74,8 @@ public class ElevatorBangBang extends SubsystemBase implements Elevator {
     
     @Override
     public void periodic() {
+
+
         currentHeight = getCurrentHeight();
         
         if ((currentState == State.MOVING_DOWN || currentState == State.MANUAL_DOWN || currentState == State.INIT) && !bottomBeamBreak.get()) {
@@ -115,6 +117,7 @@ public class ElevatorBangBang extends SubsystemBase implements Elevator {
                 motor.setVoltage(-10.0);
                 break;
         }
+
     }
     
     private void handleStateTransition(double currentHeight) {
@@ -187,8 +190,16 @@ public class ElevatorBangBang extends SubsystemBase implements Elevator {
         return startEnd(() -> currentState = State.MANUAL_DOWN, () -> stop());
     }
     
-    private void stop() {
+    public void stop() {
         currentState = State.HOLDING_POSITION;
         setTargetHeight(getCurrentHeight());
+    }
+
+    public Command setHeightZero(){
+        return runOnce(() -> {
+            motor.setPosition(0);
+            setTargetHeight(0);
+        });
+
     }
 }

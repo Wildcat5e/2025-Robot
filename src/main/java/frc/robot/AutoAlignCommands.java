@@ -65,65 +65,7 @@ private static final double POSITION_TOLERANCE = 0.02;
     }
 
     public Command leftAutoAlign() {
-        return Commands.defer(() -> {
-        
-        //robotpose and currentpose are same in this command
-        Pose2d robotPose = drivetrain.getState().Pose;
-        Pose2d nearestTagPose = robotPose.nearest(limelight.aprilTagPoses);
-        // System.out.println("closest tag pose (before transform): "+ nearestTagPose);
-        nearestTagPose = nearestTagPose.transformBy(LEFT_ALIGN_DISTANCE);
-        // System.out.println("closest tag pose (after transform): "+ nearestTagPose);
-        double distance = robotPose.getTranslation().getDistance(nearestTagPose.getTranslation());
-        // System.out.println("robot pose: " + robotPose);
-        // System.out.println("distance:" + distance + "min distancne: " + MIN_DISTANCE);
-        PathPlannerTrajectoryState goalState = new PathPlannerTrajectoryState();
-        goalState.pose = nearestTagPose;
-      
-
-        if (distance < MIN_DISTANCE){
-          return new FunctionalCommand(
-            () -> {
-              startTime = System.currentTimeMillis();
-            },
-            () -> {
-      
-              Pose2d currentPose = drivetrain.getState().Pose;
-              ChassisSpeeds outputSpeeds = drivetrain.holonomicDriveController.calculateRobotRelativeSpeeds(currentPose, goalState);
-
-              drivetrain.setControl(drivetrain.m_pathApplyRobotSpeeds
-                  .withSpeeds(outputSpeeds));
-
-                // System.out.println(outputSpeeds);
-            },
-            (interrupted) -> {
-                tooLong = false;
-                emergencyStop = false;
-                // System.out.println("POSE REACHED");
-                // System.out.println("ROBOT POSE: " + drivetrain.getState().Pose);
-                // System.out.println("TARGET POSE: " + goalState.pose);
-            },
-            () -> {
-              endTime = System.currentTimeMillis();
-              if (endTime - startTime >= 1000){
-                tooLong = true;
-              }
-
-              Pose2d currentPose = drivetrain.getState().Pose;
-              double positionDistance = currentPose.getTranslation().getDistance(goalState.pose.getTranslation());
-              double rotationDistance = Math.abs(currentPose.getRotation().minus(goalState.pose.getRotation()).getRadians());
-              // System.out.println("position distance: " + positionDistance + " rotation distance:" + rotationDistance);
-              withinTolerance = (positionDistance < POSITION_TOLERANCE && rotationDistance < ROTATION_TOLERANCE);
-              System.out.println(withinTolerance + " " + emergencyStop + " " + tooLong);
-              return (withinTolerance || emergencyStop || tooLong);
-            },
-            drivetrain);
-        } else {
-          return Commands.none();
-        }
-      
-      
-      }
-      , Set.of(drivetrain));
+        return new AutoAlign(drivetrain, limelight, LEFT_ALIGN_DISTANCE);
       }
 
       public Command rightAutoAlign() {

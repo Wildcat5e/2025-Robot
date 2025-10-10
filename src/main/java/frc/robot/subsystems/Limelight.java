@@ -52,7 +52,7 @@ public class Limelight extends SubsystemBase {
   int counter = 0;
 
   Drivetrain drivetrain;
-  // Field2d field = new Field2d();
+  Field2d field = new Field2d();
   NetworkTableEntry botPoseEntry;
   double[] botPose;
   public List<Pose2d> aprilTagPoses;
@@ -88,33 +88,22 @@ public class Limelight extends SubsystemBase {
     this.drivetrain = drivetrain;
 
 
-
-    // SmartDashboard.putData("Field", field);
-    SmartDashboard.putData(this);
-
-    calibrate = false;
-  }
-
-  private void setAprilTags() {
-    if (aprilTagPoses != null) {
-      return;
-    }
-
-    Alliance alliance = DriverStation.getAlliance().orElse(null);
-    if (alliance == null){
-      return;
-    }
+    Alliance alliance = DriverStation.getAlliance().orElse(Alliance.Blue);
     botPoseEntry = limelight.getEntry("botpose_wpiblue");
     if (alliance == Alliance.Blue) {
       aprilTagPoses = blueAprilTagPoses;
     } else {
       aprilTagPoses = redAprilTagPoses;
     }
+
+    // SmartDashboard.putData("Field", field);
+    // SmartDashboard.putData(this);
+
+    calibrate = false;
   }
 
   @Override
   public void periodic() {
-    setAprilTags();
     hasTarget = limelight.getEntry("tv").getDouble(0.0) == 1.0;
 
     if (hasTarget && DriverStation.isTeleop()){
@@ -135,7 +124,7 @@ public class Limelight extends SubsystemBase {
       drivetrain.addVisionMeasurement(updatedPose, timestamp, stddevs);
 
     }
-    // field.setRobotPose(drivetrain.getState().Pose);
+
 
   }
 
@@ -143,5 +132,10 @@ public class Limelight extends SubsystemBase {
     return calibrate;
   }
 
-
+  public Command updateLimelight(){
+    return runOnce(() -> {
+      drivetrain.addVisionMeasurement(updatedPose, timestamp, stddevs);
+    }
+      );
+  }
 }

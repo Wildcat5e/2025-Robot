@@ -63,11 +63,11 @@ public class RobotContainer {
 
     public final Drivetrain drivetrain = TunerConstants.createDrivetrain();
     public final Limelight limelight = new Limelight(drivetrain);
-    public final Elevator elevator = new ElevatorBangBang();
+    public final ElevatorBangBang elevator = new ElevatorBangBang();
     public final Outtake outtake = new Outtake();
     public final Extractor extractor = new Extractor();
     public final AutoAlignCommands autoAlignCommands = new AutoAlignCommands(drivetrain, extractor, limelight);
-    public final ShootingCommands shootingCommands = new ShootingCommands(elevator, outtake, extractor, autoAlignCommands);
+    // public final ShootingCommands shootingCommands = new ShootingCommands(elevator, outtake, extractor, autoAlignCommands);
 
     private final SendableChooser<Command> autoChooser;
 
@@ -122,13 +122,13 @@ public class RobotContainer {
         // joystick.rightBumper().onTrue(limelight.rightAutoAlign());
 
         joystick.leftTrigger().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
-        joystick.leftBumper().onTrue(autoAlignCommands.leftAutoAlign());
-        joystick.rightBumper().onTrue(autoAlignCommands.rightAutoAlign());
-        joystick.rightTrigger().onTrue(shootingCommands.safetyStopExtractorPID());
-        joystick.y().onTrue(shootingCommands.algaeAlignOver());
-        joystick.b().onTrue(shootingCommands.algaeExtractOver());
-        joystick.x().onTrue(shootingCommands.algaeAlignUnder());
-        joystick.a().onTrue(shootingCommands.algaeExtractUnder());
+         joystick.leftBumper().onTrue(autoAlignCommands.leftAutoAlign());
+        // joystick.rightBumper().onTrue(autoAlignCommands.rightAutoAlign());
+        // joystick.rightTrigger().onTrue(shootingCommands.safetyStopExtractorPID());
+        // joystick.y().onTrue(shootingCommands.algaeAlignOver());
+        // joystick.b().onTrue(shootingCommands.algaeExtractOver());
+        // joystick.x().onTrue(shootingCommands.algaeAlignUnder());
+        // joystick.a().onTrue(shootingCommands.algaeExtractUnder());
 
         // joystick.a().onTrue(shootingCommands.algaeExtractUnder());
         // joystick.y().onTrue(autoAlignCommands.printPose());
@@ -147,10 +147,15 @@ public class RobotContainer {
         // button11.onTrue(elevator.moveToLevelTwo());
 
 
-        button1.onTrue(shootingCommands.safetyStopExtractorPID());
+        // button1.onTrue(shootingCommands.safetyStopExtractorPID());
+    
+
+        button2.onTrue(elevator.setHeightZero());
+        button3.whileTrue(elevator.manualUp());
+        button5.whileTrue(elevator.manualDown());
         button4.onTrue(outtake.shoot());
         button10.onTrue(extractor.moveArmToZero());
-        button5.onTrue(elevator.moveToLevelThree());
+        // button5.onTrue(elevator.moveToLevelThree());
         button8.onTrue(elevator.moveToLevelTwo());
         button11.onTrue(elevator.moveToPositionZero());
 

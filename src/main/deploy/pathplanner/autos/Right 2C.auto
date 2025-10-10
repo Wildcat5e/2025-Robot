@@ -11,9 +11,39 @@
           }
         },
         {
+          "type": "named",
+          "data": {
+            "name": "moveToLevelTwo"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "shoot"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.4
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "moveToPositionZero"
+          }
+        },
+        {
           "type": "path",
           "data": {
             "pathName": "Front Right LReef to Right Coral Station"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "waitForLoading"
           }
         },
         {
@@ -23,15 +53,27 @@
           }
         },
         {
-          "type": "path",
+          "type": "named",
           "data": {
-            "pathName": "Front Right RReef to Right Coral Station"
+            "name": "moveToLevelTwo"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "shoot"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.4
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "Right Coral Station to Back Center LReef"
+            "pathName": "Front Right RReef to Right Coral Station"
           }
         }
       ]
