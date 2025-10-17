@@ -13,6 +13,9 @@ import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.events.EventTrigger;
 
 import edu.wpi.first.cameraserver.CameraServer;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -32,6 +35,7 @@ import frc.robot.subsystems.Limelight;
 import frc.robot.subsystems.Outtake;
 
 public class RobotContainer {
+
     private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
     private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
 
@@ -148,7 +152,9 @@ public class RobotContainer {
 
 
         // button1.onTrue(shootingCommands.safetyStopExtractorPID());
-    
+        button2.onTrue(new AutoAlign(drivetrain, limelight, LEFT_ALIGN_DISTANCE));
+        button2.onTrue(elevator.setHeightZero());
+
 
         button2.onTrue(elevator.setHeightZero());
         button3.whileTrue(elevator.manualUp());

@@ -42,8 +42,8 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Limelight extends SubsystemBase {
 
-  private static final AprilTagFieldLayout layout = AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeWelded);
 
+  private static final AprilTagFieldLayout layout = AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeWelded);
   private static final List<Pose2d> blueAprilTagPoses = new ArrayList<Pose2d>();
   private static final List<Pose2d> redAprilTagPoses = new ArrayList<Pose2d>();
 

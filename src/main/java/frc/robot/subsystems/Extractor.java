@@ -70,12 +70,6 @@ public class Extractor extends SubsystemBase {
         break;
     }
 
-    // counter++;
-    // if (counter % 100 == 0){
-    //   System.out.println("current height: " + currentHeight);
-    //   System.out.println("within tolerance?: " + withinTolerance());
-    // }
-
   }
 
   public boolean withinTolerance(){

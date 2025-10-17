@@ -4,8 +4,13 @@
 
 package frc.robot;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.pathplanner.lib.trajectory.PathPlannerTrajectoryState;
 
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
@@ -21,28 +26,11 @@ public class AutoAlign extends Command {
   Drivetrain drivetrain;
   Limelight limelight;
 
+
 private static final double POSITION_TOLERANCE = 0.02;
   private static final double ROTATION_TOLERANCE = 0.02;
   private static final double ALGAE_POSITION_TOLERANCE = 0.03;
   private static final double ALGAE_ROTATION_TOLERANCE = 0.03;
-
-  private static final Transform2d CENTER_ALGAE_ARM = new Transform2d(
-    new Translation2d(1, .25), 
-    Rotation2d.fromDegrees(180));
-
-  private static final Transform2d EXTRACT_ALGAE_ARM = new Transform2d(
-    new Translation2d(0.375, .2), 
-    Rotation2d.fromDegrees(180));
-    
-
-  private static final Transform2d LEFT_ALIGN_DISTANCE = new Transform2d(
-      new Translation2d(0.375, -0.175),
-      Rotation2d.fromDegrees(180));
-
-  private static final Transform2d RIGHT_ALIGN_DISTANCE = new Transform2d(
-      new Translation2d(0.375, 0.175),
-      Rotation2d.fromDegrees(180));
-
     double MIN_DISTANCE = 1.5;
     Extractor extractor;
     Pose2d targetPose;
@@ -62,32 +50,28 @@ private static final double POSITION_TOLERANCE = 0.02;
     this.limelight = limelight;
     addRequirements(drivetrain);
 
-    Pose2d currentPose = drivetrain.getState().Pose;
-    Pose2d nearestTagPose = currentPose.nearest(limelight.aprilTagPoses);
-    nearestTagPose = nearestTagPose.transformBy(LEFT_ALIGN_DISTANCE);
-    double distance = currentPose.getTranslation().getDistance(nearestTagPose.getTranslation());
-    goalState.pose = nearestTagPose;
-  
-    if (distance > MIN_DISTANCE){
-      return;
-      // how to fully end command?
-      // could also add distance checker inside left auto align call
-    }
+
   }
 
   @Override
   public void initialize() {
     startTime = System.currentTimeMillis();
+    Pose2d currentPose = drivetrain.getState().Pose;
+    Pose2d nearestTagPose = currentPose.nearest(limelight.aprilTagPoses);
+    nearestTagPose = nearestTagPose.transformBy(alignment);
+    double distance = currentPose.getTranslation().getDistance(nearestTagPose.getTranslation());
+    goalState.pose = nearestTagPose;
+    if (distance > MIN_DISTANCE){
+      return;
+    }
   }
 
   @Override
   public void execute() {
-              Pose2d currentPose = drivetrain.getState().Pose;
-              ChassisSpeeds outputSpeeds = drivetrain.holonomicDriveController.calculateRobotRelativeSpeeds(currentPose, goalState);
-
-              drivetrain.setControl(drivetrain.m_pathApplyRobotSpeeds
-                  .withSpeeds(outputSpeeds));
-
+    Pose2d currentPose = drivetrain.getState().Pose;
+    ChassisSpeeds outputSpeeds = drivetrain.holonomicDriveController.calculateRobotRelativeSpeeds(currentPose, goalState);
+    drivetrain.setControl(drivetrain.m_pathApplyRobotSpeeds
+       .withSpeeds(outputSpeeds));
   }
 
   @Override
