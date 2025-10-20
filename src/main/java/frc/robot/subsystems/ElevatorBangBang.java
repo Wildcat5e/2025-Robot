@@ -24,13 +24,22 @@ public class ElevatorBangBang extends SubsystemBase implements Elevator {
     private static final double GEAR_RATIO = 20.0;
     private static final double SPOOL_DIAMETER_METERS = 0.0199898;
     private static final double SPOOL_CIRCUMFERENCE_METERS = Math.PI * SPOOL_DIAMETER_METERS;
-    
+    boolean disableElevator = true;
+
+    public boolean isDisableElevator() {
+        return disableElevator;
+    }
+
+    public void setDisableElevator(boolean disableElevator) {
+        this.disableElevator = disableElevator;
+    }
+
     private final TalonFX motor = new TalonFX(14);
     private final DigitalInput bottomBeamBreak = new DigitalInput(0);
-    // private final BooleanPublisher bottomBeamBreakPublisher;
-    // private final DoublePublisher currentHeightPublisher;
-    // private final DoublePublisher targetHeightPublisher;
-    // private final StringPublisher currentStatePublisher;
+    private final BooleanPublisher bottomBeamBreakPublisher;
+    private final DoublePublisher currentHeightPublisher;
+    private final DoublePublisher targetHeightPublisher;
+    private final StringPublisher currentStatePublisher;
     
     private State currentState;
     private double currentHeight;
@@ -55,11 +64,11 @@ public class ElevatorBangBang extends SubsystemBase implements Elevator {
         currentState = State.INIT;
         motor.setPosition(0.0);
        
-        // NetworkTable elevator = NetworkTableInstance.getDefault().getTable("Elevator");
-        // bottomBeamBreakPublisher = elevator.getBooleanTopic("BottomBeamBreak").publish();
-        // currentHeightPublisher = elevator.getDoubleTopic("CurrentHeight").publish();
-        // targetHeightPublisher = elevator.getDoubleTopic("TargetHeight").publish();
-        // currentStatePublisher = elevator.getStringTopic("CurrentState").publish();
+        NetworkTable elevator = NetworkTableInstance.getDefault().getTable("Elevator");
+        bottomBeamBreakPublisher = elevator.getBooleanTopic("BottomBeamBreak").publish();
+        currentHeightPublisher = elevator.getDoubleTopic("CurrentHeight").publish();
+        targetHeightPublisher = elevator.getDoubleTopic("TargetHeight").publish();
+        currentStatePublisher = elevator.getStringTopic("CurrentState").publish();
         SmartDashboard.putData(this);
     }
     
@@ -74,11 +83,15 @@ public class ElevatorBangBang extends SubsystemBase implements Elevator {
         
         handleStateTransition(currentHeight);
         
-        // bottomBeamBreakPublisher.set(bottomBeamBreak.get());
-        // currentStatePublisher.set(currentState.toString());
-        // currentHeightPublisher.set(currentHeight);
-        // targetHeightPublisher.set(targetHeight);
+        bottomBeamBreakPublisher.set(bottomBeamBreak.get());
+        currentStatePublisher.set(currentState.toString());
+        currentHeightPublisher.set(currentHeight);
+        targetHeightPublisher.set(targetHeight);
         
+        if (disableElevator){
+            // return;
+        }
+
         switch (currentState) {
             case NOT_MOVING:
                 motor.setVoltage(0.0);
@@ -123,7 +136,7 @@ public class ElevatorBangBang extends SubsystemBase implements Elevator {
             currentState = State.MOVING_DOWN;
         }
     }
-    
+
     private void setTargetHeight(double targetHeight) {
         this.targetHeight = targetHeight;
     }

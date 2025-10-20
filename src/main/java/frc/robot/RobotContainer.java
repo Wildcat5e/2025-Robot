@@ -153,8 +153,10 @@ public class RobotContainer {
         button5.onTrue(elevator.moveToLevelThree());
         button8.onTrue(elevator.moveToLevelTwo());
         button11.onTrue(elevator.moveToPositionZero());
-        button9.whileTrue(extractor.manualUpCommand());
-        button12.whileTrue(extractor.manualDownCommand());
+
+
+        button9.whileTrue(elevator.manualUp());
+        button12.whileTrue(elevator.manualDown());
 
         // drivetrain.registerTelemetry(logger::telemeterize);
     }
