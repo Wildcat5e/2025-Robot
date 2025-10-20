@@ -51,6 +51,14 @@ public class ShootingCommands {
         this.extractor = extractor;
     }
 
+    public Command leftAutoAlign (){
+        return new AutoAlign(drivetrain, limelight, LEFT_ALIGN_DISTANCE);
+    }
+
+    public Command rightAutoAlign(){
+        return new AutoAlign(drivetrain, limelight, RIGHT_ALIGN_DISTANCE);
+    }
+
     public Command algaeAlignOver() {
         return new SequentialCommandGroup(
         new ParallelCommandGroup(

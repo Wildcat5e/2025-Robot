@@ -33,6 +33,7 @@ import frc.robot.subsystems.ElevatorBangBang;
 import frc.robot.subsystems.Extractor;
 import frc.robot.subsystems.Limelight;
 import frc.robot.subsystems.Outtake;
+import frc.robot.subsystems.Photon;
 
 public class RobotContainer {
 
@@ -70,7 +71,8 @@ public class RobotContainer {
     public final ElevatorBangBang elevator = new ElevatorBangBang();
     public final Outtake outtake = new Outtake();
     public final Extractor extractor = new Extractor();
-    public final AutoAlignCommands autoAlignCommands = new AutoAlignCommands(drivetrain, extractor, limelight);
+    public final Photon photon = new Photon(drivetrain);
+    public final ShootingCommands shootingCommands = new ShootingCommands(drivetrain, limelight, elevator, outtake, extractor);
     // public final ShootingCommands shootingCommands = new ShootingCommands(elevator, outtake, extractor, autoAlignCommands);
 
     private final SendableChooser<Command> autoChooser;
@@ -126,7 +128,7 @@ public class RobotContainer {
         // joystick.rightBumper().onTrue(limelight.rightAutoAlign());
 
         joystick.leftTrigger().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
-         joystick.leftBumper().onTrue(autoAlignCommands.leftAutoAlign());
+         joystick.leftBumper().onTrue();
         // joystick.rightBumper().onTrue(autoAlignCommands.rightAutoAlign());
         // joystick.rightTrigger().onTrue(shootingCommands.safetyStopExtractorPID());
         // joystick.y().onTrue(shootingCommands.algaeAlignOver());
