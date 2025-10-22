@@ -31,15 +31,15 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Robot;
 
 public class Photon extends SubsystemBase {
-  private static final AprilTagFieldLayout layout = AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeWelded);
+  private static final AprilTagFieldLayout layout = AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
   private static final List<Pose2d> blueAprilTagPoses = new ArrayList<Pose2d>();
   private static final List<Pose2d> redAprilTagPoses = new ArrayList<Pose2d>();
   private static final Transform3d cameraToRobot = new Transform3d(0, 0, 0, new Rotation3d(0, 0, 0));
 
-  PhotonPoseEstimator photonEstimator = new PhotonPoseEstimator(layout, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
+  PhotonPoseEstimator photonEstimator = new PhotonPoseEstimator(layout, PoseStrategy.LOWEST_AMBIGUITY,
       cameraToRobot);
   // create camera object for phton camera
-  PhotonCamera camera = new PhotonCamera("a");
+  PhotonCamera camera = new PhotonCamera("GENERAL_WEBCAM");
   Matrix<N3, N1> stddev = VecBuilder.fill(0.5, 0.5, 1);
   Optional<EstimatedRobotPose> visionEst = Optional.empty();
 
@@ -74,14 +74,16 @@ public class Photon extends SubsystemBase {
       //update visionEst using photon estimator, visionEst contains info about
       //estimated pose and timestamp, visionEst is Optional, meaning it can be empty
       visionEst = photonEstimator.update(change);
-
+      System.out.println(change.getTimestampSeconds());
       //if the visionEst object has an estimated pose, update the drivetrain pose
       //and calculate the stddev
       if (!visionEst.isEmpty()) {
+        System.out.println("TAG DETECTED");
         Pose2d estimatedPose = visionEst.get().estimatedPose.toPose2d();
         double timestamp = visionEst.get().timestampSeconds;
         updateEstimationStdDevs(estimatedPose, change.getTargets());
         drivetrain.addVisionMeasurement(estimatedPose, timestamp, stddev);
+        System.out.println("estimated pose: " + estimatedPose);
       }
     }
   }

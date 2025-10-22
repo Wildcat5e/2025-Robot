@@ -6,6 +6,7 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.*;
 
+
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -67,22 +68,22 @@ public class RobotContainer {
     private final JoystickButton button12 = new JoystickButton(operator, 12);
 
     public final Drivetrain drivetrain = TunerConstants.createDrivetrain();
-    public final Limelight limelight = new Limelight(drivetrain);
-    public final ElevatorBangBang elevator = new ElevatorBangBang();
-    public final Outtake outtake = new Outtake();
-    public final Extractor extractor = new Extractor();
     public final Photon photon = new Photon(drivetrain);
-    public final ShootingCommands shootingCommands = new ShootingCommands(drivetrain, limelight, elevator, outtake, extractor);
+    // public final Limelight limelight = new Limelight(drivetrain);
+    // public final ElevatorBangBang elevator = new ElevatorBangBang();
+    // public final Outtake outtake = new Outtake();
+    // public final Extractor extractor = new Extractor();
+    // public final AutoAlignCommands autoAlignCommands = new AutoAlignCommands(drivetrain, extractor, limelight);
     // public final ShootingCommands shootingCommands = new ShootingCommands(elevator, outtake, extractor, autoAlignCommands);
 
     private final SendableChooser<Command> autoChooser;
 
     public RobotContainer() {
-        NamedCommands.registerCommand("moveToPositionZero", elevator.moveToPositionZero());
-        NamedCommands.registerCommand("moveToLevelTwo", elevator.moveToLevelTwo());
-        NamedCommands.registerCommand("moveToLevelThree", elevator.moveToLevelThree());
-        NamedCommands.registerCommand("waitForLoading", outtake.waitForLoading());
-        NamedCommands.registerCommand("shoot", outtake.shoot());
+        // NamedCommands.registerCommand("moveToPositionZero", elevator.moveToPositionZero());
+        // NamedCommands.registerCommand("moveToLevelTwo", elevator.moveToLevelTwo());
+        // NamedCommands.registerCommand("moveToLevelThree", elevator.moveToLevelThree());
+        // NamedCommands.registerCommand("waitForLoading", outtake.waitForLoading());
+        // NamedCommands.registerCommand("shoot", outtake.shoot());
 
         configureBindings();
 
@@ -127,8 +128,6 @@ public class RobotContainer {
         // joystick.leftBumper().onTrue(limelight.leftAutoAlign());
         // joystick.rightBumper().onTrue(limelight.rightAutoAlign());
 
-        joystick.leftTrigger().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
-         joystick.leftBumper().onTrue();
         // joystick.rightBumper().onTrue(autoAlignCommands.rightAutoAlign());
         // joystick.rightTrigger().onTrue(shootingCommands.safetyStopExtractorPID());
         // joystick.y().onTrue(shootingCommands.algaeAlignOver());
@@ -154,15 +153,15 @@ public class RobotContainer {
 
 
         // button1.onTrue(shootingCommands.safetyStopExtractorPID());
-        button2.onTrue(new AutoAlign(drivetrain, limelight, LEFT_ALIGN_DISTANCE));
-        button2.onTrue(elevator.setHeightZero());
+        // button2.onTrue(new AutoAlign(drivetrain, limelight, LEFT_ALIGN_DISTANCE));
+        // button2.onTrue(elevator.setHeightZero());
 
 
-        button2.onTrue(elevator.setHeightZero());
-        button3.whileTrue(elevator.manualUp());
-        button5.whileTrue(elevator.manualDown());
-        button4.onTrue(outtake.shoot());
-        button10.onTrue(extractor.moveArmToZero());
+        // button2.onTrue(elevator.setHeightZero());
+        // button3.whileTrue(elevator.manualUp());
+        // button5.whileTrue(elevator.manualDown());
+        // button4.onTrue(outtake.shoot());
+        // button10.onTrue(extractor.moveArmToZero());
         // button5.onTrue(elevator.moveToLevelThree());
         button8.onTrue(elevator.moveToLevelTwo());
         button11.onTrue(elevator.moveToPositionZero());

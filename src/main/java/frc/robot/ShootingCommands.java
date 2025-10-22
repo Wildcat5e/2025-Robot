@@ -103,13 +103,13 @@ public class ShootingCommands {
     }
 
 
-    public Command safetyStopExtractorPID() {
-        return extractor.runEnd(() -> {
-            autoAlignCommands.emergencyStop = true;
-            extractor.stop();
-        }, () -> {
-            autoAlignCommands.emergencyStop = false;
-        });
-    }
+    // public Command safetyStopExtractorPID() {
+    //     return extractor.runEnd(() -> {
+    //         autoAlignCommands.emergencyStop = true;
+    //         extractor.stop();
+    //     }, () -> {
+    //         autoAlignCommands.emergencyStop = false;
+    //     });
+    // }
 
 }
