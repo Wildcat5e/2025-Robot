@@ -46,9 +46,12 @@ public class Photon extends SubsystemBase {
   Drivetrain drivetrain;
   double distanceSum;
   double numOfTags;
+  Runtime runtime = Runtime.getRuntime();
 
   /** Creates a new Photon. */
   public Photon(Drivetrain drivetrain) {
+
+    this.drivetrain = drivetrain;
 
     blueAprilTagPoses.add(layout.getTagPose(17).get().toPose2d());
     blueAprilTagPoses.add(layout.getTagPose(18).get().toPose2d());
@@ -67,6 +70,8 @@ public class Photon extends SubsystemBase {
 
   @Override
   public void periodic() {
+
+    
 
     //for every pipeline in the list of unread pipeline results
     for (var change : camera.getAllUnreadResults()) {

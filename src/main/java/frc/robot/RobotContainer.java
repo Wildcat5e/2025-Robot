@@ -68,7 +68,7 @@ public class RobotContainer {
     private final JoystickButton button12 = new JoystickButton(operator, 12);
 
     public final Drivetrain drivetrain = TunerConstants.createDrivetrain();
-    public final Photon photon = new Photon(drivetrain);
+    // public final Photon photon = new Photon(drivetrain);
     // public final Limelight limelight = new Limelight(drivetrain);
     // public final ElevatorBangBang elevator = new ElevatorBangBang();
     // public final Outtake outtake = new Outtake();
@@ -90,7 +90,7 @@ public class RobotContainer {
         // DataLogManager.start();
         // DriverStation.startDataLog(DataLogManager.getLog());
 
-        CameraServer.startAutomaticCapture();
+        // CameraServer.startAutomaticCapture();
 
         autoChooser = AutoBuilder.buildAutoChooser();
         SmartDashboard.putData("Auto Chooser", autoChooser);
