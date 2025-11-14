@@ -13,7 +13,6 @@ import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.numbers.N1;
@@ -23,112 +22,93 @@ import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
-import org.photonvision.PhotonUtils;
-import org.photonvision.targeting.PhotonPipelineResult;
+
 import org.photonvision.targeting.PhotonTrackedTarget;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Robot;
 
 public class Photon extends SubsystemBase {
-  // private static final AprilTagFieldLayout layout = AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
-  // private static final List<Pose2d> blueAprilTagPoses = new ArrayList<Pose2d>();
-  // private static final List<Pose2d> redAprilTagPoses = new ArrayList<Pose2d>();
-  // private static final Transform3d cameraToRobot = new Transform3d(0, 0, 0, new Rotation3d(0, 0, 0));
+    private static final AprilTagFieldLayout LAYOUT = AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
+    private static final Transform3d CAMERA_TO_ROBOT = new Transform3d(0, 0, 0, new Rotation3d(0, 0, 0));
 
-  // PhotonPoseEstimator photonEstimator = new PhotonPoseEstimator(layout, PoseStrategy.LOWEST_AMBIGUITY,
-  //     cameraToRobot);
-  // create camera object for phton camera
-  PhotonCamera camera = new PhotonCamera("GENERAL_WEBCAM");
-  // Matrix<N3, N1> stddev = VecBuilder.fill(0.5, 0.5, 1);
-  // Optional<EstimatedRobotPose> visionEst = Optional.empty();
+    private static final PhotonPoseEstimator PHOTON_ESTIMATOR = new PhotonPoseEstimator(
+            LAYOUT,
+            PoseStrategy.LOWEST_AMBIGUITY,
+            CAMERA_TO_ROBOT);
 
-  Drivetrain drivetrain;
-  double distanceSum;
-  double numOfTags;
-  Runtime runtime = Runtime.getRuntime();
+    // create camera object for phton camera
+    PhotonCamera camera = new PhotonCamera("GENERAL_WEBCAM");
+    Optional<EstimatedRobotPose> visionEst = Optional.empty();
 
-  /** Creates a new Photon. */
-  public Photon(Drivetrain drivetrain) {
+    Drivetrain drivetrain;
+    double distanceSum;
+    double numOfTags;
+    Runtime runtime = Runtime.getRuntime();
 
-    this.drivetrain = drivetrain;
+    /** Creates a new Photon. */
+    public Photon(Drivetrain drivetrain) {
 
-    // blueAprilTagPoses.add(layout.getTagPose(17).get().toPose2d());
-    // blueAprilTagPoses.add(layout.getTagPose(18).get().toPose2d());
-    // blueAprilTagPoses.add(layout.getTagPose(19).get().toPose2d());
-    // blueAprilTagPoses.add(layout.getTagPose(20).get().toPose2d());
-    // blueAprilTagPoses.add(layout.getTagPose(21).get().toPose2d());
-    // blueAprilTagPoses.add(layout.getTagPose(22).get().toPose2d());
+        this.drivetrain = drivetrain;
 
-    // redAprilTagPoses.add(layout.getTagPose(6).get().toPose2d());
-    // redAprilTagPoses.add(layout.getTagPose(7).get().toPose2d());
-    // redAprilTagPoses.add(layout.getTagPose(8).get().toPose2d());
-    // redAprilTagPoses.add(layout.getTagPose(9).get().toPose2d());
-    // redAprilTagPoses.add(layout.getTagPose(10).get().toPose2d());
-    // redAprilTagPoses.add(layout.getTagPose(11).get().toPose2d());
-  }
-// int counter = 0;
-  @Override
-  public void periodic() {
-    // counter += 1;
-    // if (counter % 1000 != 0){
-    //   return;
-    // }
+    }
 
-  
+    int counter = 0;
 
-    //for every pipeline in the list of unread pipeline results
-    // System.out.println("before");
-    // for (var change : camera.getAllUnreadResults()) {
+    @Override
+    public void periodic() {
+        if (counter % 50 != 0) { // only run every once a second
+            return;
+        }
+        counter += 1;
+        Matrix<N3, N1> stddev = VecBuilder.fill(0.5, 0.5, 1);
 
+        // for every pipeline in the list of unread pipeline results
+        for (var change : camera.getAllUnreadResults()) {
 
-    //   //update visionEst using photon estimator, visionEst contains info about
-    //   //estimated pose and timestamp, visionEst is Optional, meaning it can be empty
-    //   visionEst = photonEstimator.update(change);
-    //   //if the visionEst object has an estimated pose, update the drivetrain pose
-    //   //and calculate the stddev
-    //   if (!visionEst.isEmpty()) {
-    //     // System.out.println("TAG DETECTED");
-    //     Pose2d estimatedPose = visionEst.get().estimatedPose.toPose2d();
-    //     double timestamp = visionEst.get().timestampSeconds;
-    //     updateEstimationStdDevs(estimatedPose, change.getTargets());
-    //     drivetrain.addVisionMeasurement(estimatedPose, timestamp, stddev);
-    //     // System.out.println("estimated pose: " + estimatedPose);
-    //   }
-    // }
-    // System.out.println("after");
-  }
+            // update visionEst using photon estimator, visionEst contains info about
+            // estimated pose and timestamp, visionEst is Optional, meaning it can be empty
+            // Update visionEst using photon estimator
+            // If the visionEst object has an estimated pose, update the drivetrain pose
+            // and calculate the stddev
+            var optionalVisionEst = PHOTON_ESTIMATOR.update(change);
+            if (optionalVisionEst.isEmpty()) {
+                continue;
+            }
+            var visionEst = optionalVisionEst.get();
+            Pose2d estimatedPose = visionEst.estimatedPose.toPose2d();
+            double distance = averageDistanceOfTag(estimatedPose, change.getTargets());
+            stddev = stddev.plus(distance);
+            drivetrain.addVisionMeasurement(estimatedPose, visionEst.timestampSeconds, stddev);
+        }
+    }
 
+    // Calculate the standard deviation, how much on average the visual of the april
+    // tag deviates in meters
+    // from its actual location in real life
 
-  // Calculate the standard deviation, how much on average the visual of the april tag deviates in meters
-  // from its actual location in real life
+    private double averageDistanceOfTag(Pose2d estimatedPose, List<PhotonTrackedTarget> targets) {
+        int numOfTags = 0;
+        double distanceSum = 0;
+        double avgDistance = 0;
 
-  // private void updateEstimationStdDevs(Pose2d estimatedPose, List<PhotonTrackedTarget> targets) {
-  //     int numOfTags = 0;
-  //     double distanceSum = 0;
-  //     double avgDistance = 0;
+        // For each photon tracked target, grab the april tag's pose, and find the
+        // distance from the
+        // estimated robot pose and april tag to calculate and estimate a standard
+        // deviation
+        for (var target : targets) {
+            Pose2d tagPose = LAYOUT.getTagPose(target.getFiducialId()).get().toPose2d();
+            double distance = tagPose.getTranslation().getDistance(estimatedPose.getTranslation());
+            numOfTags++;
+            distanceSum += distance;
+        }
 
-  //   // For each photon tracked target, grab the april tag's pose, and find the distance from the
-  //   // estimated robot pose and april tag to calculate and estimate a standard deviation
-  //     for (var target : targets){
-  //       Pose2d tagPose = layout.getTagPose(target.getFiducialId()).get().toPose2d();
-  //       double distance = tagPose.getTranslation().getDistance(estimatedPose.getTranslation());
-  //       numOfTags++;
-  //       distanceSum += distance;
-  //     }
-    
-  //     if (numOfTags == 0){
-  //       avgDistance = distanceSum;
-  //     } else {
-  //       avgDistance = distanceSum/numOfTags;
-  //     }
+        avgDistance = distanceSum / numOfTags;
+        
 
-  //     if (numOfTags == 1){
-  //       stddev = stddev.plus(avgDistance * avgDistance);
-  //     } else {
-  //       stddev = stddev.plus(avgDistance);
-  //     }
-
-  // }
+        if (numOfTags == 1) {
+            return avgDistance * avgDistance;
+        }
+        return avgDistance;
+    }
 
 }
