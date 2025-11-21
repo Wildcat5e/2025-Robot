@@ -36,7 +36,7 @@ import frc.robot.subsystems.Limelight;
 import frc.robot.subsystems.Outtake;
 import frc.robot.subsystems.Photon;
 
-public class RobotContainer {
+public class RobotContainer<AutoAlignCommands> {
 
     private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
     private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
@@ -68,13 +68,13 @@ public class RobotContainer {
     private final JoystickButton button12 = new JoystickButton(operator, 12);
 
     public final Drivetrain drivetrain = TunerConstants.createDrivetrain();
-    public Photon photon;
-    // public final Limelight limelight = new Limelight(drivetrain);
+    public Photon photon = new Photon(drivetrain);
+    public final Limelight limelight = new Limelight(drivetrain);
     // public final ElevatorBangBang elevator = new ElevatorBangBang();
-    // public final Outtake outtake = new Outtake();
-    // public final Extractor extractor = new Extractor();
-    // public final AutoAlignCommands autoAlignCommands = new AutoAlignCommands(drivetrain, extractor, limelight);
-    // public final ShootingCommands shootingCommands = new ShootingCommands(elevator, outtake, extractor, autoAlignCommands);
+    public final Outtake outtake = new Outtake();
+    public final Extractor extractor = new Extractor();
+    public final AutoAlignCommands autoAlignCommands = new AutoAlignCommands(drivetrain, extractor, limelight);
+    public final ShootingCommands shootingCommands = new ShootingCommands(elevator, outtake, extractor, autoAlignCommands);
 
     private final SendableChooser<Command> autoChooser;
 

@@ -20,12 +20,12 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.Extractor;
 import frc.robot.subsystems.Limelight;
+import frc.robot.subsystems.Photon;
 // might need to schedule this command !!
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class AutoAlign extends Command {
   Drivetrain drivetrain;
-  Limelight limelight;
-
+  Photon photon;
 
 private static final double POSITION_TOLERANCE = 0.02;
   private static final double ROTATION_TOLERANCE = 0.02;
@@ -44,10 +44,10 @@ private static final double POSITION_TOLERANCE = 0.02;
 
 
 
-  public AutoAlign(Drivetrain drivetrain, Limelight limelight, Transform2d alignment) {
+  public AutoAlign(Drivetrain drivetrain, Photon photon, Transform2d alignment) {
     this.alignment = alignment;
     this.drivetrain = drivetrain;
-    this.limelight = limelight;
+    this.photon = photon;
     addRequirements(drivetrain);
 
 
@@ -57,7 +57,7 @@ private static final double POSITION_TOLERANCE = 0.02;
   public void initialize() {
     startTime = System.currentTimeMillis();
     Pose2d currentPose = drivetrain.getState().Pose;
-    Pose2d nearestTagPose = currentPose.nearest(limelight.aprilTagPoses);
+    Pose2d nearestTagPose = currentPose.nearest(photon.apriltags);
     nearestTagPose = nearestTagPose.transformBy(alignment);
     double distance = currentPose.getTranslation().getDistance(nearestTagPose.getTranslation());
     goalState.pose = nearestTagPose;

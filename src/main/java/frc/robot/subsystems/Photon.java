@@ -24,6 +24,7 @@ import java.util.Optional;
 import static frc.robot.subsystems.AprilTag2025.*;
 
 public class Photon extends SubsystemBase {
+
     private static final double FIELD_WIDTH = 8.052;
     private static final double FIELD_LENGTH = 17.548;
     private static final Transform3d CAMERA_TO_ROBOT = new Transform3d(0, 0, 0, new Rotation3d(0, 0, 0));
@@ -31,6 +32,7 @@ public class Photon extends SubsystemBase {
 
     private final Drivetrain drivetrain;
 
+    public List<AprilTag> apriltags = List.of(TAG_1, TAG_2, TAG_3, TAG_4, TAG_5, TAG_6, TAG_7, TAG_8, TAG_9, TAG_10, TAG_11, TAG_12, TAG_13, TAG_14, TAG_15, TAG_16, TAG_17, TAG_18, TAG_19, TAG_20, TAG_21, TAG_22);
     private AprilTagFieldLayout layout;
     private PhotonPoseEstimator estimator;
 
@@ -43,9 +45,11 @@ public class Photon extends SubsystemBase {
 
     @Override
     public void periodic() {
-        if (++counter % 5 != 0) { // only run every once a second, skipping 1st second
-            return;
-        }
+        // if (++counter % 5 != 0) { // only run every once a second, skipping 1st second
+        //     return;
+        // }
+
+
         if (!initializeLayoutAndEstimator()) {
             return;
         }
@@ -59,6 +63,7 @@ public class Photon extends SubsystemBase {
             }
             var visionEst = optionalVisionEst.get();
             Pose2d estimatedPose2d = visionEst.estimatedPose.toPose2d();
+            System.out.println(estimatedPose2d);
             stddev = stddev.plus(averageDistanceOfTag(estimatedPose2d, change.getTargets()));
             drivetrain.addVisionMeasurement(estimatedPose2d, visionEst.timestampSeconds, stddev);
         }
@@ -97,12 +102,6 @@ public class Photon extends SubsystemBase {
         if (alliance == null)
             // not yet determined
             return false;
-        List<AprilTag> apriltags;
-        if (alliance == DriverStation.Alliance.Blue) {
-            apriltags = List.of(TAG_19);
-        } else {
-            apriltags = List.of(TAG_20);
-        }
         layout = new AprilTagFieldLayout(apriltags, FIELD_LENGTH, FIELD_WIDTH);
         estimator = new PhotonPoseEstimator(layout, PoseStrategy.LOWEST_AMBIGUITY, CAMERA_TO_ROBOT);
         return true;
