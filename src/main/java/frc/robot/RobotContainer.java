@@ -68,14 +68,14 @@ public class RobotContainer<AutoAlignCommands> {
     private final JoystickButton button12 = new JoystickButton(operator, 12);
 
     public final Drivetrain drivetrain = TunerConstants.createDrivetrain();
-    public Photon photon = new Photon(drivetrain);
-    public final Limelight limelight = new Limelight(drivetrain);
+    // public Photon photon = new Photon(drivetrain);
+    // public final Limelight limelight = new Limelight(drivetrain);
     // public final ElevatorBangBang elevator = new ElevatorBangBang();
     public final Outtake outtake = new Outtake();
     public final Extractor extractor = new Extractor();
     public final AutoAlignCommands autoAlignCommands = new AutoAlignCommands(drivetrain, extractor, limelight);
     public final ShootingCommands shootingCommands = new ShootingCommands(elevator, outtake, extractor, autoAlignCommands);
-
+    
     private final SendableChooser<Command> autoChooser;
 
     public RobotContainer() {
@@ -90,7 +90,7 @@ public class RobotContainer<AutoAlignCommands> {
         // DataLogManager.start();
         // DriverStation.startDataLog(DataLogManager.getLog());
 
-        // CameraServer.startAutomaticCapture();
+        CameraServer.startAutomaticCapture();
 
         autoChooser = AutoBuilder.buildAutoChooser();
         SmartDashboard.putData("Auto Chooser", autoChooser);
