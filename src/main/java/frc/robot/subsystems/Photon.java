@@ -1,3 +1,7 @@
+// Copyright (c) FIRST and other WPILib contributors.
+// Open Source Software; you can modify and/or share it under the terms of
+// the WPILib BSD license file in the root directory of this project.
+
 package frc.robot.subsystems;
 
 import edu.wpi.first.apriltag.AprilTag;
@@ -7,6 +11,7 @@ import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
@@ -15,29 +20,25 @@ import org.photonvision.targeting.PhotonTrackedTarget;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
-import static frc.robot.subsystems.AprilTag2025.*;
+import static frc.robot.subsystems.ListAprilTag2025.*;
 
 public class Photon extends SubsystemBase {
 
-    private static final PhotonCamera CAMERAL = new PhotonCamera("GENERAL_WEBCAM");
-
-    private static final List<AprilTag> APRIL_TAGS = List.of(
-            TAG_1, TAG_2, TAG_3, TAG_4, TAG_5, TAG_6, TAG_7, TAG_8, TAG_9, TAG_10, TAG_11,
-            TAG_12, TAG_13, TAG_14, TAG_15, TAG_16, TAG_17, TAG_18, TAG_19, TAG_20, TAG_21, TAG_22);
-
     private static final double FIELD_WIDTH = 8.052;
     private static final double FIELD_LENGTH = 17.548;
-
-    private static final AprilTagFieldLayout LAYOUT = new AprilTagFieldLayout(APRIL_TAGS, FIELD_LENGTH, FIELD_WIDTH);
-
-    // Adjust this to reflect the camera position on the robot
-    private static final Transform3d ROBOT_TO_CAMERA = new Transform3d(0, 0, 0, new Rotation3d(0, 0, 0));
-
-    private static final PhotonPoseEstimator ESTIMATOR =
-            new PhotonPoseEstimator(LAYOUT, PoseStrategy.LOWEST_AMBIGUITY, ROBOT_TO_CAMERA);
+    private static final Transform3d CAMERA_TO_ROBOT = new Transform3d(0.216, 0, 0, new Rotation3d(0, 0, 0));
+    private static final PhotonCamera CAMERAL = new PhotonCamera("GENERAL_WEBCAM");
 
     private final Drivetrain drivetrain;
+
+    private AprilTagFieldLayout layout;
+    private PhotonPoseEstimator estimator;
+
+    private int counter = 0;
+
+    public List<AprilTag> TAG_LIST = List.of(TAG_15, TAG_16, TAG_17, TAG_18, TAG_19, TAG_20, TAG_21, TAG_22);
 
 
     public Photon(Drivetrain drivetrain) {
@@ -46,42 +47,68 @@ public class Photon extends SubsystemBase {
 
     @Override
     public void periodic() {
-        Matrix<N3, N1> stddev = VecBuilder.fill(0.5, 0.5, 1);
+        // if (++counter % 5 != 0) { // only run every once a second, skipping 1st second
+        //     return;
+        // }
+
+
+        if (!initializeLayoutAndEstimator()) {
+            return;
+        }
+
+        Matrix<N3, N1> stddev = VecBuilder.fill(0.1, 0.1, .1);
 
         for (var change : CAMERAL.getAllUnreadResults()) {
-            var optionalVisionEst = ESTIMATOR.update(change);
+            var optionalVisionEst = estimator.update(change);
             if (optionalVisionEst.isEmpty()) {
                 continue;
             }
             var visionEst = optionalVisionEst.get();
-            var estimatedPose2d = visionEst.estimatedPose.toPose2d();
-            stddev = stddev.plus(standardDeviationOfDistance(estimatedPose2d, change.getTargets()));
+            Pose2d estimatedPose2d = visionEst.estimatedPose.toPose2d();
+            // System.out.println(estimatedPose2d);
+            stddev = stddev.plus(averageDistanceOfTag(estimatedPose2d, change.getTargets()));
             drivetrain.addVisionMeasurement(estimatedPose2d, visionEst.timestampSeconds, stddev);
+            ;
         }
     }
+
 
     // Calculate the standard deviation, how much on average the visual of the april
     // tag deviates in meters from its actual location in real life
-    private double standardDeviationOfDistance(Pose2d estimatedPose, List<PhotonTrackedTarget> targets) {
+    private double averageDistanceOfTag(Pose2d estimatedPose, List<PhotonTrackedTarget> targets) {
         // For each photon tracked target, grab the april tag's pose, and find the distance from the estimated robot
         // pose and april tag to calculate and estimate a standard deviation
-        double sumOfDistanceToAprilTag = 0;
-        int numberOfAprilTagsFound = 0;
+        double distanceSum = 0;
+        int numOfTags = 0;
         for (var target : targets) {
-            Optional<Pose3d> pose3d = LAYOUT.getTagPose(target.getFiducialId());
+            Optional<Pose3d> pose3d = layout.getTagPose(target.getFiducialId());
             if (pose3d.isPresent()) {
-                ++numberOfAprilTagsFound;
+                ++numOfTags;
                 Pose2d tagPose = pose3d.get().toPose2d();
-                sumOfDistanceToAprilTag += tagPose.getTranslation().getDistance(estimatedPose.getTranslation());
+                double distance = tagPose.getTranslation().getDistance(estimatedPose.getTranslation());
+                distanceSum += distance;
             }
         }
-        double averageAprilTagDistance = sumOfDistanceToAprilTag / numberOfAprilTagsFound;
 
-        // If there is only one pose, square the standard deviation to account for higher uncertainty
-        if (numberOfAprilTagsFound == 1) {
-            return averageAprilTagDistance * averageAprilTagDistance;
+        double avgDistance = distanceSum / numOfTags;
+
+        if (numOfTags == 1) {
+            return avgDistance * avgDistance;
         }
-        return averageAprilTagDistance;
+        return avgDistance;
     }
-}
 
+    private boolean initializeLayoutAndEstimator() {
+        if (layout != null)
+            // already initialized
+            return true;
+        var alliance = DriverStation.getAlliance().orElse(null);
+        if (alliance == null)
+            // not yet determined
+            return false;
+        layout = new AprilTagFieldLayout(TAG_LIST, FIELD_LENGTH, FIELD_WIDTH);
+        estimator = new PhotonPoseEstimator(layout, PoseStrategy.LOWEST_AMBIGUITY, CAMERA_TO_ROBOT);
+        return true;
+    }
+
+}

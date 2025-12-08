@@ -60,7 +60,7 @@ public class Drivetrain extends TunerSwerveDrivetrain implements Subsystem, Send
         new PIDConstants(2, 0, 0),
         new PIDConstants(2, 0, 0));
     public final PPHolonomicDriveController holonomicDriveController = new PPHolonomicDriveController(
-        new PIDConstants(3, 0, 0),
+        new PIDConstants(5, 0, 0),
         new PIDConstants(6, 0, 0));
 
         public final PPHolonomicDriveController algaeDriveController = new PPHolonomicDriveController(

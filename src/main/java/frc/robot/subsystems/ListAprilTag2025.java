@@ -7,7 +7,7 @@ import edu.wpi.first.math.geometry.Rotation3d;
 
 // LINK OF ALL THE APRIL TAG POSES FROM JSON FILE
 // https://github.com/wpilibsuite/allwpilib/blob/main/apriltag/src/main/native/resources/edu/wpi/first/apriltag/2025-reefscape-welded.json
-public interface AprilTag2025 {
+public interface ListAprilTag2025 {
     AprilTag TAG_1 = new AprilTag(1, new Pose3d(16.697198, 0.65532, 1.4859,
             new Rotation3d(new Quaternion(0.4539904997395468, 0.0, 0.0, 0.8910065241883678))));
     AprilTag TAG_2 = new AprilTag(2, new Pose3d(16.697198, 7.39648, 1.4859,

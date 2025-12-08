@@ -9,6 +9,7 @@ import java.util.List;
 
 import com.pathplanner.lib.trajectory.PathPlannerTrajectoryState;
 
+import edu.wpi.first.apriltag.AprilTag;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -17,21 +18,23 @@ import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.Extractor;
 import frc.robot.subsystems.Limelight;
 import frc.robot.subsystems.Photon;
+
+import static frc.robot.subsystems.ListPose2d.*;
 // might need to schedule this command !!
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class AutoAlign extends Command {
   Drivetrain drivetrain;
-  Photon photon;
 
-private static final double POSITION_TOLERANCE = 0.02;
+private static final double POSITION_TOLERANCE = 0.01;
   private static final double ROTATION_TOLERANCE = 0.02;
   private static final double ALGAE_POSITION_TOLERANCE = 0.03;
   private static final double ALGAE_ROTATION_TOLERANCE = 0.03;
-    double MIN_DISTANCE = 1.5;
+    double MAX_DISTANCE = 1.5;
     Extractor extractor;
     Pose2d targetPose;
     boolean emergencyStop = false;
@@ -42,12 +45,11 @@ private static final double POSITION_TOLERANCE = 0.02;
   Transform2d alignment;
   PathPlannerTrajectoryState goalState = new PathPlannerTrajectoryState();
 
+    public List<Pose2d> TAG_POSE_LIST = List.of(POSE_1, POSE_2, POSE_3, POSE_4, POSE_5, POSE_6, POSE_7, POSE_8, POSE_9, POSE_10, POSE_11, POSE_12, POSE_13, POSE_14, POSE_15, POSE_16, POSE_17, POSE_18, POSE_19, POSE_20, POSE_21, POSE_22);
 
-
-  public AutoAlign(Drivetrain drivetrain, Photon photon, Transform2d alignment) {
+  public AutoAlign(Drivetrain drivetrain, Transform2d alignment) {
     this.alignment = alignment;
     this.drivetrain = drivetrain;
-    this.photon = photon;
     addRequirements(drivetrain);
 
 
@@ -57,12 +59,14 @@ private static final double POSITION_TOLERANCE = 0.02;
   public void initialize() {
     startTime = System.currentTimeMillis();
     Pose2d currentPose = drivetrain.getState().Pose;
-    Pose2d nearestTagPose = currentPose.nearest(photon.apriltags);
+    Pose2d nearestTagPose = currentPose.nearest(TAG_POSE_LIST);
     nearestTagPose = nearestTagPose.transformBy(alignment);
     double distance = currentPose.getTranslation().getDistance(nearestTagPose.getTranslation());
     goalState.pose = nearestTagPose;
-    if (distance > MIN_DISTANCE){
-      return;
+    System.out.println("CLOSEST POSE ALERT !!!!!!!!!!!!!" + nearestTagPose);
+    if (distance > MAX_DISTANCE){
+      CommandScheduler.getInstance().cancel(this);
+      System.out.println("TOO FAR DUMMY");
     }
   }
 

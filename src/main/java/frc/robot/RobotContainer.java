@@ -36,7 +36,7 @@ import frc.robot.subsystems.Limelight;
 import frc.robot.subsystems.Outtake;
 import frc.robot.subsystems.Photon;
 
-public class RobotContainer<AutoAlignCommands> {
+public class RobotContainer{
 
     private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
     private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
@@ -68,13 +68,13 @@ public class RobotContainer<AutoAlignCommands> {
     private final JoystickButton button12 = new JoystickButton(operator, 12);
 
     public final Drivetrain drivetrain = TunerConstants.createDrivetrain();
-    // public Photon photon = new Photon(drivetrain);
+    public Photon photon = new Photon(drivetrain);
     // public final Limelight limelight = new Limelight(drivetrain);
     // public final ElevatorBangBang elevator = new ElevatorBangBang();
     public final Outtake outtake = new Outtake();
     public final Extractor extractor = new Extractor();
-    public final AutoAlignCommands autoAlignCommands = new AutoAlignCommands(drivetrain, extractor, limelight);
-    public final ShootingCommands shootingCommands = new ShootingCommands(elevator, outtake, extractor, autoAlignCommands);
+    public final AutoAlignCommands autoAlignCommands = new AutoAlignCommands(drivetrain, extractor, photon);
+    // public final ShootingCommands shootingCommands = new ShootingCommands(elevator, outtake, extractor, autoAlignCommands);
     
     private final SendableChooser<Command> autoChooser;
 
@@ -124,8 +124,9 @@ public class RobotContainer<AutoAlignCommands> {
         joystick.start().and(joystick.y()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
         joystick.start().and(joystick.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
         // joystick.b().onTrue(limelight.printDistances());
+        joystick.leftTrigger().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
         // reset the field-centric heading on left bumper press
-        // joystick.leftBumper().onTrue(limelight.leftAutoAlign());
+        joystick.leftBumper().onTrue(autoAlignCommands.leftAutoAlign());
         // joystick.rightBumper().onTrue(limelight.rightAutoAlign());
 
         // joystick.rightBumper().onTrue(autoAlignCommands.rightAutoAlign());
