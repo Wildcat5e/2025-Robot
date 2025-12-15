@@ -96,8 +96,6 @@ public class Limelight extends SubsystemBase {
       aprilTagPoses = redAprilTagPoses;
     }
 
-    // SmartDashboard.putData("Field", field);
-    // SmartDashboard.putData(this);
 
     calibrate = false;
   }

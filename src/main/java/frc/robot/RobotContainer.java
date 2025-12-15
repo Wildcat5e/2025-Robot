@@ -73,7 +73,7 @@ public class RobotContainer{
     // public final ElevatorBangBang elevator = new ElevatorBangBang();
     public final Outtake outtake = new Outtake();
     public final Extractor extractor = new Extractor();
-    public final AutoAlignCommands autoAlignCommands = new AutoAlignCommands(drivetrain, extractor, photon);
+    // public final AutoAlignCommands autoAlignCommands = new AutoAlignCommands(drivetrain, extractor, photon);
     // public final ShootingCommands shootingCommands = new ShootingCommands(elevator, outtake, extractor, autoAlignCommands);
     
     private final SendableChooser<Command> autoChooser;
@@ -126,7 +126,7 @@ public class RobotContainer{
         // joystick.b().onTrue(limelight.printDistances());
         joystick.leftTrigger().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
         // reset the field-centric heading on left bumper press
-        joystick.leftBumper().onTrue(autoAlignCommands.leftAutoAlign());
+        // joystick.leftBumper().onTrue(autoAlignCommands.leftAutoAlign());
         // joystick.rightBumper().onTrue(limelight.rightAutoAlign());
 
         // joystick.rightBumper().onTrue(autoAlignCommands.rightAutoAlign());
@@ -164,12 +164,12 @@ public class RobotContainer{
         // button4.onTrue(outtake.shoot());
         // button10.onTrue(extractor.moveArmToZero());
         // button5.onTrue(elevator.moveToLevelThree());
-        button8.onTrue(elevator.moveToLevelTwo());
-        button11.onTrue(elevator.moveToPositionZero());
+        // button8.onTrue(elevator.moveToLevelTwo());
+        // button11.onTrue(elevator.moveToPositionZero());
 
 
-        button9.whileTrue(elevator.manualUp());
-        button12.whileTrue(elevator.manualDown());
+        // button9.whileTrue(elevator.manualUp());
+        // button12.whileTrue(elevator.manualDown());
 
         // drivetrain.registerTelemetry(logger::telemeterize);
     }

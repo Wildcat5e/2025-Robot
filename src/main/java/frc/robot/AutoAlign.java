@@ -30,7 +30,7 @@ import static frc.robot.subsystems.ListPose2d.*;
 public class AutoAlign extends Command {
   Drivetrain drivetrain;
 
-private static final double POSITION_TOLERANCE = 0.01;
+private static final double POSITION_TOLERANCE = 0.005;
   private static final double ROTATION_TOLERANCE = 0.02;
   private static final double ALGAE_POSITION_TOLERANCE = 0.03;
   private static final double ALGAE_ROTATION_TOLERANCE = 0.03;
