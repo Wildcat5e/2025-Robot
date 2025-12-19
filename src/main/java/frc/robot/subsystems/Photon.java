@@ -4,11 +4,13 @@
 
 package frc.robot.subsystems;
 
-import edu.wpi.first.apriltag.AprilTag;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
-import edu.wpi.first.math.geometry.*;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -20,9 +22,6 @@ import org.photonvision.targeting.PhotonTrackedTarget;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
-
-import static frc.robot.subsystems.ListAprilTag2025.*;
 
 public class Photon extends SubsystemBase {
 
@@ -36,22 +35,12 @@ public class Photon extends SubsystemBase {
     private AprilTagFieldLayout layout;
     private PhotonPoseEstimator estimator;
 
-    private int counter = 0;
-
-    public List<AprilTag> TAG_LIST = List.of(TAG_15, TAG_16, TAG_17, TAG_18, TAG_19, TAG_20, TAG_21, TAG_22);
-
-
     public Photon(Drivetrain drivetrain) {
         this.drivetrain = drivetrain;
     }
 
     @Override
     public void periodic() {
-        // if (++counter % 5 != 0) { // only run every once a second, skipping 1st second
-        //     return;
-        // }
-
-
         if (!initializeLayoutAndEstimator()) {
             return;
         }
@@ -68,7 +57,6 @@ public class Photon extends SubsystemBase {
             // System.out.println(estimatedPose2d);
             stddev = stddev.plus(averageDistanceOfTag(estimatedPose2d, change.getTargets()));
             drivetrain.addVisionMeasurement(estimatedPose2d, visionEst.timestampSeconds, stddev);
-            ;
         }
     }
 
@@ -106,7 +94,7 @@ public class Photon extends SubsystemBase {
         if (alliance == null)
             // not yet determined
             return false;
-        layout = new AprilTagFieldLayout(TAG_LIST, FIELD_LENGTH, FIELD_WIDTH);
+        layout = new AprilTagFieldLayout(AprilTag2025.LIST, FIELD_LENGTH, FIELD_WIDTH);
         estimator = new PhotonPoseEstimator(layout, PoseStrategy.LOWEST_AMBIGUITY, CAMERA_TO_ROBOT);
         return true;
     }
