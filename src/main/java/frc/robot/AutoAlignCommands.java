@@ -41,7 +41,7 @@ private static final double POSITION_TOLERANCE = 0.02;
     Rotation2d.fromDegrees(180));
     
   private static final Transform2d LEFT_ALIGN_DISTANCE = new Transform2d(
-      new Translation2d(0.35, -0.175),
+      new Translation2d(0.375, -0.175),
       Rotation2d.fromDegrees(180));
 
   private static final Transform2d RIGHT_ALIGN_DISTANCE = new Transform2d(

@@ -28,8 +28,8 @@ public class Photon extends SubsystemBase {
 
     private static final double FIELD_WIDTH = 8.052;
     private static final double FIELD_LENGTH = 17.548;
-    private static final Transform3d CAMERA_TO_ROBOT = new Transform3d(0.216, 0, 0, new Rotation3d(0, 0, 0));
-    private static final PhotonCamera CAMERAL = new PhotonCamera("GENERAL_WEBCAM");
+    private static final Transform3d CAMERA_TO_ROBOT = new Transform3d(0.114, 0, 0, new Rotation3d(0, 0, 0));
+    private static final PhotonCamera CAMERAL = new PhotonCamera("C922_Pro_Stream_Webcam");
 
     private final Drivetrain drivetrain;
 
