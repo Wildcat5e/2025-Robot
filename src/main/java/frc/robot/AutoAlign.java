@@ -28,26 +28,26 @@ import static frc.robot.subsystems.ListPose2d.*;
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class AutoAlign extends Command {
   Drivetrain drivetrain;
-
-private static final double POSITION_TOLERANCE = 0.05;
-  private static final double ROTATION_TOLERANCE = 0.05;
-    double MAX_DISTANCE = 1.5;
-    Extractor extractor;
-    Pose2d targetPose;
-    boolean emergencyStop = false;
-    long startTime;
-    long endTime;
+  private static final double POSITION_TOLERANCE = 0.025;
+  private static final double ROTATION_TOLERANCE = 0.025;
+  /**
+   * Max distance to allow autoalign to work from, unknown units
+   */
+  double MAX_DISTANCE = 3;
+  Extractor extractor;
+  Pose2d targetPose;
+  boolean cancelAlign = false;
+  long startTime;
+  long endTime;
   boolean tooLong = false;
   boolean withinTolerance;
   PathPlannerTrajectoryState goalState = new PathPlannerTrajectoryState();
 
-    public List<Pose2d> TAG_POSE_LIST = List.of(CENTER_HUB);
+  public List<Pose2d> TAG_POSE_LIST = List.of(CENTER_HUB);
 
   public AutoAlign(Drivetrain drivetrain) {
     this.drivetrain = drivetrain;
     addRequirements(drivetrain);
-
-
   }
 
   @Override
@@ -59,7 +59,9 @@ private static final double POSITION_TOLERANCE = 0.05;
     goalState.pose = nearestTagPose;
     if (distance > MAX_DISTANCE){
       CommandScheduler.getInstance().cancel(this);
+      System.out.println("_");
       System.out.println("TOO FAR DUMMY");
+      System.out.println("_");
     }
   }
 
@@ -81,6 +83,10 @@ private static final double POSITION_TOLERANCE = 0.05;
     endTime = System.currentTimeMillis();
     if (endTime - startTime >= 3000){
       tooLong = true;
+      
+      System.out.println("_");
+      System.out.println("TIME LIMIT HIT");
+      System.out.println("_");
     }
 
     Pose2d currentPose = drivetrain.getState().Pose;
@@ -92,7 +98,7 @@ private static final double POSITION_TOLERANCE = 0.05;
       System.out.println("TOLERANCE HIT");
       System.out.println("_");
     }
-    return (withinTolerance || emergencyStop || tooLong);
+    return (withinTolerance || cancelAlign || tooLong);
 
   }
 }
