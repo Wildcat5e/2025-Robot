@@ -18,6 +18,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -76,6 +77,8 @@ public class RobotContainer{
     // public final ShootingCommands shootingCommands = new ShootingCommands(elevator, outtake, extractor, autoAlignCommands);
     
     private final SendableChooser<Command> autoChooser;
+    private final Field2d field = new Field2d();
+
 
     public RobotContainer() {
         // NamedCommands.registerCommand("moveToPositionZero", elevator.moveToPositionZero());
@@ -93,6 +96,7 @@ public class RobotContainer{
 
         autoChooser = AutoBuilder.buildAutoChooser();
         SmartDashboard.putData("Auto Chooser", autoChooser);
+        SmartDashboard.putData("Field", field);
     }
 
     private void configureBindings() {
@@ -175,5 +179,9 @@ public class RobotContainer{
 
     public Command getAutonomousCommand() {
         return autoChooser.getSelected();
+    }
+
+    public void periodic() {
+        field.setRobotPose(drivetrain.getState().Pose);
     }
 }
