@@ -24,10 +24,11 @@ public interface ListAprilTag2025 {
             new Rotation3d(new Quaternion(1.0, 0.0, 0.0, 0.0))));
     AprilTag TAG_8 = new AprilTag(8, new Pose3d(13.474446, 4.745482, 0.308102,
             new Rotation3d(new Quaternion(0.8660254037844387, 0.0, 0.0, 0.49999999999999994))));
-    AprilTag TAG_9 = new AprilTag(9, new Pose3d(12.643358, 4.745482, 0.308102,
-            new Rotation3d(new Quaternion(0.5000000000000001, 0.0, 0.0, 0.8660254037844386))));
-    AprilTag TAG_10 = new AprilTag(10, new Pose3d(12.227306, 4.0259, 0.308102,
-            new Rotation3d(new Quaternion(6.123233995736766e-17, 0.0, 0.0, 1.0))));
+            // TAG 9 AND 10 ARE FOR 2026
+    AprilTag TAG_9 = new AprilTag(9, new Pose3d(12.519177399999998, 3.6790375999999996, 1.12395,
+            new Rotation3d(new Quaternion(1.0, 0.0, 0.0, 0.0))));
+    AprilTag TAG_10 = new AprilTag(10, new Pose3d(12.519177399999998, 4.0346376, 1.12395,
+            new Rotation3d(new Quaternion(1.0, 0.0, 0.0, 0.0))));
     AprilTag TAG_11 = new AprilTag(11, new Pose3d(12.643358, 3.306318, 0.308102,
             new Rotation3d(new Quaternion(-0.4999999999999998, -0.0, 0.0, 0.8660254037844387))));
     AprilTag TAG_12 = new AprilTag(12, new Pose3d(0.851154, 0.65532, 1.4859,
@@ -54,4 +55,10 @@ public interface ListAprilTag2025 {
             new Rotation3d(new Quaternion(1.0, 0.0, 0.0, 0.0))));
     AprilTag TAG_22 = new AprilTag(22, new Pose3d(4.90474, 3.306318, 0.308102,
             new Rotation3d(new Quaternion(-0.8660254037844387, -0.0, 0.0, 0.49999999999999994))));
+            // TAG 25 26 ARE 2026 FIELD
+        AprilTag TAG_25 = new AprilTag(25, new Pose3d(4.0218614, 4.3902376, 1.12395
+,
+            new Rotation3d(new Quaternion(6.123233995736766e-17, 0.0, 0.0, 1.0))));
+    AprilTag TAG_26 = new AprilTag(26, new Pose3d(4.0218614, 4.0346376, 1.12395,
+            new Rotation3d(new Quaternion(6.123233995736766e-17, 0.0, 0.0, 1.0))));
 }

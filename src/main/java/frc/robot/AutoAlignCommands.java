@@ -27,11 +27,6 @@ import static frc.robot.subsystems.ListPose2d.*;
 /** Add your docs here. */
 public class AutoAlignCommands {
 
-private static final double POSITION_TOLERANCE = 0.02;
-  private static final double ROTATION_TOLERANCE = 0.02;
-  private static final double ALGAE_POSITION_TOLERANCE = 0.03;
-  private static final double ALGAE_ROTATION_TOLERANCE = 0.03;
-
 
   // public List<Pose2d> TAG_POSE_LIST = List.of(POSE_1, POSE_2, POSE_3, POSE_4, POSE_5, POSE_6, POSE_7, POSE_8, POSE_9, POSE_10, POSE_11, POSE_12, POSE_13, POSE_14, POSE_15, POSE_16, POSE_17, POSE_18, POSE_19, POSE_20, POSE_21, POSE_22);
 

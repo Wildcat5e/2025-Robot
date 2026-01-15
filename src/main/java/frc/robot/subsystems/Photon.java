@@ -28,7 +28,7 @@ public class Photon extends SubsystemBase {
 
     private static final double FIELD_WIDTH = 8.052;
     private static final double FIELD_LENGTH = 17.548;
-    private static final Transform3d CAMERA_TO_ROBOT = new Transform3d(0.114, 0, 0, new Rotation3d(0, 0, 0));
+    private static final Transform3d CAMERA_TO_ROBOT = new Transform3d(-0.114, 0, 0, new Rotation3d(0, 0, 0));
     private static final PhotonCamera CAMERAL = new PhotonCamera("C922_Pro_Stream_Webcam");
 
     private final Drivetrain drivetrain;
@@ -38,7 +38,7 @@ public class Photon extends SubsystemBase {
 
     private int counter = 0;
 
-    public List<AprilTag> TAG_LIST = List.of(TAG_15, TAG_16, TAG_17, TAG_18, TAG_19, TAG_20, TAG_21, TAG_22);
+    public List<AprilTag> TAG_LIST = List.of(TAG_25, TAG_26);
 
 
     public Photon(Drivetrain drivetrain) {
@@ -47,16 +47,14 @@ public class Photon extends SubsystemBase {
 
     @Override
     public void periodic() {
-        // if (++counter % 5 != 0) { // only run every once a second, skipping 1st second
-        //     return;
-        // }
+        counter++;
 
 
         if (!initializeLayoutAndEstimator()) {
             return;
         }
 
-        Matrix<N3, N1> stddev = VecBuilder.fill(0.1, 0.1, .1);
+        Matrix<N3, N1> stddev = VecBuilder.fill(0.01, 0.01, .01);
 
         for (var change : CAMERAL.getAllUnreadResults()) {
             var optionalVisionEst = estimator.update(change);
@@ -66,9 +64,12 @@ public class Photon extends SubsystemBase {
             var visionEst = optionalVisionEst.get();
             Pose2d estimatedPose2d = visionEst.estimatedPose.toPose2d();
             // System.out.println(estimatedPose2d);
-            stddev = stddev.plus(averageDistanceOfTag(estimatedPose2d, change.getTargets()));
+            // stddev = stddev.plus(averageDistanceOfTag(estimatedPose2d, change.getTargets()));
             drivetrain.addVisionMeasurement(estimatedPose2d, visionEst.timestampSeconds, stddev);
-            ;
+            if (counter % 100 == 0){
+                System.out.println("estimated pose: " + estimatedPose2d);
+                System.out.println("actual robot pose: " + drivetrain.getState().Pose);
+            }
         }
     }
 
@@ -107,7 +108,7 @@ public class Photon extends SubsystemBase {
             // not yet determined
             return false;
         layout = new AprilTagFieldLayout(TAG_LIST, FIELD_LENGTH, FIELD_WIDTH);
-        estimator = new PhotonPoseEstimator(layout, PoseStrategy.LOWEST_AMBIGUITY, CAMERA_TO_ROBOT);
+        estimator = new PhotonPoseEstimator(layout, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, CAMERA_TO_ROBOT);
         return true;
     }
 
