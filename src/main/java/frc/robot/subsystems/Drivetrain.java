@@ -58,7 +58,8 @@ public class Drivetrain extends TunerSwerveDrivetrain implements Subsystem, Send
     private final SwerveRequest.SysIdSwerveRotation m_rotationCharacterization = new SwerveRequest.SysIdSwerveRotation();
     public final PPHolonomicDriveController holonomicDriveController = new PPHolonomicDriveController(
         new PIDConstants(5, .5, .2),
-        new PIDConstants(5, .5, .2));
+        new PIDConstants(5, .5, .2)
+    );
 
 
     /* SysId routine for characterizing translation. This is used to find PID gains for the drive motors. */

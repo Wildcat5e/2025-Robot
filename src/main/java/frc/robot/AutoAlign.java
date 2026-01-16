@@ -83,7 +83,6 @@ public class AutoAlign extends Command {
     endTime = System.currentTimeMillis();
     if (endTime - startTime >= 3000){
       tooLong = true;
-      
       System.out.println("_");
       System.out.println("TIME LIMIT HIT");
       System.out.println("_");
