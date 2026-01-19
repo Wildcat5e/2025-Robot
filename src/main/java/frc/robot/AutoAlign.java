@@ -29,8 +29,8 @@ import static frc.robot.subsystems.ListPose2d.*;
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class AutoAlign extends Command {
   Drivetrain drivetrain;
-  private static final double POSITION_TOLERANCE = 0.025;
-  private static final double ROTATION_TOLERANCE = 0.025;
+  private static final double POSITION_TOLERANCE = 0.04;
+  private static final double ROTATION_TOLERANCE = 0.04;
   /**
    * Max distance to allow autoalign to work from, unknown units
    */
