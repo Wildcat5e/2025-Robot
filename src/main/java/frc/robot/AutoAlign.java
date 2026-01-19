@@ -24,6 +24,7 @@ import frc.robot.subsystems.Extractor;
 import frc.robot.subsystems.Photon;
 
 import static frc.robot.subsystems.ListPose2d.*;
+
 // might need to schedule this command !!
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class AutoAlign extends Command {
@@ -38,8 +39,6 @@ public class AutoAlign extends Command {
   Pose2d targetPose;
   boolean cancelAlign = false;
   long startTime;
-  long endTime;
-  boolean tooLong = false;
   boolean withinTolerance;
   PathPlannerTrajectoryState goalState = new PathPlannerTrajectoryState();
 
@@ -68,6 +67,7 @@ public class AutoAlign extends Command {
   @Override
   public void execute() {
     Pose2d currentPose = drivetrain.getState().Pose;
+    // calculate speed
     ChassisSpeeds outputSpeeds = drivetrain.holonomicDriveController.calculateRobotRelativeSpeeds(currentPose, goalState);
     drivetrain.setControl(drivetrain.m_pathApplyRobotSpeeds
        .withSpeeds(outputSpeeds));
@@ -80,12 +80,11 @@ public class AutoAlign extends Command {
 
   @Override
   public boolean isFinished() {
-    endTime = System.currentTimeMillis();
-    if (endTime - startTime >= 3000){
-      tooLong = true;
+    if (elapsedTime() >= 3000){
       System.out.println("_");
       System.out.println("TIME LIMIT HIT");
       System.out.println("_");
+      return true;
     }
 
     Pose2d currentPose = drivetrain.getState().Pose;
@@ -97,7 +96,12 @@ public class AutoAlign extends Command {
       System.out.println("TOLERANCE HIT");
       System.out.println("_");
     }
-    return (withinTolerance || cancelAlign || tooLong);
 
+    return (withinTolerance || cancelAlign);
+
+  }
+
+  long elapsedTime() {
+    return System.currentTimeMillis() - startTime;
   }
 }

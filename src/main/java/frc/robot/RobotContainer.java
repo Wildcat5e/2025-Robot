@@ -127,11 +127,13 @@ public class RobotContainer{
         joystick.start().and(joystick.y()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
         joystick.start().and(joystick.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
         // joystick.b().onTrue(limelight.printDistances());
+        // reset the field-centric heading on left trigger press
         joystick.leftTrigger().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
-        // reset the field-centric heading on left bumper press
+        
+        // do auto align on left bumper
         joystick.leftBumper().onTrue(autoAlignCommands.leftAutoAlign());
+        
         // joystick.rightBumper().onTrue(limelight.rightAutoAlign());
-
         // joystick.rightBumper().onTrue(autoAlignCommands.rightAutoAlign());
         // joystick.rightTrigger().onTrue(shootingCommands.safetyStopExtractorPID());
         // joystick.y().onTrue(shootingCommands.algaeAlignOver());

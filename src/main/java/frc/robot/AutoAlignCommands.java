@@ -29,17 +29,8 @@ public class AutoAlignCommands {
 
 
   // public List<Pose2d> TAG_POSE_LIST = List.of(POSE_1, POSE_2, POSE_3, POSE_4, POSE_5, POSE_6, POSE_7, POSE_8, POSE_9, POSE_10, POSE_11, POSE_12, POSE_13, POSE_14, POSE_15, POSE_16, POSE_17, POSE_18, POSE_19, POSE_20, POSE_21, POSE_22);
-
-
-    double MIN_DISTANCE = 1.5;
     Drivetrain drivetrain;
     Extractor extractor;
-    Pose2d targetPose;
-    boolean emergencyStop = false;
-    long startTime;
-    long endTime;
-  boolean tooLong = false;
-  boolean withinTolerance;
 
     public AutoAlignCommands(Drivetrain drivetrain, Extractor extractor, Photon photon){
         this.drivetrain = drivetrain;
@@ -47,7 +38,6 @@ public class AutoAlignCommands {
     }
 
     public Command leftAutoAlign() {
-      
         return new AutoAlign(drivetrain);
       }
 }

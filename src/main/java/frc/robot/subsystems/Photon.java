@@ -54,7 +54,7 @@ public class Photon extends SubsystemBase {
             return;
         }
 
-        Matrix<N3, N1> stddev = VecBuilder.fill(0.5, 0.5, .5);
+        Matrix<N3, N1> stddev = VecBuilder.fill(10, 10, 10);
 
         for (var change : CAMERAL.getAllUnreadResults()) {
             var optionalVisionEst = estimator.update(change);
